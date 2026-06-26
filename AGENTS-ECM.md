@@ -37,6 +37,21 @@
 - 修改完成后，说明改了哪些文件、改了什么、是否需要用户手动测试。
 - 遇到不确定的业务逻辑，先给出判断，不要擅自大改。
 
+## GitHub 推送与迭代规则
+- GitHub 仓库地址：`https://github.com/xyh476323/ecm-AI-demo-maycur`
+- Git 远端地址：`https://github.com/xyh476323/ecm-AI-demo-maycur.git`
+- 本地发布仓库目录：`/Users/xyh/Downloads/vscode/ecm-AI-demo-maycur`
+- 默认分支：`main`
+- 每次项目阶段完成后，都要将本地演示产品同步到发布仓库，完成必要验证后提交并 push 到 GitHub，保证线上部署仓库持续更新迭代。
+- 推送前应先检查 `git status -sb`，确认只包含本次需求相关文件；不要把研究截图、临时文件、账号、密码、token 或无关素材提交到 Git。
+- 常用推送流程：
+  1. 同步主文件和实际引用资源到 `/Users/xyh/Downloads/vscode/ecm-AI-demo-maycur`
+  2. 运行脚本语法检查和必要的浏览器交互验证
+  3. 执行 `git status -sb` 和 `git diff --stat` 确认提交范围
+  4. 执行 `git add <本次相关文件>`
+  5. 执行 `git commit -m "<本次迭代说明>"`
+  6. 执行 `git push -u origin main`，已有 upstream 后可执行 `git push`
+
 ## 本地演示产品实现规范
 
 ### 组件库优先级
