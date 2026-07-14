@@ -9829,6 +9829,7 @@
     .ai-elapsed { padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; color: rgba(0,0,0,.24); font-size: 12px; }
     .ai-result-copy { min-width: 0; padding-top: 16px; overflow-wrap: anywhere; }
     .ai-file-card {
+      position: relative;
       width: min(335px, 100%);
       height: 73px;
       gap: 20px;
@@ -9836,12 +9837,39 @@
       padding: 0 16px 0 20px;
       border: 1px solid #eeeeee;
       border-radius: 8px;
-      background: linear-gradient(90deg, #f2fff6 0%, #f8fffa 48%, #ffffff 100%);
+      background: linear-gradient(135deg, #f2fff6 0%, #f8fffa 48%, #ffffff 78%);
       cursor: pointer;
     }
     .ai-file-type { width: 28px; height: 28px; display: block; flex: 0 0 28px; border-radius: 0; background: transparent; object-fit: contain; }
+    .ai-file-info { transition: padding-right .12s ease; }
     .ai-file-info strong { max-width: 100%; color: rgba(0,0,0,.85); font-size: 13px; font-weight: 600; }
     .ai-file-info span { color: rgba(0,0,0,.4); font-size: 12px; }
+    .ai-file-download {
+      position: absolute;
+      top: 50%;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-50%);
+      transition: opacity .12s ease;
+    }
+    .ai-file-download .ai-file-download-icon { width: 32px; height: 32px; display: block; }
+    .ai-file-card:hover .ai-file-info,
+    .ai-file-card:focus-within .ai-file-info { padding-right: 48px; }
+    .ai-file-card:hover .ai-file-download,
+    .ai-file-card:focus-within .ai-file-download,
+    .ai-file-download:focus-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
     .ai-reactions { display: flex; gap: 12px; margin-top: 8px; }
     .ai-reaction-button { position: relative; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; cursor: pointer; overflow: visible; }
     .ai-reaction-button:hover { background: #f0f0f2; }
@@ -16136,6 +16164,7 @@
       <div class="ai-file-card">
         ${aiFileIcon(file)}
         <span class="ai-file-info" data-ai-preview-result><strong>${file[1]}</strong><span>${file[2]}</span></span>
+        <button class="ai-file-download" type="button" data-ai-download="${file[1]}" aria-label="下载：${file[1]}">${aiIcon("download.svg", "ai-file-download-icon")}</button>
       </div>
     `;
 
