@@ -10213,6 +10213,120 @@
     .ai-file-row-option:hover,
     .ai-file-row-option.keyboard-active { background: #f8f8f8; }
     .ai-file-row-option .ai-svg-icon { width: 22px; height: 22px; flex: 0 0 22px; }
+    .ai-search-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: clamp(160px, 29.3vh, 264px);
+      background: rgba(0, 0, 0, .08);
+    }
+    .ai-search-panel {
+      width: min(460px, calc(100vw - 32px));
+      padding: 16px 12px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 9px 28px 8px rgba(0, 0, 0, .05), 0 3px 6px -4px rgba(0, 0, 0, .12), 0 6px 16px rgba(0, 0, 0, .08);
+    }
+    .ai-search-tabs {
+      height: 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 0 12px;
+    }
+    .ai-search-tab {
+      position: relative;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgba(0, 0, 0, .64);
+      cursor: pointer;
+      font: 400 13px/20px "PingFang SC", sans-serif;
+    }
+    .ai-search-tab.active { color: rgba(0, 0, 0, .85); font-weight: 600; }
+    .ai-search-tab.active::after {
+      content: "";
+      position: absolute;
+      right: 8px;
+      bottom: 0;
+      left: 8px;
+      height: 2px;
+      background: rgba(0, 0, 0, .85);
+    }
+    .ai-search-input {
+      width: 100%;
+      height: 36px;
+      margin-top: 16px;
+      padding: 0 12px;
+      border: 1px solid #eeeeee;
+      border-radius: 8px;
+      outline: 0;
+      background: #fff;
+      color: rgba(0, 0, 0, .85);
+      font: 14px/22px "PingFang SC", sans-serif;
+    }
+    .ai-search-input::placeholder { color: rgba(0, 0, 0, .28); }
+    .ai-search-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22, 119, 255, .1); }
+    .ai-search-results { display: grid; gap: 8px; margin-top: 12px; }
+    .ai-search-results:empty { display: none; }
+    .ai-search-history-result {
+      width: 100%;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(0, 0, 0, .85);
+      cursor: pointer;
+      font: 14px/22px "PingFang SC", sans-serif;
+      text-align: left;
+    }
+    .ai-search-history-result > span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ai-search-history-result:hover,
+    .ai-search-history-result.keyboard-active { background: #f0f0f2; }
+    .ai-search-file-result.ai-files-row { margin: 0; }
+    .ai-search-file-main {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+    }
+    .ai-search-file-main > span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .ai-search-file-result:has(.ai-search-file-main.keyboard-active) { background: #f0f0f2; }
+    .ai-search-empty {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(0, 0, 0, .28);
+      font: 13px/20px "PingFang SC", sans-serif;
+    }
     .ai-quick-trigger {
       right: 12px;
       bottom: 140px;
@@ -16160,6 +16274,20 @@
       ["CSV", "其他格式通用样式.csv", "CSV文件 · 8KB"],
       ["IMG", "文件名称.png", "图片文件 · 320KB"]
     ];
+    const AI_SEARCH_UPLOAD_FILES = [
+      ["XLS", "MK-202607061631-付款申请单.xlsx", "Excel文件 · 4KB"],
+      ["XLS", "MK-202607061632-付款申请单.xlsx", "Excel文件 · 4KB"],
+      ...AI_FILES.slice(1)
+    ];
+    const AI_SEARCH_GENERATED_FILES = [
+      AI_FILES[0],
+      ["XLS", "MK-202607061632-付款申请单.xlsx", "Excel文件 · 4KB"]
+    ];
+    const AI_SEARCH_TABS = [
+      { id: "history", label: "历史对话" },
+      { id: "upload", label: "上传文件" },
+      { id: "generated", label: "生成文件" }
+    ];
     const AI_ICON_BASE = "assets/ecm-icons/archive-ai";
     const AI_FILE_ICONS = {
       XLS: "file-xlsx.svg",
@@ -16242,6 +16370,10 @@
       groupedHistoryItems: createAiGroupedHistoryItems(),
       historyItems: createAiHistoryItems(),
       activeHistoryId: "history-1",
+      searchOpen: false,
+      searchTab: "history",
+      searchQuery: "",
+      searchActiveIndex: -1,
       reactionVote: null,
       draft: "",
       view: "welcome",
@@ -16363,6 +16495,46 @@
       }).join("")}</div></aside>`;
     };
 
+    const normalizeAiSearchText = (value) => String(value || "")
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/五月/g, "5月")
+      .replace(/六月/g, "6月")
+      .replace(/七月/g, "7月");
+
+    const getAiSearchResults = () => {
+      const keyword = normalizeAiSearchText(aiRuntime.searchQuery);
+      if (!keyword) return [];
+      if (aiRuntime.searchTab === "history") {
+        return [...aiRuntime.groupedHistoryItems, ...aiRuntime.historyItems]
+          .filter((item) => normalizeAiSearchText(item.title).includes(keyword));
+      }
+      const files = aiRuntime.searchTab === "generated" ? AI_SEARCH_GENERATED_FILES : AI_SEARCH_UPLOAD_FILES;
+      return files.filter((file) => normalizeAiSearchText(file[1]).includes(keyword));
+    };
+
+    const renderAiSearchResults = () => {
+      if (!aiRuntime.searchQuery.trim()) return "";
+      const results = getAiSearchResults();
+      if (!results.length) return `<div class="ai-search-empty" role="status">未找到相关内容</div>`;
+      if (aiRuntime.searchTab === "history") {
+        return results.map((item, index) => `<button class="ai-search-history-result ${aiRuntime.searchActiveIndex === index ? "keyboard-active" : ""}" type="button" role="option" data-ai-search-result data-ai-search-history="${item.id}" aria-selected="${aiRuntime.searchActiveIndex === index}" data-ai-tooltip="${escapeHtml(item.title)}"><span>${escapeHtml(item.title)}</span></button>`).join("");
+      }
+      return results.map((file, index) => {
+        const rowId = `search-${aiRuntime.searchTab}-${index}`;
+        const menuOpen = aiRuntime.fileRowMenuId === rowId;
+        return `<div class="ai-search-file-result ai-files-row ${menuOpen ? "menu-open" : ""}"><button class="ai-search-file-main ${aiRuntime.searchActiveIndex === index ? "keyboard-active" : ""}" type="button" role="option" data-ai-search-result data-ai-search-file="${escapeHtml(file[1])}" aria-selected="${aiRuntime.searchActiveIndex === index}">${aiFileIcon(file)}<span>${escapeHtml(file[1])}</span></button><button class="ai-files-row-more" type="button" data-ai-file-row-more="${rowId}" data-ai-tooltip="更多操作" aria-label="更多操作：${escapeHtml(file[1])}" aria-haspopup="menu" aria-expanded="${menuOpen}">${aiIcon("more.svg")}</button>${menuOpen ? `<div class="ai-file-row-menu" role="menu" aria-label="${escapeHtml(file[1])} 文件操作"><button class="ai-file-row-option ${aiRuntime.fileRowMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" data-ai-download="${escapeHtml(file[1])}" aria-selected="${aiRuntime.fileRowMenuActiveIndex === 0}">${aiIcon("download-menu.svg")}<span>下载</span></button></div>` : ""}</div>`;
+      }).join("");
+    };
+
+    const renderAiSearchOverlay = () => `<div class="ai-search-overlay" data-ai-search-backdrop>
+      <section class="ai-search-panel" data-ai-search-panel role="dialog" aria-modal="true" aria-label="搜索">
+        <div class="ai-search-tabs" role="tablist" aria-label="搜索范围">${AI_SEARCH_TABS.map((tab) => `<button class="ai-search-tab ${aiRuntime.searchTab === tab.id ? "active" : ""}" type="button" role="tab" data-ai-search-tab="${tab.id}" aria-selected="${aiRuntime.searchTab === tab.id}">${tab.label}</button>`).join("")}</div>
+        <input class="ai-search-input" type="search" value="${escapeHtml(aiRuntime.searchQuery)}" data-ai-search-input placeholder="请输入搜索内容" aria-label="搜索内容" autocomplete="off">
+        <div class="ai-search-results" role="listbox" aria-label="搜索结果" aria-live="polite">${renderAiSearchResults()}</div>
+      </section>
+    </div>`;
+
     const renderAiHistoryMoveMenu = () => `<div class="ai-history-move-submenu" role="menu" aria-label="选择分组">
       ${AI_HISTORY_GROUPS.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.historyMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-history-group-option="${group}" aria-selected="${aiRuntime.historyMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${group}</span></button>`).join("")}
       <div class="ai-history-group-divider" aria-hidden="true"></div>
@@ -16407,7 +16579,7 @@
       <aside class="ai-history ${aiRuntime.historyMenuId !== null ? "menu-open" : ""}" aria-label="AI 会话历史">
         <div class="ai-history-head"><span class="ai-history-title">我的项目</span><button class="ai-history-toggle" type="button" data-ai-history-toggle aria-label="收起会话栏">${aiIcon("sidebar-toggle.svg")}</button></div>
         <button class="ai-new-chat" type="button" data-ai-new-chat>${aiIcon("new-chat.svg")}<span>新建对话</span>${aiIcon("new-chat-shortcut.svg", "ai-shortcut-icon")}</button>
-        <div class="ai-history-tools"><button class="ai-history-tool" type="button">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
+        <div class="ai-history-tools"><button class="ai-history-tool" type="button" data-ai-search-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.searchOpen}">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
         <button class="ai-history-section-toggle" type="button" data-ai-history-section="groups" aria-expanded="${aiRuntime.historyGroupsExpanded}"><span>分组</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
         <div class="ai-history-section ai-history-groups" ${aiRuntime.historyGroupsExpanded ? "" : "hidden"}>
           ${AI_HISTORY_GROUPS.map((group) => `<button class="ai-history-group" type="button">${aiIcon("new-group.svg")}<span>${group}</span></button>${aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("")}`).join("")}
@@ -16445,6 +16617,7 @@
               ${aiRuntime.preview ? renderAiPreview() : ""}${aiRuntime.filePanel ? renderAiFilesPanel() : ""}
             </div>
           </section>
+          ${aiRuntime.searchOpen ? renderAiSearchOverlay() : ""}
           ${aiRuntime.toast ? `<span class="ai-toast">${aiRuntime.toast}</span>` : ""}
         </section>
       `;
@@ -17228,6 +17401,76 @@
       const aiPromptSurface = event.target.closest("[data-ai-prompt-form]");
       if (aiPromptSurface && !event.target.closest("button, textarea, .ai-select-menu, .ai-mention-menu")) {
         requestAnimationFrame(() => aiPromptSurface.querySelector(".ai-prompt-input")?.focus());
+      }
+
+      const aiSearchTrigger = event.target.closest("[data-ai-search-trigger]");
+      if (aiSearchTrigger) {
+        event.preventDefault();
+        aiRuntime.searchOpen = true;
+        aiRuntime.searchTab = "history";
+        aiRuntime.searchQuery = "";
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-search-input]")?.focus());
+        return;
+      }
+
+      const aiSearchTab = event.target.closest("[data-ai-search-tab]");
+      if (aiSearchTab) {
+        event.preventDefault();
+        aiRuntime.searchTab = aiSearchTab.dataset.aiSearchTab || "history";
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        refreshAiUi();
+        requestAnimationFrame(() => {
+          const input = document.querySelector("[data-ai-search-input]");
+          input?.focus();
+          input?.setSelectionRange(input.value.length, input.value.length);
+        });
+        return;
+      }
+
+      const aiSearchHistory = event.target.closest("[data-ai-search-history]");
+      if (aiSearchHistory) {
+        event.preventDefault();
+        aiRuntime.activeHistoryId = aiSearchHistory.dataset.aiSearchHistory || aiRuntime.activeHistoryId;
+        aiRuntime.searchOpen = false;
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.view = "result";
+        aiRuntime.taskStep = 5;
+        aiRuntime.taskDetailsExpanded = false;
+        aiRuntime.preview = false;
+        aiRuntime.filePanel = false;
+        refreshAiUi();
+        return;
+      }
+
+      const aiSearchFile = event.target.closest("[data-ai-search-file]");
+      if (aiSearchFile) {
+        event.preventDefault();
+        aiRuntime.searchOpen = false;
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.preview = true;
+        aiRuntime.filePanel = false;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        aiRuntime.toast = `已打开文件：${aiSearchFile.dataset.aiSearchFile}`;
+        refreshAiUi();
+        return;
+      }
+
+      if (event.target.matches("[data-ai-search-backdrop]")) {
+        event.preventDefault();
+        aiRuntime.searchOpen = false;
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-search-trigger]")?.focus());
+        return;
       }
 
       const aiMentionOption = event.target.closest("[data-ai-mention-option]");
@@ -18234,6 +18477,30 @@
     });
 
     document.addEventListener("keydown", (event) => {
+      const aiSearchPanel = event.target.closest?.("[data-ai-search-panel]");
+      const aiSearchKeyboardTarget = event.target.closest?.("[data-ai-search-input], [data-ai-search-result]");
+      const aiSearchFileMenuTarget = event.target.closest?.("[data-ai-file-row-more], [data-ai-download]");
+      if (aiRuntime.searchOpen && event.key === "Escape" && !(aiRuntime.fileRowMenuId !== null && aiSearchFileMenuTarget)) {
+        event.preventDefault();
+        aiRuntime.searchOpen = false;
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-search-trigger]")?.focus());
+        return;
+      }
+      if (aiRuntime.searchOpen && aiSearchPanel && aiSearchKeyboardTarget && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+        event.preventDefault();
+        setAiKeyboardSelection(aiSearchPanel, "[data-ai-search-result]", "searchActiveIndex", event.key === "ArrowDown" ? 1 : -1);
+        return;
+      }
+      if (aiRuntime.searchOpen && aiSearchPanel && aiSearchKeyboardTarget && event.key === "Enter" && aiRuntime.searchActiveIndex >= 0) {
+        event.preventDefault();
+        activateAiKeyboardSelection(aiSearchPanel, "[data-ai-search-result]", "searchActiveIndex");
+        return;
+      }
+
       const aiResizeHandle = event.target.closest?.("[data-ai-resize-handle]");
       if (aiResizeHandle && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
         event.preventDefault();
@@ -18562,6 +18829,16 @@
     });
 
     document.addEventListener("input", (event) => {
+      const aiSearchInput = event.target.closest("[data-ai-search-input]");
+      if (aiSearchInput) {
+        aiRuntime.searchQuery = aiSearchInput.value;
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        const results = aiSearchInput.closest("[data-ai-search-panel]")?.querySelector(".ai-search-results");
+        if (results) results.innerHTML = renderAiSearchResults();
+        return;
+      }
       const aiPromptInput = event.target.closest(".ai-prompt-input");
       if (aiPromptInput) {
         const prompt = aiPromptInput.closest(".ai-prompt");
