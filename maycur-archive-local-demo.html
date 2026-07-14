@@ -9012,6 +9012,8 @@
     .app.ai-center-mode .page-body { background: #fff; }
     .ai-center-page {
       --ai-side-width: 250px;
+      --ai-right-pane-width: 317px;
+      --ai-resizer-size: 5px;
       position: relative;
       height: 100%;
       display: flex;
@@ -9025,9 +9027,11 @@
       z-index: 4;
       width: var(--ai-side-width);
       flex: 0 0 var(--ai-side-width);
+      min-width: 180px;
+      max-width: 420px;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid #eeeeee;
+      border-right: 0;
       background: #fafafb;
       transition: none;
     }
@@ -9063,7 +9067,7 @@
     .ai-top-icon:hover,
     .ai-icon-button:hover { border-color: #d9d9d9; background: #f7f7f8; color: #0f1419; }
     .ai-new-chat {
-      width: 226px;
+      width: calc(100% - 24px);
       height: 36px;
       flex: 0 0 36px;
       justify-content: flex-start;
@@ -9087,7 +9091,7 @@
     .ai-history-tool,
     .ai-history-item,
     .ai-history-group {
-      width: 226px;
+      width: calc(100% - 24px);
       min-height: 34px;
       display: flex;
       align-items: center;
@@ -9107,7 +9111,7 @@
     .ai-history-item.menu-open,
     .ai-history-group:hover { background: #f0f0f2; color: rgba(0, 0, 0, .85); }
     .ai-history-section-toggle {
-      width: 226px;
+      width: calc(100% - 24px);
       height: 28px;
       display: flex;
       align-items: center;
@@ -9136,11 +9140,12 @@
     .ai-history-list .ai-history-item,
     .ai-history-groups .ai-history-child {
       position: relative;
-      width: 226px;
       gap: 4px;
       padding: 0 8px 0 12px;
       cursor: default;
     }
+    .ai-history-list .ai-history-item { width: 100%; }
+    .ai-history-groups .ai-history-child { width: calc(100% - 24px); }
     .ai-history-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ai-history-group,
     .ai-history-child { margin: 0 12px; }
@@ -9285,6 +9290,41 @@
     .ai-history-group-option .ai-new-group-add-icon { width: 22px; height: 22px; }
     .ai-history-group-divider { height: 1px; margin: 4px 0; background: #eeeeee; }
     .ai-history .ai-mini-mark { display: none; }
+    .ai-panel-resizer {
+      position: relative;
+      z-index: 9;
+      width: var(--ai-resizer-size);
+      flex: 0 0 var(--ai-resizer-size);
+      align-self: stretch;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      cursor: col-resize;
+      touch-action: none;
+    }
+    .ai-panel-resizer::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background: #eeeeee;
+      transform: translateX(-50%);
+      transition: width .12s ease, background-color .12s ease;
+    }
+    .ai-panel-resizer:hover::after,
+    .ai-panel-resizer:focus-visible::after,
+    .ai-panel-resizer.is-resizing::after {
+      width: 2px;
+      background: #0088ff;
+    }
+    body.ai-column-resizing,
+    body.ai-column-resizing * {
+      cursor: col-resize !important;
+      user-select: none !important;
+    }
     .ai-workbench,
     .ai-canvas {
       --ai-chat-background-size: 100% auto;
@@ -9320,16 +9360,20 @@
       align-items: center;
       gap: 14px;
     }
-    .ai-canvas-top-left { left: 16px; }
+    .ai-canvas-top-left { left: 16px; max-width: calc(100% - 150px); }
     .ai-canvas-top-right { right: 16px; gap: 14px; }
     .ai-conversation-title-wrap {
       position: relative;
+      min-width: 0;
+      max-width: 100%;
       height: 32px;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
     .ai-conversation-title {
+      min-width: 0;
+      max-width: 100%;
       height: 32px;
       display: inline-flex;
       align-items: center;
@@ -9337,6 +9381,9 @@
       font-size: 14px;
       font-weight: 500;
       line-height: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .ai-conversation-more-button {
       width: 32px;
@@ -9379,12 +9426,18 @@
     .ai-files-button:hover { border-color: #d9d9d9; }
     .ai-files-button .ai-svg-icon { width: 14px; height: 15px; }
     .ai-main-area { position: relative; z-index: 1; min-width: 0; flex: 1; display: flex; overflow: hidden; }
-    .ai-chat-stage { position: relative; min-width: 0; flex: 1; overflow: hidden; }
+    .ai-chat-stage {
+      position: relative;
+      min-width: 180px;
+      flex: 1 1 320px;
+      overflow: hidden;
+      container: ai-chat-stage / inline-size;
+    }
     .ai-welcome {
       position: absolute;
       top: 158px;
       left: 50%;
-      width: 760px;
+      width: min(760px, calc(100% - 48px));
       margin: 0;
       transform: translateX(-50%);
     }
@@ -9455,7 +9508,7 @@
       background: #fff;
       box-shadow: 0 12px 28px rgba(67, 62, 160, .08);
     }
-    .ai-welcome > .ai-prompt { width: 760px; height: 140px; }
+    .ai-welcome > .ai-prompt { width: 100%; height: 140px; }
     .ai-prompt:focus-within { border-color: #e8e8e8; box-shadow: 0 12px 28px rgba(67, 62, 160, .1); }
     .ai-center-page .ai-welcome > .ai-prompt,
     .ai-center-page .ai-welcome > .ai-prompt:focus-within {
@@ -9564,6 +9617,7 @@
       align-items: center;
       gap: 8px;
     }
+    .ai-prompt-footer > .ai-dropdown-wrap { min-width: 0; }
     .ai-add-button {
       width: 32px;
       height: 32px;
@@ -9580,6 +9634,8 @@
     .ai-add-button .ai-svg-icon { width: 20px; height: 20px; }
     .ai-add-button:hover { background: #f8f8f8; }
     .ai-agent-trigger {
+      max-width: 100%;
+      min-width: 0;
       height: 32px;
       display: inline-flex;
       align-items: center;
@@ -9592,6 +9648,12 @@
       cursor: pointer;
       font: 13px/18px "PingFang SC", sans-serif;
     }
+    .ai-agent-trigger > span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .ai-agent-trigger:hover,
     .ai-agent-trigger.open { background: #f8f8f8; }
     .ai-agent-trigger .ai-agent-icon { width: 20px; height: 20px; }
@@ -9599,6 +9661,7 @@
     .ai-send {
       width: 32px;
       height: 32px;
+      flex: 0 0 32px;
       margin-left: auto;
       border-radius: 50%;
       background: rgba(15, 20, 25, .18);
@@ -9705,17 +9768,20 @@
     .ai-chat-content {
       position: absolute;
       top: 72px;
+      right: 24px;
       bottom: 154px;
-      left: 50%;
-      width: 760px;
-      margin: 0;
+      left: 24px;
+      width: auto;
+      max-width: 760px;
+      margin: 0 auto;
       padding: 0;
-      overflow: auto;
-      transform: translateX(-50%);
+      overflow-x: hidden;
+      overflow-y: auto;
+      transform: none;
     }
     .ai-user-message {
-      width: 440px;
-      max-width: none;
+      width: min(440px, 100%);
+      max-width: 100%;
       min-height: 64px;
       margin: 0 0 30px auto;
       padding: 12px 14px;
@@ -9724,6 +9790,7 @@
       color: rgba(0,0,0,.85);
       font-size: 14px;
       line-height: 20px;
+      overflow-wrap: anywhere;
     }
     .ai-thinking {
       display: inline-block;
@@ -9759,9 +9826,9 @@
     .ai-agent-bubble { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: rgba(0,0,0,.85); font-size: 14px; line-height: 22px; }
     .ai-agent-name { display: none; }
     .ai-elapsed { padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; color: rgba(0,0,0,.24); font-size: 12px; }
-    .ai-result-copy { padding-top: 16px; }
+    .ai-result-copy { min-width: 0; padding-top: 16px; overflow-wrap: anywhere; }
     .ai-file-card {
-      width: 335px;
+      width: min(335px, 100%);
       height: 73px;
       gap: 20px;
       margin-top: 12px;
@@ -9772,7 +9839,7 @@
       cursor: pointer;
     }
     .ai-file-type { width: 28px; height: 28px; display: block; flex: 0 0 28px; border-radius: 0; background: transparent; object-fit: contain; }
-    .ai-file-info strong { max-width: 247px; color: rgba(0,0,0,.85); font-size: 13px; font-weight: 600; }
+    .ai-file-info strong { max-width: 100%; color: rgba(0,0,0,.85); font-size: 13px; font-weight: 600; }
     .ai-file-info span { color: rgba(0,0,0,.4); font-size: 12px; }
     .ai-reactions { display: flex; gap: 12px; margin-top: 8px; }
     .ai-reaction-button { position: relative; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; cursor: pointer; overflow: visible; }
@@ -9814,12 +9881,15 @@
       bottom: 144px;
       left: 50%;
       z-index: 1;
-      width: 450px;
-      min-height: 172px;
+      width: min(450px, calc(100% - 32px));
+      min-height: 0;
+      max-height: calc(100% - 180px);
       padding: 12px 16px;
       border: 1px solid #efefef;
       border-radius: 16px 16px 0 0;
       background: #fafafa;
+      overflow-x: hidden;
+      overflow-y: auto;
       transform: translateX(-50%);
     }
     .ai-task-card-title {
@@ -9837,22 +9907,24 @@
     .ai-task-card-title .ai-task-chevron { width: 12px; height: 8px; opacity: .35; }
     .ai-task-card.is-complete .ai-task-card-title { color: rgba(0,0,0,.28); font-size: 13px; }
     .ai-task-steps { gap: 5px; margin: 0; }
-    .ai-task-step { position: relative; gap: 8px; color: rgba(0,0,0,.42); font-size: 12px; line-height: 18px; }
-    .ai-task-step:not(:last-child)::after { content: ""; position: absolute; left: 6px; top: 14px; width: 1px; height: 8px; background: #c8c8c8; }
+    .ai-task-step { position: relative; align-items: flex-start; gap: 8px; color: rgba(0,0,0,.42); font-size: 12px; line-height: 18px; }
+    .ai-task-step > span:last-child { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+    .ai-task-step:not(:last-child)::after { content: ""; position: absolute; left: 6px; top: 14px; bottom: -5px; width: 1px; background: #c8c8c8; }
     .ai-task-dot { width: 12px; height: 12px; flex-basis: 12px; border-color: #8f8f8f; background: #fff; color: #666; font-size: 8px; }
     .ai-task-step.done .ai-task-dot { border-color: #8f8f8f; background: #fff; color: #666; }
     .ai-task-step.current .ai-task-dot { border-color: #8a8a8a; border-top-color: transparent; }
     .ai-chat-composer {
       position: absolute;
-      right: 0;
+      right: 24px;
       bottom: 24px;
-      left: 0;
+      left: 24px;
       z-index: 3;
-      width: 760px;
+      width: auto;
+      max-width: 760px;
       height: 120px;
       margin: 0 auto;
     }
-    .ai-chat-composer .ai-prompt { width: 760px; height: 120px; }
+    .ai-chat-composer .ai-prompt { width: 100%; height: 120px; }
     .ai-chat-composer .ai-prompt-hint { color: rgba(0,0,0,.28); }
     .ai-chat-composer .ai-prompt-hint .ai-at-mark { color: #0088ff; }
     .ai-status-card {
@@ -9860,7 +9932,7 @@
       bottom: 144px;
       left: 50%;
       z-index: 1;
-      width: 450px;
+      width: min(450px, calc(100% - 32px));
       height: 42px;
       display: flex;
       align-items: center;
@@ -9883,21 +9955,34 @@
       transform-origin: center;
     }
     .ai-preview {
-      width: 628px;
-      flex: 0 0 628px;
-      border-left: 1px solid #e6e6e6;
+      width: var(--ai-right-pane-width);
+      min-width: 180px;
+      max-width: 780px;
+      flex: 0 1 var(--ai-right-pane-width);
+      border-left: 0;
       background: #fff;
+      overflow: hidden;
+      container: ai-right-pane / inline-size;
     }
     .ai-preview-head { height: 64px; padding: 0 16px; border-bottom: 1px solid #eeeeee; color: rgba(0,0,0,.72); font-size: 13px; }
     .ai-files-panel > .ai-preview-head { font-weight: 500; }
-    .ai-preview-title { min-width: 0; display: flex; align-items: center; }
-    .ai-preview-title span { max-width: 500px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ai-preview-title { min-width: 0; flex: 1; display: flex; align-items: center; }
+    .ai-preview-title span { min-width: 0; max-width: none; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ai-preview-title .ai-icon-button { margin-right: 8px; }
     .ai-preview-actions { display: flex; align-items: center; gap: 8px; }
     .ai-excel-sheet { position: relative; flex: 1; overflow: hidden; background: #fff; }
     .ai-excel-preview-image { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: top center; }
     .ai-excel-preview-bottom { position: absolute; right: 0; bottom: 0; left: 0; z-index: 1; height: 36px; border-top: 1px solid #e5e5e5; background: #f7f7f7 url("assets/ecm-images/archive-ai-excel-preview.png") center bottom / 100% auto no-repeat; }
-    .ai-files-panel { width: 317px; flex: 0 0 317px; border-left: 1px solid #eeeeee; background: #fff; }
+    .ai-files-panel {
+      width: var(--ai-right-pane-width);
+      min-width: 180px;
+      max-width: 520px;
+      flex: 0 1 var(--ai-right-pane-width);
+      border-left: 0;
+      background: #fff;
+      overflow: hidden;
+      container: ai-right-pane / inline-size;
+    }
     .ai-design-tabs { height: 44px; align-items: flex-start; gap: 17px; padding: 16px 16px 0; border-bottom: 0; }
     .ai-design-tab {
       height: 28px;
@@ -9909,10 +9994,10 @@
     }
     .ai-design-tab.active { color: rgba(0, 0, 0, .85); font-weight: 600; }
     .ai-design-tab.active::after { right: 8px; left: 8px; background: rgba(0, 0, 0, .85); }
-    .ai-files-list { padding: 16px 16px 0; overflow-x: hidden; overflow-y: auto; }
+    .ai-files-list { min-width: 0; padding: 16px 16px 0; overflow-x: hidden; overflow-y: auto; }
     .ai-files-row {
       position: relative;
-      width: 285px;
+      width: 100%;
       height: 42px;
       gap: 8px;
       margin-bottom: 8px;
@@ -10014,25 +10099,64 @@
     .ai-quick-drawer .ai-welcome-copy { display: block; font-size: 14px; }
     .ai-quick-drawer .ai-welcome > .ai-prompt { width: 438px; height: 140px; }
     .ai-quick-drawer .ai-suggestions { display: none; }
-    .ai-quick-drawer .ai-chat-content { width: 438px; }
-    .ai-quick-drawer .ai-chat-composer { width: 438px; }
-    .ai-quick-drawer .ai-chat-composer .ai-prompt { width: 438px; }
-    .ai-center-page.with-preview .ai-chat-content { left: 24px; width: calc(100% - 48px); transform: none; }
-    .ai-center-page.with-preview .ai-canvas-top-right { right: 640px; }
+    .ai-quick-drawer .ai-chat-content {
+      right: auto;
+      left: 50%;
+      width: min(438px, calc(100% - 36px));
+      max-width: none;
+      transform: translateX(-50%);
+    }
+    .ai-quick-drawer .ai-chat-composer {
+      right: auto;
+      left: 50%;
+      width: min(438px, calc(100% - 36px));
+      max-width: none;
+      transform: translateX(-50%);
+    }
+    .ai-quick-drawer .ai-chat-composer .ai-prompt { width: 100%; }
     .ai-center-page.with-preview .ai-canvas-top-right .ai-top-icon { display: none; }
-    .ai-center-page.with-files .ai-canvas-top-right { right: 333px; }
-    .ai-center-page.with-preview .ai-chat-composer { right: 24px; left: 24px; width: auto; }
-    .ai-center-page.with-preview .ai-chat-composer .ai-prompt { width: 100%; }
-    .ai-center-page.with-preview .ai-task-card,
-    .ai-center-page.with-preview .ai-status-card { left: 50%; }
+    @container ai-chat-stage (max-width: 520px) {
+      .ai-chat-content {
+        right: 16px;
+        left: 16px;
+      }
+      .ai-chat-composer {
+        right: 16px;
+        left: 16px;
+      }
+      .ai-task-card,
+      .ai-status-card { width: calc(100% - 24px); }
+      .ai-file-card {
+        min-height: 73px;
+        height: auto;
+        gap: 12px;
+        padding: 12px;
+      }
+      .ai-canvas-top-left { left: 12px; }
+      .ai-canvas-top-right { right: 12px; }
+      .ai-canvas-top-left { max-width: calc(100% - 96px); }
+      .ai-files-button {
+        width: 32px;
+        justify-content: center;
+        padding: 0;
+      }
+      .ai-files-button span { display: none; }
+    }
+    @container ai-right-pane (max-width: 240px) {
+      .ai-preview-head { padding: 0 8px; }
+      .ai-preview-title .ai-icon-button { margin-right: 4px; }
+      .ai-design-tabs {
+        gap: 8px;
+        padding-right: 8px;
+        padding-left: 8px;
+      }
+      .ai-files-list { padding-right: 8px; padding-left: 8px; }
+      .ai-files-row { padding-right: 8px; padding-left: 8px; }
+    }
     @media (max-width: 1180px) {
       .ai-welcome { width: min(760px, calc(100% - 48px)); }
       .ai-welcome > .ai-prompt { width: 100%; }
-      .ai-chat-content { width: min(760px, calc(100% - 48px)); }
-      .ai-chat-composer { width: min(760px, calc(100% - 48px)); }
       .ai-chat-composer .ai-prompt { width: 100%; }
-      .ai-preview { width: 46%; flex-basis: 46%; }
-      .ai-center-page.with-preview .ai-canvas-top-right { right: calc(46% + 12px); }
     }
   </style>
 </head>
@@ -15930,6 +16054,17 @@
       "业务管理问答": "业务管理问答",
       "借阅管理问答": "借阅管理问答"
     }[scenario] || scenario);
+    const AI_LAYOUT_STORAGE_KEY = "maycur-archive-local-demo.ai-layout";
+    const AI_LAYOUT_DEFAULTS = { historyWidth: 250, filesWidth: 317, previewWidth: 628 };
+    const loadAiLayoutPreferences = () => {
+      try {
+        return { ...AI_LAYOUT_DEFAULTS, ...JSON.parse(localStorage.getItem(AI_LAYOUT_STORAGE_KEY) || "{}") };
+      } catch (error) {
+        return { ...AI_LAYOUT_DEFAULTS };
+      }
+    };
+    const aiLayoutPreferences = loadAiLayoutPreferences();
+    const normalizeAiLayoutWidth = (value, fallback, min, max) => Math.min(max, Math.max(min, Number(value) || fallback));
     const aiIcon = (name, className = "ai-svg-icon") => `<img class="${className} ai-svg-icon" src="${AI_ICON_BASE}/${name}" alt="" aria-hidden="true">`;
     const aiFileIcon = (file, className = "ai-file-type") => aiIcon(AI_FILE_ICONS[file[0]] || AI_FILE_ICONS.IMG, className);
     const aiScenarioIcon = (scenario) => aiIcon(AI_SCENARIO_ICONS[scenario] || AI_SCENARIO_ICONS[AI_SCENARIOS[0]], "ai-scenario-icon");
@@ -15968,10 +16103,32 @@
       fileTab: "upload",
       fileRowMenuId: null,
       fileRowMenuActiveIndex: -1,
+      historyWidth: normalizeAiLayoutWidth(aiLayoutPreferences.historyWidth, AI_LAYOUT_DEFAULTS.historyWidth, 180, 420),
+      filesWidth: normalizeAiLayoutWidth(aiLayoutPreferences.filesWidth, AI_LAYOUT_DEFAULTS.filesWidth, 180, 520),
+      previewWidth: normalizeAiLayoutWidth(aiLayoutPreferences.previewWidth, AI_LAYOUT_DEFAULTS.previewWidth, 180, 780),
       quickOpen: false,
       toast: ""
     };
     let aiTaskTimer = null;
+
+    const persistAiLayoutPreferences = () => {
+      try {
+        localStorage.setItem(AI_LAYOUT_STORAGE_KEY, JSON.stringify({
+          historyWidth: aiRuntime.historyWidth,
+          filesWidth: aiRuntime.filesWidth,
+          previewWidth: aiRuntime.previewWidth
+        }));
+      } catch (error) {
+        // Local file previews can block storage; the current in-memory layout still remains usable.
+      }
+    };
+
+    const renderAiResizeHandle = (side, panel = "") => {
+      const isLeft = side === "left";
+      const value = isLeft ? aiRuntime.historyWidth : (panel === "preview" ? aiRuntime.previewWidth : aiRuntime.filesWidth);
+      const max = isLeft ? 420 : (panel === "preview" ? 780 : 520);
+      return `<div class="ai-panel-resizer ai-panel-resizer-${side}" role="separator" tabindex="0" aria-label="${isLeft ? "调整左侧会话栏宽度" : "调整右侧栏宽度"}" aria-orientation="vertical" aria-valuemin="180" aria-valuemax="${max}" aria-valuenow="${Math.round(value)}" data-ai-resize-handle="${side}" ${panel ? `data-ai-resize-panel="${panel}"` : ""}></div>`;
+    };
 
     const aiFileCard = (file = AI_FILES[0]) => `
       <div class="ai-file-card">
@@ -16107,17 +16264,27 @@
       </aside>
     `;
 
-    const renderAiCenter = () => `
-      <section class="ai-center-page ${aiRuntime.preview ? "with-preview" : ""} ${aiRuntime.filePanel ? "with-files" : ""}" data-ai-center-page>
-        ${aiRuntime.historyCollapsed ? "" : renderAiHistory()}
-        <section class="ai-canvas">
-          <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<button class="ai-top-icon" type="button" data-ai-history-toggle aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title">查找付款申请单</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
-          <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel>${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-file-panel aria-label="展开文件栏">${aiIcon("sidebar-toggle.svg")}</button></div>
-          <div class="ai-main-area"><section class="ai-chat-stage">${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}</section>${aiRuntime.preview ? renderAiPreview() : ""}${aiRuntime.filePanel ? renderAiFilesPanel() : ""}</div>
+    const renderAiCenter = () => {
+      const rightPanel = aiRuntime.preview ? "preview" : (aiRuntime.filePanel ? "files" : "");
+      const rightPanelWidth = rightPanel === "preview" ? aiRuntime.previewWidth : (rightPanel === "files" ? aiRuntime.filesWidth : 0);
+      return `
+        <section class="ai-center-page ${aiRuntime.preview ? "with-preview" : ""} ${aiRuntime.filePanel ? "with-files" : ""}" style="--ai-side-width:${aiRuntime.historyWidth}px;--ai-right-pane-width:${rightPanelWidth}px" data-ai-center-page>
+          ${aiRuntime.historyCollapsed ? "" : `${renderAiHistory()}${renderAiResizeHandle("left")}`}
+          <section class="ai-canvas">
+            <div class="ai-main-area">
+              <section class="ai-chat-stage">
+                <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<button class="ai-top-icon" type="button" data-ai-history-toggle aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title">查找付款申请单</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
+                <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel>${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-file-panel aria-label="展开文件栏">${aiIcon("sidebar-toggle.svg")}</button></div>
+                ${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}
+              </section>
+              ${rightPanel ? renderAiResizeHandle("right", rightPanel) : ""}
+              ${aiRuntime.preview ? renderAiPreview() : ""}${aiRuntime.filePanel ? renderAiFilesPanel() : ""}
+            </div>
+          </section>
+          ${aiRuntime.toast ? `<span class="ai-toast">${aiRuntime.toast}</span>` : ""}
         </section>
-        ${aiRuntime.toast ? `<span class="ai-toast">${aiRuntime.toast}</span>` : ""}
-      </section>
-    `;
+      `;
+    };
 
     const renderAiQuickDrawer = () => {
       const drawer = document.getElementById("aiQuickDrawer");
@@ -16129,6 +16296,37 @@
     const refreshAiUi = () => {
       if (routeFromHash().module === "ai-center") document.getElementById("pageBody").innerHTML = renderAiCenter();
       renderAiQuickDrawer();
+    };
+
+    const getAiResizeStateKey = (handle) => {
+      if (handle?.dataset.aiResizeHandle === "left") return "historyWidth";
+      return handle?.dataset.aiResizePanel === "preview" ? "previewWidth" : "filesWidth";
+    };
+
+    const getAiResizeLimits = (handle) => {
+      const page = handle?.closest("[data-ai-center-page]");
+      if (!page) return { min: 0, max: 0 };
+      if (handle.dataset.aiResizeHandle === "left") {
+        const rightWidth = page.querySelector(".ai-preview, .ai-files-panel")?.getBoundingClientRect().width || 0;
+        const availableMax = page.getBoundingClientRect().width - rightWidth - 185;
+        return { min: 180, max: Math.min(420, Math.max(180, availableMax)) };
+      }
+      const canvasWidth = page.querySelector(".ai-canvas")?.getBoundingClientRect().width || page.getBoundingClientRect().width;
+      const configuredMax = handle.dataset.aiResizePanel === "preview" ? 780 : 520;
+      return { min: 180, max: Math.min(configuredMax, Math.max(180, canvasWidth - 185)) };
+    };
+
+    const applyAiPanelWidth = (handle, requestedWidth) => {
+      const page = handle?.closest("[data-ai-center-page]");
+      if (!page) return 0;
+      const key = getAiResizeStateKey(handle);
+      const { min, max } = getAiResizeLimits(handle);
+      const nextWidth = Math.round(Math.min(max, Math.max(min, requestedWidth)));
+      aiRuntime[key] = nextWidth;
+      page.style.setProperty(handle.dataset.aiResizeHandle === "left" ? "--ai-side-width" : "--ai-right-pane-width", `${nextWidth}px`);
+      handle.setAttribute("aria-valuenow", String(nextWidth));
+      handle.setAttribute("aria-valuemax", String(Math.round(max)));
+      return nextWidth;
     };
 
     const setAiKeyboardSelection = (root, selector, stateKey, direction) => {
@@ -16688,6 +16886,44 @@
     };
 
     window.addEventListener("resize", syncActionColumnShadows);
+
+    document.addEventListener("pointerdown", (event) => {
+      const handle = event.target.closest?.("[data-ai-resize-handle]");
+      if (!handle || event.button !== 0) return;
+      event.preventDefault();
+      const page = handle.closest("[data-ai-center-page]");
+      const panel = handle.dataset.aiResizeHandle === "left"
+        ? page?.querySelector(".ai-history")
+        : page?.querySelector(".ai-preview, .ai-files-panel");
+      if (!page || !panel) return;
+
+      const startX = event.clientX;
+      const renderedStartWidth = panel.getBoundingClientRect().width;
+      const startWidth = applyAiPanelWidth(handle, renderedStartWidth);
+      const direction = handle.dataset.aiResizeHandle === "left" ? 1 : -1;
+      handle.classList.add("is-resizing");
+      document.body.classList.add("ai-column-resizing");
+      handle.setPointerCapture?.(event.pointerId);
+
+      const move = (moveEvent) => {
+        if (moveEvent.pointerId !== event.pointerId) return;
+        applyAiPanelWidth(handle, startWidth + ((moveEvent.clientX - startX) * direction));
+      };
+      const finish = (finishEvent) => {
+        if (finishEvent.pointerId !== event.pointerId) return;
+        handle.classList.remove("is-resizing");
+        document.body.classList.remove("ai-column-resizing");
+        handle.releasePointerCapture?.(event.pointerId);
+        document.removeEventListener("pointermove", move);
+        document.removeEventListener("pointerup", finish);
+        document.removeEventListener("pointercancel", finish);
+        persistAiLayoutPreferences();
+      };
+
+      document.addEventListener("pointermove", move);
+      document.addEventListener("pointerup", finish);
+      document.addEventListener("pointercancel", finish);
+    });
 
     document.addEventListener("click", (event) => {
       if (!event.target.closest(".ai-prompt")) {
@@ -17719,6 +17955,20 @@
     });
 
     document.addEventListener("keydown", (event) => {
+      const aiResizeHandle = event.target.closest?.("[data-ai-resize-handle]");
+      if (aiResizeHandle && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+        event.preventDefault();
+        const panel = aiResizeHandle.dataset.aiResizeHandle === "left"
+          ? aiResizeHandle.closest("[data-ai-center-page]")?.querySelector(".ai-history")
+          : aiResizeHandle.closest("[data-ai-center-page]")?.querySelector(".ai-preview, .ai-files-panel");
+        const currentWidth = panel?.getBoundingClientRect().width || aiRuntime[getAiResizeStateKey(aiResizeHandle)];
+        const direction = aiResizeHandle.dataset.aiResizeHandle === "left" ? 1 : -1;
+        const keyboardDelta = event.key === "ArrowRight" ? 8 : -8;
+        applyAiPanelWidth(aiResizeHandle, currentWidth + (keyboardDelta * direction));
+        persistAiLayoutPreferences();
+        return;
+      }
+
       const aiPrompt = event.target.closest?.(".ai-prompt");
       const aiPromptInput = event.target.closest?.(".ai-prompt-input");
 
