@@ -8908,8 +8908,6 @@
     .ai-workbench-name { color: rgba(0,0,0,.78); font-size: 16px; font-weight: 500; }
     .ai-head-actions { display: flex; align-items: center; gap: 4px; }
     .ai-action-tip { position: relative; }
-    .ai-action-tip::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); right: 0; z-index: 5; display: none; padding: 5px 8px; border-radius: 3px; background: rgba(0,0,0,.78); color: #fff; font-size: 12px; white-space: nowrap; }
-    .ai-action-tip:hover::after { display: block; }
     .ai-main-area { min-height: 0; flex: 1; display: flex; overflow: hidden; }
     .ai-chat-stage { min-width: 0; flex: 1; display: flex; flex-direction: column; }
     .ai-welcome { width: min(760px, 92%); margin: auto; transform: translateY(-6%); }
@@ -9848,37 +9846,38 @@
     .ai-reaction-button { position: relative; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; cursor: pointer; overflow: visible; }
     .ai-reaction-button:hover { background: #f0f0f2; }
     .ai-reaction-button .ai-svg-icon { width: 16px; height: 16px; }
-    .ai-reaction-button::before {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 8px);
-      z-index: 5;
-      min-width: max-content;
-      height: 30px;
+    .ai-global-tooltip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1200;
+      width: max-content;
+      max-width: min(360px, calc(100vw - 16px));
+      min-height: 30px;
       display: flex;
       align-items: center;
-      padding: 0 10px;
+      justify-content: center;
+      padding: 5px 10px;
       border-radius: 4px;
       background: rgba(0, 0, 0, .75);
       box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
       color: #fff;
       font: 12px/20px "PingFang SC", sans-serif;
-      white-space: nowrap;
+      text-align: left;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      visibility: hidden;
       opacity: 0;
       pointer-events: none;
-      transform: translate(-50%, 4px);
-      transition: opacity .12s ease, transform .12s ease;
+      transform: translateY(4px);
+      transition: opacity .12s ease, transform .12s ease, visibility 0s linear .12s;
     }
-    .ai-reaction-button:hover::before,
-    .ai-reaction-button:focus-visible::before {
+    .ai-global-tooltip.visible {
+      visibility: visible;
       opacity: 1;
-      transform: translate(-50%, 0);
+      transform: translateY(0);
+      transition-delay: 0s;
     }
-    .ai-reaction-button:first-child::before { left: 0; transform: translate(0, 4px); }
-    .ai-reaction-button:first-child:hover::before,
-    .ai-reaction-button:first-child:focus-visible::before { transform: translate(0, 0); }
-    .ai-reactions:hover .ai-reaction-button:focus-visible:not(:hover)::before { opacity: 0; }
     .ai-task-card {
       position: absolute;
       bottom: 144px;
@@ -16251,7 +16250,7 @@
       </div>
     </div>`;
 
-    const renderAiHistoryItem = (item, child = false) => `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${item.id}"><span class="ai-history-text" title="${item.title}">${item.title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${item.id}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${item.title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><button class="ai-history-more-button" type="button" data-ai-history-more="${item.id}" aria-label="更多操作：${item.title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
+    const renderAiHistoryItem = (item, child = false) => `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${item.id}" data-ai-tooltip="${item.title}"><span class="ai-history-text">${item.title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${item.id}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${item.title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><button class="ai-history-more-button" type="button" data-ai-history-more="${item.id}" aria-label="更多操作：${item.title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
 
     const renderAiHistory = () => `
       <aside class="ai-history" aria-label="AI 会话历史">
@@ -16277,7 +16276,7 @@
             <div class="ai-main-area">
               <section class="ai-chat-stage">
                 <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<button class="ai-top-icon" type="button" data-ai-history-toggle aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title">查找付款申请单</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
-                <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel>${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-last-preview aria-label="打开上次查看的文件">${aiIcon("sidebar-toggle.svg")}</button></div>
+                <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel aria-label="${aiRuntime.filePanel ? "收起文件库" : "展开文件库"}">${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-last-preview aria-label="打开上次查看的文件">${aiIcon("sidebar-toggle.svg")}</button></div>
                 ${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}
               </section>
               ${rightPanel ? renderAiResizeHandle("right", rightPanel) : ""}
@@ -16296,7 +16295,74 @@
       drawer.innerHTML = aiRuntime.quickOpen ? `<section class="ai-workbench"><header class="ai-workbench-head"><span class="ai-workbench-name">每刻档案AI助手</span><div class="ai-head-actions"><button class="ai-icon-button ai-drag-handle" type="button" aria-label="移动 AI 助手窗口">${aiIcon("move.svg")}</button><button class="ai-icon-button" type="button" data-ai-go-center aria-label="进入 AI 应用中心">${aiIcon("fullscreen.svg")}</button><button class="ai-icon-button" type="button" data-ai-quick-close aria-label="关闭 AI 助手">${aiIcon("close.svg")}</button></div></header><div class="ai-main-area"><section class="ai-chat-stage">${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}</section></div>${aiIcon("resize-handle.svg", "ai-resize-handle")}</section>` : "";
     };
 
+    let aiTooltipTarget = null;
+
+    const getAiTooltipTarget = (node) => node?.closest?.([
+      ".ai-center-page [data-ai-tooltip]",
+      ".ai-center-page [data-tooltip]",
+      ".ai-center-page [data-tip]",
+      ".ai-center-page button[aria-label]",
+      ".ai-center-page [role=\"separator\"][aria-label]",
+      ".ai-quick-drawer [data-ai-tooltip]",
+      ".ai-quick-drawer [data-tooltip]",
+      ".ai-quick-drawer [data-tip]",
+      ".ai-quick-drawer button[aria-label]"
+    ].join(", ")) || null;
+
+    const getAiTooltipText = (target) => target?.dataset.aiTooltip
+      || target?.dataset.tooltip
+      || target?.dataset.tip
+      || target?.getAttribute("aria-label")
+      || "";
+
+    const ensureAiTooltip = () => {
+      let tooltip = document.getElementById("aiGlobalTooltip");
+      if (!tooltip) {
+        tooltip = document.createElement("div");
+        tooltip.id = "aiGlobalTooltip";
+        tooltip.className = "ai-global-tooltip";
+        tooltip.setAttribute("role", "tooltip");
+        tooltip.setAttribute("aria-hidden", "true");
+        document.body.appendChild(tooltip);
+      }
+      return tooltip;
+    };
+
+    const hideAiTooltip = () => {
+      aiTooltipTarget = null;
+      const tooltip = document.getElementById("aiGlobalTooltip");
+      if (!tooltip) return;
+      tooltip.classList.remove("visible");
+      tooltip.setAttribute("aria-hidden", "true");
+    };
+
+    const showAiTooltip = (target) => {
+      const text = getAiTooltipText(target).trim();
+      if (!text) {
+        hideAiTooltip();
+        return;
+      }
+      const tooltip = ensureAiTooltip();
+      aiTooltipTarget = target;
+      tooltip.textContent = text;
+      tooltip.classList.remove("visible");
+      tooltip.setAttribute("aria-hidden", "false");
+      const targetRect = target.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let top = targetRect.top - tooltipRect.height - 8;
+      if (top < 8) top = targetRect.bottom + 8;
+      let left = targetRect.left + ((targetRect.width - tooltipRect.width) / 2);
+      left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
+      top = Math.max(8, Math.min(top, window.innerHeight - tooltipRect.height - 8));
+      tooltip.style.left = `${Math.round(left)}px`;
+      tooltip.style.top = `${Math.round(top)}px`;
+      requestAnimationFrame(() => {
+        if (aiTooltipTarget === target) tooltip.classList.add("visible");
+      });
+    };
+
     const refreshAiUi = () => {
+      hideAiTooltip();
       if (routeFromHash().module === "ai-center") document.getElementById("pageBody").innerHTML = renderAiCenter();
       renderAiQuickDrawer();
     };
@@ -16889,6 +16955,30 @@
     };
 
     window.addEventListener("resize", syncActionColumnShadows);
+
+    document.addEventListener("mouseover", (event) => {
+      const target = getAiTooltipTarget(event.target);
+      if (!target || target === aiTooltipTarget) return;
+      showAiTooltip(target);
+    });
+
+    document.addEventListener("mouseout", (event) => {
+      if (!aiTooltipTarget || aiTooltipTarget.contains(event.relatedTarget)) return;
+      hideAiTooltip();
+    });
+
+    document.addEventListener("focusin", (event) => {
+      const target = getAiTooltipTarget(event.target);
+      if (target) showAiTooltip(target);
+    });
+
+    document.addEventListener("focusout", (event) => {
+      if (!aiTooltipTarget || aiTooltipTarget.contains(event.relatedTarget)) return;
+      hideAiTooltip();
+    });
+
+    document.addEventListener("scroll", hideAiTooltip, true);
+    window.addEventListener("resize", hideAiTooltip);
 
     document.addEventListener("pointerdown", (event) => {
       const handle = event.target.closest?.("[data-ai-resize-handle]");
@@ -18365,6 +18455,7 @@
     });
 
     window.addEventListener("hashchange", () => {
+      hideAiTooltip();
       document.body.classList.remove("table-settings-open");
       activeTableSettingsId = "";
       renderPage();
