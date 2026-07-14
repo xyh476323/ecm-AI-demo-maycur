@@ -10026,7 +10026,7 @@
     }
     .ai-task-card {
       position: absolute;
-      bottom: 144px;
+      bottom: calc(24px + var(--ai-composer-height, 120px));
       left: 50%;
       z-index: 1;
       width: min(450px, calc(100% - 32px));
@@ -10069,15 +10069,40 @@
       z-index: 3;
       width: auto;
       max-width: 760px;
-      height: 120px;
+      height: var(--ai-composer-height, 120px);
       margin: 0 auto;
     }
-    .ai-chat-composer .ai-prompt { width: 100%; height: 120px; }
+    .ai-chat-composer .ai-prompt { width: 100%; height: var(--ai-composer-height, 120px); }
     .ai-chat-composer .ai-prompt-hint { color: rgba(0,0,0,.28); }
     .ai-chat-composer .ai-prompt-hint .ai-at-mark { color: #0088ff; }
+    .ai-composer-resize-handle {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 8;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 7px 7px 0 0;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: rgba(0, 0, 0, .28);
+      cursor: ns-resize;
+      touch-action: none;
+    }
+    .ai-composer-resize-handle:hover,
+    .ai-composer-resize-handle:focus-visible { background: #f8f8f8; }
+    .ai-composer-resize-handle:focus-visible { outline: 2px solid rgba(0, 136, 255, .22); outline-offset: -2px; }
+    .ai-composer-resize-handle .ai-composer-resize-icon { width: 18px; height: 18px; }
+    .ai-composer-resize-handle.is-resizing { background: #f8f8f8; }
+    body.ai-row-resizing,
+    body.ai-row-resizing * { cursor: ns-resize !important; user-select: none !important; }
     .ai-status-card {
       position: absolute;
-      bottom: 144px;
+      bottom: calc(24px + var(--ai-composer-height, 120px));
       left: 50%;
       z-index: 1;
       width: min(450px, calc(100% - 32px));
@@ -16332,7 +16357,7 @@
     }[scenario] || scenario);
     const getAiPromptAgentIndent = (scenario) => 34 + ([...getAiPromptAgentLabel(scenario)].length * 14);
     const AI_LAYOUT_STORAGE_KEY = "maycur-archive-local-demo.ai-layout";
-    const AI_LAYOUT_DEFAULTS = { historyWidth: 250, filesWidth: 317, previewWidth: 628 };
+    const AI_LAYOUT_DEFAULTS = { historyWidth: 250, filesWidth: 317, previewWidth: 628, composerHeight: 120 };
     const loadAiLayoutPreferences = () => {
       try {
         return { ...AI_LAYOUT_DEFAULTS, ...JSON.parse(localStorage.getItem(AI_LAYOUT_STORAGE_KEY) || "{}") };
@@ -16384,6 +16409,7 @@
       fileTab: "upload",
       fileRowMenuId: null,
       fileRowMenuActiveIndex: -1,
+      composerHeight: normalizeAiLayoutWidth(aiLayoutPreferences.composerHeight, AI_LAYOUT_DEFAULTS.composerHeight, 96, 210),
       historyWidth: normalizeAiLayoutWidth(aiLayoutPreferences.historyWidth, AI_LAYOUT_DEFAULTS.historyWidth, 180, 420),
       filesWidth: normalizeAiLayoutWidth(aiLayoutPreferences.filesWidth, AI_LAYOUT_DEFAULTS.filesWidth, 180, 520),
       previewWidth: normalizeAiLayoutWidth(aiLayoutPreferences.previewWidth, AI_LAYOUT_DEFAULTS.previewWidth, 180, 780),
@@ -16397,7 +16423,8 @@
         localStorage.setItem(AI_LAYOUT_STORAGE_KEY, JSON.stringify({
           historyWidth: aiRuntime.historyWidth,
           filesWidth: aiRuntime.filesWidth,
-          previewWidth: aiRuntime.previewWidth
+          previewWidth: aiRuntime.previewWidth,
+          composerHeight: aiRuntime.composerHeight
         }));
       } catch (error) {
         // Local file previews can block storage; the current in-memory layout still remains usable.
@@ -16426,8 +16453,9 @@
       </div>
     `;
 
-    const renderAiPrompt = ({ welcome = false } = {}) => `
+    const renderAiPrompt = ({ welcome = false, resizable = false } = {}) => `
       <form class="ai-prompt ${aiRuntime.draft ? "has-value" : ""} ${aiRuntime.selectedScenarioKey ? "has-agent" : ""}" data-ai-prompt-form>
+        ${resizable ? `<button class="ai-composer-resize-handle" type="button" role="separator" data-ai-composer-resize aria-label="调整对话框高度" aria-orientation="vertical" aria-valuemin="96" aria-valuemax="210" aria-valuenow="${Math.round(aiRuntime.composerHeight)}">${aiIcon("resize-handle.svg", "ai-composer-resize-icon")}</button>` : ""}
         <div class="ai-prompt-entry"${aiRuntime.selectedScenarioKey ? ` style="--ai-agent-prefix-indent:${getAiPromptAgentIndent(aiRuntime.selectedScenarioKey)}px"` : ""}>
           ${aiRuntime.selectedScenarioKey
             ? `<span class="ai-selected-agent-prefix">${aiScenarioIcon(aiRuntime.selectedScenarioKey)}<span>${getAiPromptAgentLabel(aiRuntime.selectedScenarioKey)}</span></span>`
@@ -16470,7 +16498,7 @@
       ? `<div class="ai-task-card is-complete"><button class="ai-task-card-title" type="button" data-ai-task-details-toggle aria-expanded="true"><span>任务已完成</span>${aiIcon("chevron-down.svg", "ai-task-chevron")}</button>${renderAiTaskSteps(true)}</div>`
       : `<button class="ai-status-card" type="button" data-ai-task-details-toggle aria-expanded="false"><span>任务已完成</span>${aiIcon("chevron-down.svg", "ai-status-chevron")}</button>`;
 
-    const renderAiTask = () => `
+    const renderAiTask = ({ resizable = false } = {}) => `
       <div class="ai-chat-content">
         <div class="ai-user-message">帮我找出单据号为MK-202607061631的付款申请单，生成 excel的格式供我浏览</div>
         ${aiRuntime.view === "processing" ? `<div class="ai-thinking" role="status" aria-live="polite">正在思考</div>` : aiRuntime.view === "cancelled" ? `<div class="ai-cancelled-message" role="status" aria-live="polite">任务已取消</div>` : `<div class="ai-agent-message"><div class="ai-agent-bubble"><div class="ai-elapsed">已处理 3m28s</div><div class="ai-result-copy">我从系统内筛选出了 1 条 符合条件的 MK-202607061631 付款申请单，已为您生成 1份 Excel的文件。</div>${aiFileCard()}<div class="ai-reactions">${[
@@ -16481,7 +16509,7 @@
         ].map(({ action, icon, label }) => `<button class="ai-reaction-button ${aiRuntime.reactionVote === action ? "is-active" : ""}" type="button" data-ai-reaction="${action}" data-tooltip="${label}" aria-label="${label}" ${action === "like" || action === "dislike" ? `aria-pressed="${aiRuntime.reactionVote === action}"` : ""}>${aiIcon(icon)}</button>`).join("")}</div></div></div>`}
       </div>
       ${aiRuntime.view === "processing" ? renderAiTaskCard() : aiRuntime.view === "result" ? renderAiCompletedTask() : ""}
-      <div class="ai-chat-composer">${renderAiPrompt()}</div>
+      <div class="ai-chat-composer">${renderAiPrompt({ resizable })}</div>
     `;
 
     const renderAiPreview = () => `<aside class="ai-preview" aria-label="Excel 文件预览"><div class="ai-preview-head"><div class="ai-preview-title"><button class="ai-icon-button" type="button" data-ai-preview-close aria-label="关闭预览">${aiIcon("sidebar-toggle.svg")}</button><span>MK-202607061631-付款申请.xlsx</span></div><div class="ai-preview-actions"><button class="ai-icon-button" type="button" aria-label="全屏预览">${aiIcon("fullscreen.svg")}</button></div></div><div class="ai-excel-sheet"><img class="ai-excel-preview-image" src="assets/ecm-images/archive-ai-excel-preview.png" alt="MK-202607061631 付款申请 Excel 示例单据"><span class="ai-excel-preview-bottom" aria-hidden="true"></span></div></aside>`;
@@ -16608,10 +16636,10 @@
           ${aiRuntime.historyCollapsed ? "" : `${renderAiHistory()}${renderAiResizeHandle("left")}`}
           <section class="ai-canvas">
             <div class="ai-main-area">
-              <section class="ai-chat-stage">
+              <section class="ai-chat-stage" style="--ai-composer-height:${Math.round(aiRuntime.composerHeight)}px">
                 <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<div class="ai-history-quick-wrap"><button class="ai-top-icon" type="button" data-ai-history-toggle data-ai-no-tooltip aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>${renderAiHistoryQuickPreview()}</div>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title">查找付款申请单</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more data-ai-tooltip="更多操作" aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
                 <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel aria-label="${aiRuntime.filePanel ? "收起文件库" : "展开文件库"}">${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-last-preview aria-label="打开上次查看的文件">${aiIcon("sidebar-toggle.svg")}</button></div>
-                ${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}
+                ${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask({ resizable: true })}
               </section>
               ${rightPanel ? renderAiResizeHandle("right", rightPanel) : ""}
               ${aiRuntime.preview ? renderAiPreview() : ""}${aiRuntime.filePanel ? renderAiFilesPanel() : ""}
@@ -16734,6 +16762,16 @@
       handle.setAttribute("aria-valuenow", String(nextWidth));
       handle.setAttribute("aria-valuemax", String(Math.round(max)));
       return nextWidth;
+    };
+
+    const applyAiComposerHeight = (handle, requestedHeight) => {
+      const stage = handle?.closest(".ai-chat-stage");
+      if (!stage) return aiRuntime.composerHeight;
+      const nextHeight = Math.round(Math.min(210, Math.max(96, Number(requestedHeight) || AI_LAYOUT_DEFAULTS.composerHeight)));
+      aiRuntime.composerHeight = nextHeight;
+      stage.style.setProperty("--ai-composer-height", `${nextHeight}px`);
+      handle.setAttribute("aria-valuenow", String(nextHeight));
+      return nextHeight;
     };
 
     const setAiKeyboardSelection = (root, selector, stateKey, direction) => {
@@ -17319,6 +17357,38 @@
     window.addEventListener("resize", hideAiTooltip);
 
     document.addEventListener("pointerdown", (event) => {
+      const composerHandle = event.target.closest?.("[data-ai-composer-resize]");
+      if (composerHandle && event.button === 0) {
+        event.preventDefault();
+        const composer = composerHandle.closest(".ai-chat-composer");
+        if (!composer) return;
+        const startY = event.clientY;
+        const startHeight = applyAiComposerHeight(composerHandle, composer.getBoundingClientRect().height);
+        composerHandle.classList.add("is-resizing");
+        document.body.classList.add("ai-row-resizing");
+        composerHandle.setPointerCapture?.(event.pointerId);
+
+        const moveComposer = (moveEvent) => {
+          if (moveEvent.pointerId !== event.pointerId) return;
+          applyAiComposerHeight(composerHandle, startHeight + (startY - moveEvent.clientY));
+        };
+        const finishComposer = (finishEvent) => {
+          if (finishEvent.pointerId !== event.pointerId) return;
+          composerHandle.classList.remove("is-resizing");
+          document.body.classList.remove("ai-row-resizing");
+          composerHandle.releasePointerCapture?.(event.pointerId);
+          document.removeEventListener("pointermove", moveComposer);
+          document.removeEventListener("pointerup", finishComposer);
+          document.removeEventListener("pointercancel", finishComposer);
+          persistAiLayoutPreferences();
+        };
+
+        document.addEventListener("pointermove", moveComposer);
+        document.addEventListener("pointerup", finishComposer);
+        document.addEventListener("pointercancel", finishComposer);
+        return;
+      }
+
       const handle = event.target.closest?.("[data-ai-resize-handle]");
       if (!handle || event.button !== 0) return;
       event.preventDefault();
@@ -18477,6 +18547,20 @@
     });
 
     document.addEventListener("keydown", (event) => {
+      const aiComposerResizeHandle = event.target.closest?.("[data-ai-composer-resize]");
+      if (aiComposerResizeHandle && ["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        const currentHeight = Number(aiComposerResizeHandle.getAttribute("aria-valuenow")) || aiRuntime.composerHeight;
+        const nextHeight = event.key === "Home"
+          ? 96
+          : event.key === "End"
+            ? 210
+            : currentHeight + (event.key === "ArrowUp" ? 8 : -8);
+        applyAiComposerHeight(aiComposerResizeHandle, nextHeight);
+        persistAiLayoutPreferences();
+        return;
+      }
+
       const aiSearchPanel = event.target.closest?.("[data-ai-search-panel]");
       const aiSearchKeyboardTarget = event.target.closest?.("[data-ai-search-input], [data-ai-search-result]");
       const aiSearchFileMenuTarget = event.target.closest?.("[data-ai-file-row-more], [data-ai-download]");
