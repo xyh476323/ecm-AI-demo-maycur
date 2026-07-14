@@ -10081,24 +10081,16 @@
       top: 3px;
       right: 3px;
       z-index: 8;
-      width: 24px;
-      height: 24px;
-      display: inline-flex;
-      align-items: flex-start;
-      justify-content: flex-end;
-      padding: 0;
-      border: 0;
-      border-radius: 6px;
-      background: transparent;
+      width: 8px;
+      height: 8px;
+      display: block;
+      overflow: visible;
       color: rgba(0, 0, 0, .28);
       cursor: ns-resize;
       touch-action: none;
     }
-    .ai-composer-resize-handle:hover,
-    .ai-composer-resize-handle:focus-visible { background: #f8f8f8; }
-    .ai-composer-resize-handle:focus-visible { outline: 2px solid rgba(0, 136, 255, .22); outline-offset: -2px; }
-    .ai-composer-resize-handle .ai-composer-resize-icon { width: 8px; height: 8px; }
-    .ai-composer-resize-handle.is-resizing { background: #f8f8f8; }
+    .ai-composer-resize-handle:focus-visible { outline: 2px solid rgba(0, 136, 255, .22); outline-offset: 3px; }
+    .ai-composer-resize-handle.is-resizing { color: rgba(0, 0, 0, .4); }
     body.ai-row-resizing,
     body.ai-row-resizing * { cursor: ns-resize !important; user-select: none !important; }
     .ai-status-card {
@@ -16483,7 +16475,7 @@
 
     const renderAiPrompt = ({ welcome = false, resizable = false } = {}) => `
       <form class="ai-prompt ${aiRuntime.draft ? "has-value" : ""} ${aiRuntime.selectedScenarioKey ? "has-agent" : ""}" data-ai-prompt-form>
-        ${resizable ? `<button class="ai-composer-resize-handle" type="button" role="separator" data-ai-composer-resize aria-label="调整对话框高度" aria-orientation="vertical" aria-valuemin="96" aria-valuemax="210" aria-valuenow="${Math.round(aiRuntime.composerHeight)}">${aiIcon("resize-handle.svg", "ai-composer-resize-icon")}</button>` : ""}
+        ${resizable ? `<svg class="ai-composer-resize-handle" width="8" height="8" viewBox="0 0 8 8" fill="none" role="separator" tabindex="0" focusable="true" data-ai-composer-resize aria-label="调整对话框高度" aria-orientation="vertical" aria-valuemin="96" aria-valuemax="210" aria-valuenow="${Math.round(aiRuntime.composerHeight)}"><path d="M0 0C4.41828 0 8 3.58172 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}
         <div class="ai-prompt-entry"${aiRuntime.selectedScenarioKey ? ` style="--ai-agent-prefix-indent:${getAiPromptAgentIndent(aiRuntime.selectedScenarioKey)}px"` : ""}>
           ${aiRuntime.selectedScenarioKey
             ? `<span class="ai-selected-agent-prefix">${aiScenarioIcon(aiRuntime.selectedScenarioKey)}<span>${getAiPromptAgentLabel(aiRuntime.selectedScenarioKey)}</span></span>`
