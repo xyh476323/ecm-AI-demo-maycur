@@ -9303,6 +9303,7 @@
       cursor: col-resize;
       touch-action: none;
     }
+    .ai-panel-resizer-left { background: #fafafb; }
     .ai-panel-resizer::after {
       content: "";
       position: absolute;
@@ -9314,6 +9315,7 @@
       transform: translateX(-50%);
       transition: width .12s ease, background-color .12s ease;
     }
+    .ai-panel-resizer-left::after { left: 100%; }
     .ai-panel-resizer:hover::after,
     .ai-panel-resizer:focus-visible::after,
     .ai-panel-resizer.is-resizing::after {
