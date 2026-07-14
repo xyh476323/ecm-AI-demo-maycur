@@ -9189,11 +9189,9 @@
     .ai-history-more-button {
       width: 20px;
       height: 20px;
-      flex: 0 0 20px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-left: 0;
       padding: 0;
       border: 0;
       border-radius: 4px;
@@ -9206,6 +9204,40 @@
     .ai-history-item:hover .ai-history-more-button,
     .ai-history-item:focus-within .ai-history-more-button,
     .ai-history-item.menu-open .ai-history-more-button { opacity: 1; }
+    .ai-history-action-slot {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+    }
+    .ai-history-action-slot .ai-history-more-button,
+    .ai-history-loading {
+      position: absolute;
+      inset: 0;
+    }
+    .ai-history-loading {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .12s ease;
+    }
+    .ai-history-loading::before {
+      width: 12px;
+      height: 12px;
+      box-sizing: border-box;
+      border: 2px solid rgba(0, 0, 0, .16);
+      border-top-color: rgba(0, 0, 0, .64);
+      border-radius: 50%;
+      content: "";
+      animation: ai-history-spin .8s linear infinite;
+    }
+    .ai-history-item.is-processing .ai-history-loading { opacity: 1; }
+    .ai-history-item.is-processing:hover .ai-history-loading,
+    .ai-history-item.is-processing:focus-within .ai-history-loading,
+    .ai-history-item.is-processing.menu-open .ai-history-loading { opacity: 0; }
+    @keyframes ai-history-spin { to { transform: rotate(360deg); } }
     .ai-history-context-menu {
       position: absolute;
       top: calc(100% + 4px);
@@ -16279,7 +16311,10 @@
       </div>
     </div>`;
 
-    const renderAiHistoryItem = (item, child = false) => `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${item.id}" data-ai-tooltip="${item.title}"><span class="ai-history-text">${item.title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${item.id}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${item.title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><button class="ai-history-more-button" type="button" data-ai-history-more="${item.id}" aria-label="更多操作：${item.title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
+    const renderAiHistoryItem = (item, child = false) => {
+      const isProcessing = aiRuntime.view === "processing" && aiRuntime.activeHistoryId === item.id;
+      return `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""} ${isProcessing ? "is-processing" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${item.id}" data-ai-tooltip="${item.title}"><span class="ai-history-text">${item.title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${item.id}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${item.title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><span class="ai-history-action-slot">${isProcessing ? `<span class="ai-history-loading" role="status" aria-label="对话处理中"></span>` : ""}<button class="ai-history-more-button" type="button" data-ai-history-more="${item.id}" aria-label="更多操作：${item.title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button></span>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
+    };
 
     const renderAiHistory = () => `
       <aside class="ai-history" aria-label="AI 会话历史">
