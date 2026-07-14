@@ -9680,13 +9680,19 @@
     }
     .ai-prompt-input::placeholder { color: rgba(0, 0, 0, .28); }
     .ai-prompt.has-agent .ai-prompt-entry {
-      flex-direction: row;
-      gap: 8px;
+      display: block;
+    }
+    .ai-prompt.has-agent .ai-selected-agent-prefix {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
     }
     .ai-prompt.has-agent .ai-prompt-input {
       min-height: 0;
-      flex: 1 1 0;
-      width: auto;
+      width: 100%;
+      text-indent: var(--ai-agent-prefix-indent, 90px);
     }
     .ai-prompt.has-value:not(.has-agent) .ai-prompt-hint { display: none; }
     .ai-prompt.has-value:not(.has-agent) .ai-prompt-entry { left: 16px; }
@@ -16196,6 +16202,7 @@
       "业务管理问答": "业务管理问答",
       "借阅管理问答": "借阅管理问答"
     }[scenario] || scenario);
+    const getAiPromptAgentIndent = (scenario) => 34 + ([...getAiPromptAgentLabel(scenario)].length * 14);
     const AI_LAYOUT_STORAGE_KEY = "maycur-archive-local-demo.ai-layout";
     const AI_LAYOUT_DEFAULTS = { historyWidth: 250, filesWidth: 317, previewWidth: 628 };
     const loadAiLayoutPreferences = () => {
@@ -16289,7 +16296,7 @@
 
     const renderAiPrompt = ({ welcome = false } = {}) => `
       <form class="ai-prompt ${aiRuntime.draft ? "has-value" : ""} ${aiRuntime.selectedScenarioKey ? "has-agent" : ""}" data-ai-prompt-form>
-        <div class="ai-prompt-entry">
+        <div class="ai-prompt-entry"${aiRuntime.selectedScenarioKey ? ` style="--ai-agent-prefix-indent:${getAiPromptAgentIndent(aiRuntime.selectedScenarioKey)}px"` : ""}>
           ${aiRuntime.selectedScenarioKey
             ? `<span class="ai-selected-agent-prefix">${aiScenarioIcon(aiRuntime.selectedScenarioKey)}<span>${getAiPromptAgentLabel(aiRuntime.selectedScenarioKey)}</span></span>`
             : `<span class="ai-prompt-hint">${aiIcon("at.svg", "ai-at-icon")}</span>`}
