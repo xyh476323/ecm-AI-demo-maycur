@@ -16039,14 +16039,14 @@
     ];
     const AI_HISTORY_GROUPS = ["26年审计项目", "5月份凭证统计"];
     const createAiHistoryItems = () => [
-      { id: "history-1", title: "帮我查找2025年7月份的会…", pinned: true },
+      { id: "history-1", title: "帮我查找2025年7月份的采购单，采购人是徐毅恒的所有采购单", pinned: true },
       { id: "history-2", title: "2025年6月份的回单", pinned: true },
-      { id: "history-3", title: "帮我导出24年的5月份的归档…", pinned: false },
+      { id: "history-3", title: "帮我导出24年5月份的银行回单", pinned: false },
       { id: "history-4", title: "导出24年的凭证统计表", pinned: false },
       { id: "history-5", title: "导出24年的凭证统计表", pinned: false }
     ];
     const createAiGroupedHistoryItems = () => [
-      { id: "group-history-1", group: "26年审计项目", title: "导出24年的5月份的归档…", pinned: false },
+      { id: "group-history-1", group: "26年审计项目", title: "导出24年的五月份的所有归档会计凭证", pinned: false },
       { id: "group-history-2", group: "26年审计项目", title: "导出24年的凭证统计表", pinned: false }
     ];
     const getAiAgentLabel = (scenario) => AI_MENTION_AGENTS.find((item) => item.scenario === scenario)?.label || scenario;
@@ -16250,7 +16250,7 @@
       </div>
     </div>`;
 
-    const renderAiHistoryItem = (item, child = false) => `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${item.id}"><span class="ai-history-text">${item.title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${item.id}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${item.title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><button class="ai-history-more-button" type="button" data-ai-history-more="${item.id}" aria-label="更多操作：${item.title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
+    const renderAiHistoryItem = (item, child = false) => `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${item.id}"><span class="ai-history-text" title="${item.title}">${item.title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${item.id}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${item.title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><button class="ai-history-more-button" type="button" data-ai-history-more="${item.id}" aria-label="更多操作：${item.title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
 
     const renderAiHistory = () => `
       <aside class="ai-history" aria-label="AI 会话历史">
