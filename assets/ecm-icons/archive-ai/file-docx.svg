@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Clipped备份</title>
+    <defs>
+        <path d="M15.75,0 L2.25,0 C1.00735714,0 0,1.00735714 0,2.25 L0,15.75 C0,16.9926429 1.00735714,18 2.25,18 L15.75,18 C16.9926429,18 18,16.9926429 18,15.75 L18,2.25 C18,1.00735714 16.9926429,0 15.75,0 Z" id="path-1"></path>
+        <path d="M0,15.75 L0,2.25 C0,1.00735714 1.00735714,0 2.25,0 L15.75,0 C16.9926429,0 18,1.00735714 18,2.25 L18,15.75 C18,16.9926429 16.9926429,18 15.75,18 L2.25,18 C1.00735714,18 0,16.9926429 0,15.75 Z" id="path-3"></path>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Clipped备份">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <g id="路径"></g>
+            <g id="Clipped" mask="url(#mask-2)">
+                <mask id="mask-4" fill="white">
+                    <use xlink:href="#path-3"></use>
+                </mask>
+                <g id="路径"></g>
+                <g id="编组" mask="url(#mask-4)">
+                    <path d="M0,15.75 L0,2.25 C0,1.00735714 1.00735714,0 2.25,0 L15.75,0 C16.9926429,0 18,1.00735714 18,2.25 L18,15.75 C18,16.9926429 16.9926429,18 15.75,18 L2.25,18 C1.00735714,18 0,16.9926429 0,15.75 Z" id="路径" fill="#0285FF"></path>
+                    <polygon id="路径" fill-opacity="0.35" fill="#FFFFFF" points="22.5 14.625 11.25 14.625 11.25 18 22.5 18"></polygon>
+                    <polygon id="路径" fill-opacity="0.25" fill="#FFFFFF" points="22.5 11.25 11.25 11.25 11.25 14.625 22.5 14.625"></polygon>
+                    <polygon id="路径" fill-opacity="0.15" fill="#FFFFFF" points="22.5 7.875 11.25 7.875 11.25 11.25 22.5 11.25"></polygon>
+                    <g id="W" transform="translate(4, 5.5)" fill="#FFFFFF" fill-rule="nonzero">
+                        <polygon id="路径" points="1.65570175 7 3.73903509 7 4.93421053 2.56195965 5 2.56195965 6.17324561 7 8.25657895 7 10 0 8.27850877 0 7.16008772 5.17435159 7.09429825 5.17435159 5.99780702 0.675792507 4.06798246 0.675792507 2.90570175 5.17435159 2.83991228 5.17435159 1.74342105 0 0 0"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

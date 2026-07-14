@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.85">
+        <g id="画框" transform="translate(-6201, -2550)" fill="#000000">
+            <g id="编组-3" transform="translate(4840, 2476)">
+                <g id="画框-2" transform="translate(950, 50)" fill-rule="nonzero">
+                    <g transform="translate(52, 0)" id="编组">
+                        <g id="编组-2" transform="translate(350, 16)">
+                            <g id="-path" transform="translate(9.5, 8.5)">
+                                <path d="M9.00533333,0 L9.00533333,6 L15,6 L15,7.33333333 L8.41866667,7.33333333 C8.32266667,7.33525333 8.22666667,7.31669333 8.13066667,7.27872 C8.04533333,7.24074667 7.96,7.18410667 7.88533333,7.11253333 C7.82133333,7.04352 7.75733333,6.96053333 7.72533333,6.8688 C7.68266667,6.77706667 7.66133333,6.67850667 7.66133333,6.5792 L7.66133333,0 L9.00533333,0 Z" transform="translate(11.3307, 3.6667) rotate(180) translate(-11.3307, -3.6667)"></path>
+                                <path d="M5.99466667,15 L5.99466667,9 L0,9 L0,7.66666667 L6.58133333,7.66666667 C6.784,7.66666667 6.96533333,7.74026667 7.11466667,7.88746667 C7.17866667,7.95648 7.24266667,8.03946667 7.27466667,8.1312 C7.31733333,8.22293333 7.33866667,8.32149333 7.33866667,8.4208 L7.33866667,15 L5.99466667,15 Z" transform="translate(3.6693, 11.3333) rotate(-180) translate(-3.6693, -11.3333)"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Clipped 2</title>
+    <defs>
+        <path d="M15.75,0 L2.25,0 C1.00735714,0 0,1.00735714 0,2.25 L0,15.75 C0,16.9926429 1.00735714,18 2.25,18 L15.75,18 C16.9926429,18 18,16.9926429 18,15.75 L18,2.25 C18,1.00735714 16.9926429,0 15.75,0 Z" id="path-1"></path>
+        <path d="M0,15.75 L0,2.25 C0,1.00735714 1.00735714,0 2.25,0 L15.75,0 C16.9926429,0 18,1.00735714 18,2.25 L18,15.75 C18,16.9926429 16.9926429,18 15.75,18 L2.25,18 C1.00735714,18 0,16.9926429 0,15.75 Z" id="path-3"></path>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Clipped">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <g id="路径"></g>
+            <g mask="url(#mask-2)">
+                <mask id="mask-4" fill="white">
+                    <use xlink:href="#path-3"></use>
+                </mask>
+                <g id="路径"></g>
+                <g id="编组" mask="url(#mask-4)">
+                    <path d="M0,15.75 L0,2.25 C0,1.00735714 1.00735714,0 2.25,0 L15.75,0 C16.9926429,0 18,1.00735714 18,2.25 L18,15.75 C18,16.9926429 16.9926429,18 15.75,18 L2.25,18 C1.00735714,18 0,16.9926429 0,15.75 Z" id="路径" fill="#EC2519"></path>
+                    <polygon id="路径" fill-opacity="0.35" fill="#FFFFFF" points="22.5 14.625 11.25 14.625 11.25 18 22.5 18"></polygon>
+                    <polygon id="路径" fill-opacity="0.25" fill="#FFFFFF" points="22.5 11.25 11.25 11.25 11.25 14.625 22.5 14.625"></polygon>
+                    <polygon id="路径" fill-opacity="0.15" fill="#FFFFFF" points="22.5 7.875 11.25 7.875 11.25 11.25 22.5 11.25"></polygon>
+                    <g id="P" transform="translate(6, 4.978)" fill="#FFFFFF" fill-rule="nonzero">
+                        <path d="M0,9.022 L1.976,9.022 L1.976,6.24 L3.081,6.24 C5.629,6.24 6.63,5.421 6.63,3.068 C6.63,0.897 5.785,0 3.081,0 L0,0 L0,9.022 Z M1.976,4.654 L1.976,1.56 L2.821,1.56 C4.147,1.56 4.615,1.95 4.615,3.107 C4.615,4.303 4.16,4.654 2.821,4.654 L1.976,4.654 Z" id="形状"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
