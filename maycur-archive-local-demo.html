@@ -10284,11 +10284,14 @@
       height: 2px;
       background: rgba(0, 0, 0, .85);
     }
+    .ai-search-input-wrap {
+      position: relative;
+      margin-top: 16px;
+    }
     .ai-search-input {
       width: 100%;
       height: 36px;
-      margin-top: 16px;
-      padding: 0 12px;
+      padding: 0 40px 0 12px;
       border: 1px solid #eeeeee;
       border-radius: 8px;
       outline: 0;
@@ -10297,7 +10300,30 @@
       font: 14px/22px "PingFang SC", sans-serif;
     }
     .ai-search-input::placeholder { color: rgba(0, 0, 0, .28); }
+    .ai-search-input::-webkit-search-cancel-button { display: none; appearance: none; -webkit-appearance: none; }
     .ai-search-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22, 119, 255, .1); }
+    .ai-search-clear {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      transform: translateY(-50%);
+      transition: opacity .12s ease, visibility .12s ease;
+    }
+    .ai-search-clear .ai-svg-icon { width: 16px; height: 16px; }
+    .ai-search-input:placeholder-shown + .ai-search-clear {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
     .ai-search-results { display: grid; gap: 8px; margin-top: 12px; }
     .ai-search-results:empty { display: none; }
     .ai-search-history-result {
@@ -16560,7 +16586,7 @@
     const renderAiSearchOverlay = () => `<div class="ai-search-overlay" data-ai-search-backdrop>
       <section class="ai-search-panel" data-ai-search-panel role="dialog" aria-modal="true" aria-label="搜索">
         <div class="ai-search-tabs" role="tablist" aria-label="搜索范围">${AI_SEARCH_TABS.map((tab) => `<button class="ai-search-tab ${aiRuntime.searchTab === tab.id ? "active" : ""}" type="button" role="tab" data-ai-search-tab="${tab.id}" aria-selected="${aiRuntime.searchTab === tab.id}">${tab.label}</button>`).join("")}</div>
-        <input class="ai-search-input" type="search" value="${escapeHtml(aiRuntime.searchQuery)}" data-ai-search-input placeholder="请输入搜索内容" aria-label="搜索内容" autocomplete="off">
+        <div class="ai-search-input-wrap"><input class="ai-search-input" type="search" value="${escapeHtml(aiRuntime.searchQuery)}" data-ai-search-input placeholder="请输入搜索内容" aria-label="搜索内容" autocomplete="off"><button class="ai-search-clear" type="button" data-ai-search-clear data-ai-tooltip="清除" aria-label="清除搜索内容">${aiIcon("clear.svg")}</button></div>
         <div class="ai-search-results" role="listbox" aria-label="搜索结果" aria-live="polite">${renderAiSearchResults()}</div>
       </section>
     </div>`;
@@ -17485,7 +17511,6 @@
         aiRuntime.fileRowMenuId = null;
         aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
-        requestAnimationFrame(() => document.querySelector("[data-ai-search-input]")?.focus());
         return;
       }
 
@@ -17497,11 +17522,22 @@
         aiRuntime.fileRowMenuId = null;
         aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
-        requestAnimationFrame(() => {
-          const input = document.querySelector("[data-ai-search-input]");
-          input?.focus();
-          input?.setSelectionRange(input.value.length, input.value.length);
-        });
+        return;
+      }
+
+      const aiSearchClear = event.target.closest("[data-ai-search-clear]");
+      if (aiSearchClear) {
+        event.preventDefault();
+        const panel = aiSearchClear.closest("[data-ai-search-panel]");
+        const input = panel?.querySelector("[data-ai-search-input]");
+        const results = panel?.querySelector(".ai-search-results");
+        aiRuntime.searchQuery = "";
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        if (input) input.value = "";
+        if (results) results.innerHTML = "";
+        input?.focus({ preventScroll: true });
         return;
       }
 
