@@ -9395,6 +9395,85 @@
     }
     .ai-canvas-top-left { left: 16px; max-width: calc(100% - 150px); }
     .ai-canvas-top-right { right: 16px; gap: 14px; }
+    .ai-history-quick-wrap {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+    }
+    .ai-history-quick-wrap::after {
+      position: absolute;
+      top: 32px;
+      left: 0;
+      width: 40px;
+      height: 4px;
+      content: "";
+    }
+    .ai-history-quick-popover {
+      position: absolute;
+      top: 36px;
+      left: 0;
+      z-index: 30;
+      width: min(250px, calc(100vw - 32px));
+      max-height: calc(100vh - 118px);
+      box-sizing: border-box;
+      padding: 12px;
+      border: 0;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 9px 28px 8px rgba(0, 0, 0, .05), 0 3px 6px -4px rgba(0, 0, 0, .12), 0 6px 16px rgba(0, 0, 0, .08);
+      opacity: 0;
+      overflow: auto;
+      pointer-events: none;
+      transform: translateY(-4px);
+      visibility: hidden;
+      transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+    }
+    .ai-history-quick-popover:focus { outline: 0; }
+    .ai-history-quick-wrap:hover .ai-history-quick-popover,
+    .ai-history-quick-wrap:focus-within .ai-history-quick-popover {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+      visibility: visible;
+    }
+    .ai-history-quick-section + .ai-history-quick-section { margin-top: 14px; }
+    .ai-history-quick-label {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      color: rgba(0, 0, 0, .28);
+      font: 12px/20px "PingFang SC", sans-serif;
+    }
+    .ai-history-quick-list { display: grid; }
+    .ai-history-quick-item {
+      width: 100%;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 0 8px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(0, 0, 0, .85);
+      cursor: pointer;
+      font: 14px/20px "PingFang SC", sans-serif;
+      text-align: left;
+    }
+    .ai-history-quick-item:hover,
+    .ai-history-quick-item:focus-visible { background: #f0f0f2; color: rgba(0, 0, 0, .85); outline: 0; }
+    .ai-history-quick-item .ai-svg-icon { width: 18px; height: 18px; }
+    .ai-history-quick-title {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ai-history-quick-pin { width: 20px !important; height: 20px !important; opacity: .28; }
     .ai-conversation-title-wrap {
       position: relative;
       min-width: 0;
@@ -16330,6 +16409,17 @@
       </aside>
     `;
 
+    const renderAiHistoryQuickPreview = () => `<div class="ai-history-quick-popover" tabindex="-1" aria-label="快速查看历史对话">
+      <section class="ai-history-quick-section">
+        <div class="ai-history-quick-label">分组</div>
+        <div class="ai-history-quick-list">${AI_HISTORY_GROUPS.map((group) => `<button class="ai-history-quick-item" type="button" data-ai-quick-history-group="${group}">${aiIcon("new-group.svg")}<span class="ai-history-quick-title">${group}</span></button>`).join("")}</div>
+      </section>
+      <section class="ai-history-quick-section">
+        <div class="ai-history-quick-label">最近对话</div>
+        <div class="ai-history-quick-list">${aiRuntime.historyItems.slice(0, 3).map((item) => `<button class="ai-history-quick-item" type="button" data-ai-history-item="${item.id}" data-ai-tooltip="${item.title}"><span class="ai-history-quick-title">${item.title}</span>${item.pinned ? aiIcon("pin-badge.svg", "ai-history-quick-pin") : ""}</button>`).join("")}</div>
+      </section>
+    </div>`;
+
     const renderAiCenter = () => {
       const rightPanel = aiRuntime.preview ? "preview" : (aiRuntime.filePanel ? "files" : "");
       const rightPanelWidth = rightPanel === "preview" ? aiRuntime.previewWidth : (rightPanel === "files" ? aiRuntime.filesWidth : 0);
@@ -16339,7 +16429,7 @@
           <section class="ai-canvas">
             <div class="ai-main-area">
               <section class="ai-chat-stage">
-                <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<button class="ai-top-icon" type="button" data-ai-history-toggle aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title">查找付款申请单</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
+                <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<div class="ai-history-quick-wrap"><button class="ai-top-icon" type="button" data-ai-history-toggle data-ai-no-tooltip aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>${renderAiHistoryQuickPreview()}</div>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title">查找付款申请单</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
                 <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel aria-label="${aiRuntime.filePanel ? "收起文件库" : "展开文件库"}">${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-last-preview aria-label="打开上次查看的文件">${aiIcon("sidebar-toggle.svg")}</button></div>
                 ${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}
               </section>
@@ -16361,17 +16451,20 @@
 
     let aiTooltipTarget = null;
 
-    const getAiTooltipTarget = (node) => node?.closest?.([
-      ".ai-center-page [data-ai-tooltip]",
-      ".ai-center-page [data-tooltip]",
-      ".ai-center-page [data-tip]",
-      ".ai-center-page button[aria-label]",
-      ".ai-center-page [role=\"separator\"][aria-label]",
-      ".ai-quick-drawer [data-ai-tooltip]",
-      ".ai-quick-drawer [data-tooltip]",
-      ".ai-quick-drawer [data-tip]",
-      ".ai-quick-drawer button[aria-label]"
-    ].join(", ")) || null;
+    const getAiTooltipTarget = (node) => {
+      const target = node?.closest?.([
+        ".ai-center-page [data-ai-tooltip]",
+        ".ai-center-page [data-tooltip]",
+        ".ai-center-page [data-tip]",
+        ".ai-center-page button[aria-label]",
+        ".ai-center-page [role=\"separator\"][aria-label]",
+        ".ai-quick-drawer [data-ai-tooltip]",
+        ".ai-quick-drawer [data-tooltip]",
+        ".ai-quick-drawer [data-tip]",
+        ".ai-quick-drawer button[aria-label]"
+      ].join(", ")) || null;
+      return target?.matches("[data-ai-no-tooltip]") ? null : target;
+    };
 
     const getAiTooltipText = (target) => target?.dataset.aiTooltip
       || target?.dataset.tooltip
@@ -17216,6 +17309,16 @@
         event.preventDefault();
         aiRuntime.historyCollapsed = !aiRuntime.historyCollapsed;
         refreshAiUi();
+        return;
+      }
+
+      const aiQuickHistoryGroup = event.target.closest("[data-ai-quick-history-group]");
+      if (aiQuickHistoryGroup) {
+        event.preventDefault();
+        aiRuntime.historyCollapsed = false;
+        aiRuntime.historyGroupsExpanded = true;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-history-section=\"groups\"]")?.focus());
         return;
       }
 
