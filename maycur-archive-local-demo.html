@@ -16274,7 +16274,7 @@
             <div class="ai-main-area">
               <section class="ai-chat-stage">
                 <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<button class="ai-top-icon" type="button" data-ai-history-toggle aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title">查找付款申请单</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
-                <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel>${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-file-panel aria-label="展开文件栏">${aiIcon("sidebar-toggle.svg")}</button></div>
+                <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel>${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-last-preview aria-label="打开上次查看的文件">${aiIcon("sidebar-toggle.svg")}</button></div>
                 ${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}
               </section>
               ${rightPanel ? renderAiResizeHandle("right", rightPanel) : ""}
@@ -17328,6 +17328,17 @@
       if (aiPreviewClose) {
         event.preventDefault();
         aiRuntime.preview = false;
+        refreshAiUi();
+        return;
+      }
+
+      const aiLastPreview = event.target.closest("[data-ai-last-preview]");
+      if (aiLastPreview) {
+        event.preventDefault();
+        aiRuntime.preview = true;
+        aiRuntime.filePanel = false;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
         return;
       }
