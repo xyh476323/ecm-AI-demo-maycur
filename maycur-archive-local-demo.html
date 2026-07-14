@@ -9033,6 +9033,7 @@
       background: #fafafb;
       transition: none;
     }
+    .ai-history.menu-open { z-index: 12; }
     .ai-history.collapsed { display: none; }
     .ai-history-head {
       height: 64px;
@@ -16396,7 +16397,7 @@
     };
 
     const renderAiHistory = () => `
-      <aside class="ai-history" aria-label="AI 会话历史">
+      <aside class="ai-history ${aiRuntime.historyMenuId !== null ? "menu-open" : ""}" aria-label="AI 会话历史">
         <div class="ai-history-head"><span class="ai-history-title">我的项目</span><button class="ai-history-toggle" type="button" data-ai-history-toggle aria-label="收起会话栏">${aiIcon("sidebar-toggle.svg")}</button></div>
         <button class="ai-new-chat" type="button" data-ai-new-chat>${aiIcon("new-chat.svg")}<span>新建对话</span>${aiIcon("new-chat-shortcut.svg", "ai-shortcut-icon")}</button>
         <div class="ai-history-tools"><button class="ai-history-tool" type="button">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
