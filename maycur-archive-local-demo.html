@@ -10338,6 +10338,70 @@
       color: #fff;
     }
     .ai-new-group-button.primary:hover { border-color: #555555; background: #555555; }
+    .ai-delete-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 140;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: clamp(160px, 29.3vh, 264px);
+      background: rgba(0, 0, 0, .08);
+    }
+    .ai-delete-dialog {
+      position: relative;
+      width: min(460px, calc(100vw - 32px));
+      height: 168px;
+      border-radius: 8px;
+      outline: 0;
+      background: #fff;
+      box-shadow: 0 9px 28px 8px rgba(0, 0, 0, .05), 0 3px 6px -4px rgba(0, 0, 0, .12), 0 6px 16px rgba(0, 0, 0, .08);
+    }
+    .ai-delete-title {
+      position: absolute;
+      top: 24px;
+      left: 16px;
+      color: rgba(0, 0, 0, .85);
+      font: 500 16px/20px "PingFang SC", sans-serif;
+    }
+    .ai-delete-message {
+      position: absolute;
+      top: 68px;
+      left: 16px;
+      margin: 0;
+      color: rgba(0, 0, 0, .85);
+      font: 14px/20px "PingFang SC", sans-serif;
+    }
+    .ai-delete-close {
+      position: absolute;
+      top: 24px;
+      right: 16px;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+    }
+    .ai-delete-close:hover { background: #f8f8f8; }
+    .ai-delete-close .ai-svg-icon { width: 14px; height: 14px; opacity: .45; }
+    .ai-delete-actions {
+      position: absolute;
+      right: 16px;
+      bottom: 24px;
+      display: flex;
+      gap: 8px;
+    }
+    .ai-new-group-button.danger {
+      border-color: #ba2623;
+      background: #ba2623;
+      color: #fff;
+    }
+    .ai-new-group-button.danger:hover { border-color: #a91f1c; background: #a91f1c; }
     .ai-search-overlay {
       position: fixed;
       inset: 0;
@@ -16487,6 +16551,24 @@
     const AI_FALLBACK_RESPONSE = "当前系统未配置大模型，无法回答此问题";
     const AI_CUSTOM_HISTORY_STORAGE_KEY = "maycur-archive-local-demo.ai-custom-history";
     const AI_HISTORY_GROUP_ASSIGNMENTS_STORAGE_KEY = "maycur-archive-local-demo.ai-history-group-assignments";
+    const AI_DELETED_HISTORY_STORAGE_KEY = "maycur-archive-local-demo.ai-deleted-history";
+    const loadAiDeletedHistoryIds = () => {
+      try {
+        const storedIds = JSON.parse(localStorage.getItem(AI_DELETED_HISTORY_STORAGE_KEY) || "[]");
+        if (!Array.isArray(storedIds)) return new Set();
+        return new Set(storedIds.map((id) => String(id || "").trim()).filter(Boolean));
+      } catch (error) {
+        return new Set();
+      }
+    };
+    const aiDeletedHistoryIds = loadAiDeletedHistoryIds();
+    const persistAiDeletedHistoryIds = () => {
+      try {
+        localStorage.setItem(AI_DELETED_HISTORY_STORAGE_KEY, JSON.stringify([...aiDeletedHistoryIds]));
+      } catch (error) {
+        // Storage can be unavailable in local previews; the current session still keeps the deletion.
+      }
+    };
     const loadAiHistoryGroupAssignments = () => {
       try {
         const storedAssignments = JSON.parse(localStorage.getItem(AI_HISTORY_GROUP_ASSIGNMENTS_STORAGE_KEY) || "{}");
@@ -16546,8 +16628,10 @@
       }
     };
     const createAiHistoryItems = () => {
-      const defaultItems = createAiDefaultHistoryItems().filter((item) => !aiHistoryGroupAssignments[item.id]);
-      const customItems = loadAiCustomHistoryItems().filter((item) => !item.group);
+      const defaultItems = createAiDefaultHistoryItems()
+        .filter((item) => !aiDeletedHistoryIds.has(item.id) && !aiHistoryGroupAssignments[item.id]);
+      const customItems = loadAiCustomHistoryItems()
+        .filter((item) => !aiDeletedHistoryIds.has(item.id) && !item.group);
       return [
         ...defaultItems.filter((item) => item.pinned),
         ...customItems.filter((item) => item.pinned),
@@ -16564,7 +16648,8 @@
         .filter((item) => aiHistoryGroupAssignments[item.id])
         .map((item) => ({ ...item, group: aiHistoryGroupAssignments[item.id] }));
       const customGroupedItems = loadAiCustomHistoryItems().filter((item) => item.group);
-      return [...defaultGroupedItems, ...assignedDefaultItems, ...customGroupedItems];
+      return [...defaultGroupedItems, ...assignedDefaultItems, ...customGroupedItems]
+        .filter((item) => !aiDeletedHistoryIds.has(item.id));
     };
     const getAiAgentLabel = (scenario) => AI_MENTION_AGENTS.find((item) => item.scenario === scenario)?.label || scenario;
     const getAiPromptAgentLabel = (scenario) => ({
@@ -16621,6 +16706,8 @@
       newGroupName: "",
       newGroupError: "",
       newGroupSource: "history",
+      deleteConfirmOpen: false,
+      deleteHistoryId: "",
       reactionVote: null,
       draft: "",
       view: "welcome",
@@ -16820,6 +16907,18 @@
       </form>
     </div>`;
 
+    const renderAiDeleteConfirmOverlay = () => `<div class="ai-delete-overlay" data-ai-delete-backdrop>
+      <section class="ai-delete-dialog" data-ai-delete-dialog role="dialog" aria-modal="true" aria-labelledby="aiDeleteTitle" aria-describedby="aiDeleteMessage" tabindex="-1">
+        <span class="ai-delete-title" id="aiDeleteTitle">删除对话</span>
+        <button class="ai-delete-close" type="button" data-ai-delete-close data-ai-no-tooltip aria-label="关闭删除对话弹窗">${aiIcon("close.svg")}</button>
+        <p class="ai-delete-message" id="aiDeleteMessage">请确认是否删除此条对话？此项操作不可恢复。</p>
+        <div class="ai-delete-actions">
+          <button class="ai-new-group-button" type="button" data-ai-delete-cancel>取 消</button>
+          <button class="ai-new-group-button danger" type="button" data-ai-delete-confirm>删 除</button>
+        </div>
+      </section>
+    </div>`;
+
     const renderAiHistoryMoveMenu = () => {
       const groups = getAiHistoryGroups();
       return `<div class="ai-history-move-submenu" role="menu" aria-label="选择分组">
@@ -16913,6 +17012,7 @@
           </section>
           ${aiRuntime.searchOpen ? renderAiSearchOverlay() : ""}
           ${aiRuntime.newGroupOpen ? renderAiNewGroupOverlay() : ""}
+          ${aiRuntime.deleteConfirmOpen ? renderAiDeleteConfirmOverlay() : ""}
           ${aiRuntime.toast ? `<span class="ai-toast">${aiRuntime.toast}</span>` : ""}
         </section>
       `;
@@ -17123,6 +17223,65 @@
     };
 
     const getAiHistoryItem = (historyId) => [...aiRuntime.groupedHistoryItems, ...aiRuntime.historyItems].find((item) => item.id === historyId);
+
+    const openAiDeleteConfirmDialog = (historyId) => {
+      if (!getAiHistoryItem(historyId)) return false;
+      aiRuntime.deleteConfirmOpen = true;
+      aiRuntime.deleteHistoryId = historyId;
+      aiRuntime.searchOpen = false;
+      aiRuntime.newGroupOpen = false;
+      aiRuntime.historyMenuId = null;
+      aiRuntime.historyMenuActiveIndex = -1;
+      aiRuntime.historyMoveOpen = false;
+      aiRuntime.historyMoveActiveIndex = -1;
+      aiRuntime.conversationMenuOpen = false;
+      aiRuntime.conversationMenuActiveIndex = -1;
+      aiRuntime.conversationMoveOpen = false;
+      aiRuntime.conversationMoveActiveIndex = -1;
+      refreshAiUi();
+      requestAnimationFrame(() => document.querySelector("[data-ai-delete-dialog]")?.focus());
+      return true;
+    };
+
+    const closeAiDeleteConfirmDialog = ({ restoreFocus = true } = {}) => {
+      const historyId = aiRuntime.deleteHistoryId;
+      aiRuntime.deleteConfirmOpen = false;
+      aiRuntime.deleteHistoryId = "";
+      refreshAiUi();
+      if (restoreFocus) requestAnimationFrame(() => document.querySelector(`[data-ai-history-more="${historyId}"]`)?.focus());
+    };
+
+    const deleteAiHistoryItem = () => {
+      const historyId = aiRuntime.deleteHistoryId;
+      let historyList = aiRuntime.historyItems;
+      let historyIndex = historyList.findIndex((item) => item.id === historyId);
+      if (historyIndex < 0) {
+        historyList = aiRuntime.groupedHistoryItems;
+        historyIndex = historyList.findIndex((item) => item.id === historyId);
+      }
+      if (historyIndex < 0) {
+        closeAiDeleteConfirmDialog({ restoreFocus: false });
+        return false;
+      }
+
+      const deletingActiveHistory = aiRuntime.activeHistoryId === historyId;
+      historyList.splice(historyIndex, 1);
+      aiDeletedHistoryIds.add(historyId);
+      persistAiDeletedHistoryIds();
+      delete aiHistoryGroupAssignments[historyId];
+      persistAiHistoryGroupAssignments();
+      persistAiCustomHistoryItems();
+      aiRuntime.deleteConfirmOpen = false;
+      aiRuntime.deleteHistoryId = "";
+
+      if (deletingActiveHistory) {
+        aiRuntime.activeHistoryId = aiRuntime.historyItems[0]?.id || aiRuntime.groupedHistoryItems[0]?.id || "";
+        resetAiConversation();
+      }
+      aiRuntime.toast = "对话已删除";
+      refreshAiUi();
+      return true;
+    };
 
     const moveAiHistoryItemToGroup = (historyId, group) => {
       const targetGroup = String(group || "").trim();
@@ -17843,6 +18002,26 @@
         requestAnimationFrame(() => aiPromptSurface.querySelector(".ai-prompt-input")?.focus());
       }
 
+      const aiDeleteClose = event.target.closest("[data-ai-delete-close], [data-ai-delete-cancel]");
+      if (aiDeleteClose) {
+        event.preventDefault();
+        closeAiDeleteConfirmDialog();
+        return;
+      }
+
+      const aiDeleteConfirm = event.target.closest("[data-ai-delete-confirm]");
+      if (aiDeleteConfirm) {
+        event.preventDefault();
+        deleteAiHistoryItem();
+        return;
+      }
+
+      if (event.target.matches("[data-ai-delete-backdrop]")) {
+        event.preventDefault();
+        closeAiDeleteConfirmDialog();
+        return;
+      }
+
       const aiNewGroupTrigger = event.target.closest("[data-ai-new-group-trigger]");
       if (aiNewGroupTrigger) {
         event.preventDefault();
@@ -18188,7 +18367,8 @@
           positionAiHistoryContextMenu(historyId, '[data-ai-history-action="move"]');
           return;
         } else if (action === "delete") {
-          aiRuntime.toast = "已模拟删除对话";
+          openAiDeleteConfirmDialog(historyId);
+          return;
         }
         aiRuntime.historyMenuId = null;
         aiRuntime.historyMenuActiveIndex = -1;
@@ -18961,6 +19141,28 @@
     });
 
     document.addEventListener("keydown", (event) => {
+      if (aiRuntime.deleteConfirmOpen && event.key === "Escape") {
+        event.preventDefault();
+        closeAiDeleteConfirmDialog();
+        return;
+      }
+      if (aiRuntime.deleteConfirmOpen && event.key === "Tab") {
+        const dialog = document.querySelector("[data-ai-delete-dialog]");
+        const focusable = Array.from(dialog?.querySelectorAll("button:not(:disabled)") || []);
+        if (focusable.length) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+        return;
+      }
+
       const aiNewGroupInput = event.target.closest?.("[data-ai-new-group-input]");
       if (aiRuntime.newGroupOpen && aiNewGroupInput && event.key === "Enter" && !event.isComposing && event.keyCode !== 229) {
         event.preventDefault();
