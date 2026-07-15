@@ -16485,6 +16485,26 @@
     };
     const AI_FALLBACK_RESPONSE = "当前系统未配置大模型，无法回答此问题";
     const AI_CUSTOM_HISTORY_STORAGE_KEY = "maycur-archive-local-demo.ai-custom-history";
+    const AI_HISTORY_GROUP_ASSIGNMENTS_STORAGE_KEY = "maycur-archive-local-demo.ai-history-group-assignments";
+    const loadAiHistoryGroupAssignments = () => {
+      try {
+        const storedAssignments = JSON.parse(localStorage.getItem(AI_HISTORY_GROUP_ASSIGNMENTS_STORAGE_KEY) || "{}");
+        if (!storedAssignments || typeof storedAssignments !== "object" || Array.isArray(storedAssignments)) return {};
+        return Object.fromEntries(Object.entries(storedAssignments)
+          .map(([historyId, group]) => [String(historyId || "").trim(), String(group || "").trim()])
+          .filter(([historyId, group]) => historyId && group));
+      } catch (error) {
+        return {};
+      }
+    };
+    const aiHistoryGroupAssignments = loadAiHistoryGroupAssignments();
+    const persistAiHistoryGroupAssignments = () => {
+      try {
+        localStorage.setItem(AI_HISTORY_GROUP_ASSIGNMENTS_STORAGE_KEY, JSON.stringify(aiHistoryGroupAssignments));
+      } catch (error) {
+        // Storage can be unavailable in local previews; the current session still keeps the assignment.
+      }
+    };
     const createAiDefaultHistoryItems = () => [
       { id: "history-1", title: "帮我查找2025年7月份的采购单，采购人是徐毅恒的所有采购单", pinned: true },
       { id: "history-2", title: "2025年6月份的回单", pinned: true },
@@ -16506,6 +16526,7 @@
             response: AI_FALLBACK_RESPONSE,
             pinned: Boolean(item?.pinned),
             cancelled: Boolean(item?.cancelled),
+            group: String(item?.group || "").trim(),
             isLocalFallback: true
           };
         }).filter(Boolean).slice(0, 30);
@@ -16513,17 +16534,19 @@
         return [];
       }
     };
-    const persistAiCustomHistoryItems = (historyItems) => {
+    const persistAiCustomHistoryItems = () => {
       try {
-        const customItems = historyItems.filter((item) => item.isLocalFallback).slice(0, 30);
+        const customItems = [...aiRuntime.historyItems, ...aiRuntime.groupedHistoryItems]
+          .filter((item) => item.isLocalFallback)
+          .slice(0, 30);
         localStorage.setItem(AI_CUSTOM_HISTORY_STORAGE_KEY, JSON.stringify(customItems));
       } catch (error) {
         // Storage can be unavailable in local previews; the current session still keeps the conversation.
       }
     };
     const createAiHistoryItems = () => {
-      const defaultItems = createAiDefaultHistoryItems();
-      const customItems = loadAiCustomHistoryItems();
+      const defaultItems = createAiDefaultHistoryItems().filter((item) => !aiHistoryGroupAssignments[item.id]);
+      const customItems = loadAiCustomHistoryItems().filter((item) => !item.group);
       return [
         ...defaultItems.filter((item) => item.pinned),
         ...customItems.filter((item) => item.pinned),
@@ -16531,10 +16554,17 @@
         ...defaultItems.filter((item) => !item.pinned)
       ];
     };
-    const createAiGroupedHistoryItems = () => [
-      { id: "group-history-1", group: "26年审计项目", title: "导出24年的五月份的所有归档会计凭证", pinned: false },
-      { id: "group-history-2", group: "26年审计项目", title: "导出24年的凭证统计表", pinned: false }
-    ];
+    const createAiGroupedHistoryItems = () => {
+      const defaultGroupedItems = [
+        { id: "group-history-1", group: "26年审计项目", title: "导出24年的五月份的所有归档会计凭证", pinned: false },
+        { id: "group-history-2", group: "26年审计项目", title: "导出24年的凭证统计表", pinned: false }
+      ].map((item) => ({ ...item, group: aiHistoryGroupAssignments[item.id] || item.group }));
+      const assignedDefaultItems = createAiDefaultHistoryItems()
+        .filter((item) => aiHistoryGroupAssignments[item.id])
+        .map((item) => ({ ...item, group: aiHistoryGroupAssignments[item.id] }));
+      const customGroupedItems = loadAiCustomHistoryItems().filter((item) => item.group);
+      return [...defaultGroupedItems, ...assignedDefaultItems, ...customGroupedItems];
+    };
     const getAiAgentLabel = (scenario) => AI_MENTION_AGENTS.find((item) => item.scenario === scenario)?.label || scenario;
     const getAiPromptAgentLabel = (scenario) => ({
       "档案智能检索": "智能检索",
@@ -16609,6 +16639,11 @@
     };
     let aiTaskTimer = null;
     let aiCustomHistorySequence = 0;
+
+    const getAiHistoryGroups = () => [...new Set([
+      ...AI_HISTORY_GROUPS,
+      ...aiRuntime.groupedHistoryItems.map((item) => String(item.group || "").trim()).filter(Boolean)
+    ])];
 
     const persistAiLayoutPreferences = () => {
       try {
@@ -16784,11 +16819,14 @@
       </form>
     </div>`;
 
-    const renderAiHistoryMoveMenu = () => `<div class="ai-history-move-submenu" role="menu" aria-label="选择分组">
-      ${AI_HISTORY_GROUPS.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.historyMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-history-group-option="${escapeHtml(group)}" aria-selected="${aiRuntime.historyMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>`).join("")}
-      <div class="ai-history-group-divider" aria-hidden="true"></div>
-      <button class="ai-history-group-option ${aiRuntime.historyMoveActiveIndex === AI_HISTORY_GROUPS.length ? "keyboard-active" : ""}" type="button" data-ai-history-group-option="__new__" aria-selected="${aiRuntime.historyMoveActiveIndex === AI_HISTORY_GROUPS.length}">${aiIcon("new-group-add.svg", "ai-new-group-add-icon")}<span>新增分组</span></button>
-    </div>`;
+    const renderAiHistoryMoveMenu = () => {
+      const groups = getAiHistoryGroups();
+      return `<div class="ai-history-move-submenu" role="menu" aria-label="选择分组">
+        ${groups.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.historyMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-history-group-option="${escapeHtml(group)}" aria-selected="${aiRuntime.historyMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>`).join("")}
+        <div class="ai-history-group-divider" aria-hidden="true"></div>
+        <button class="ai-history-group-option ${aiRuntime.historyMoveActiveIndex === groups.length ? "keyboard-active" : ""}" type="button" data-ai-history-group-option="__new__" aria-selected="${aiRuntime.historyMoveActiveIndex === groups.length}">${aiIcon("new-group-add.svg", "ai-new-group-add-icon")}<span>新增分组</span></button>
+      </div>`;
+    };
 
     const renderAiHistoryMenu = (item) => {
       const pinned = Boolean(item?.pinned);
@@ -16804,11 +16842,14 @@
       </div>`;
     };
 
-    const renderAiConversationMoveMenu = () => `<div class="ai-history-move-submenu" role="menu" aria-label="选择分组">
-      ${AI_HISTORY_GROUPS.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.conversationMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-conversation-group-option="${escapeHtml(group)}" aria-selected="${aiRuntime.conversationMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>`).join("")}
-      <div class="ai-history-group-divider" aria-hidden="true"></div>
-      <button class="ai-history-group-option ${aiRuntime.conversationMoveActiveIndex === AI_HISTORY_GROUPS.length ? "keyboard-active" : ""}" type="button" data-ai-conversation-group-option="__new__" aria-selected="${aiRuntime.conversationMoveActiveIndex === AI_HISTORY_GROUPS.length}">${aiIcon("new-group-add.svg", "ai-new-group-add-icon")}<span>新增分组</span></button>
-    </div>`;
+    const renderAiConversationMoveMenu = () => {
+      const groups = getAiHistoryGroups();
+      return `<div class="ai-history-move-submenu" role="menu" aria-label="选择分组">
+        ${groups.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.conversationMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-conversation-group-option="${escapeHtml(group)}" aria-selected="${aiRuntime.conversationMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>`).join("")}
+        <div class="ai-history-group-divider" aria-hidden="true"></div>
+        <button class="ai-history-group-option ${aiRuntime.conversationMoveActiveIndex === groups.length ? "keyboard-active" : ""}" type="button" data-ai-conversation-group-option="__new__" aria-selected="${aiRuntime.conversationMoveActiveIndex === groups.length}">${aiIcon("new-group-add.svg", "ai-new-group-add-icon")}<span>新增分组</span></button>
+      </div>`;
+    };
 
     const renderAiConversationMenu = () => `<div class="ai-history-context-menu ai-conversation-context-menu" role="menu" aria-label="当前对话操作">
       <button class="ai-history-context-option ${aiRuntime.conversationMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" data-ai-conversation-action="rename" aria-selected="${aiRuntime.conversationMenuActiveIndex === 0}">${aiIcon("rename.svg")}<span>重命名</span></button>
@@ -16832,7 +16873,7 @@
         <div class="ai-history-tools"><button class="ai-history-tool" type="button" data-ai-search-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.searchOpen}">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button" data-ai-new-group-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.newGroupOpen}">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
         <button class="ai-history-section-toggle" type="button" data-ai-history-section="groups" aria-expanded="${aiRuntime.historyGroupsExpanded}"><span>分组</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
         <div class="ai-history-section ai-history-groups" ${aiRuntime.historyGroupsExpanded ? "" : "hidden"}>
-          ${AI_HISTORY_GROUPS.map((group) => `<button class="ai-history-group" type="button" data-ai-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>${aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("")}`).join("")}
+          ${getAiHistoryGroups().map((group) => `<button class="ai-history-group" type="button" data-ai-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>${aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("")}`).join("")}
         </div>
         <button class="ai-history-section-toggle" type="button" data-ai-history-section="recent" aria-expanded="${aiRuntime.historyRecentExpanded}"><span>最近对话</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
         <div class="ai-history-section ai-history-list" ${aiRuntime.historyRecentExpanded ? "" : "hidden"}>${aiRuntime.historyItems.map((item) => renderAiHistoryItem(item)).join("")}</div>
@@ -16842,7 +16883,7 @@
     const renderAiHistoryQuickPreview = () => `<div class="ai-history-quick-popover" tabindex="-1" aria-label="快速查看历史对话">
       <section class="ai-history-quick-section">
         <div class="ai-history-quick-label">分组</div>
-        <div class="ai-history-quick-list">${AI_HISTORY_GROUPS.map((group) => `<button class="ai-history-quick-item" type="button" data-ai-quick-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}">${aiIcon("new-group.svg")}<span class="ai-history-quick-title">${escapeHtml(group)}</span></button>`).join("")}</div>
+        <div class="ai-history-quick-list">${getAiHistoryGroups().map((group) => `<button class="ai-history-quick-item" type="button" data-ai-quick-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}">${aiIcon("new-group.svg")}<span class="ai-history-quick-title">${escapeHtml(group)}</span></button>`).join("")}</div>
       </section>
       <section class="ai-history-quick-section">
         <div class="ai-history-quick-label">最近对话</div>
@@ -16987,7 +17028,7 @@
     const saveAiNewGroup = (form) => {
       const input = form?.querySelector("[data-ai-new-group-input]");
       const groupName = String(input?.value || "").trim();
-      const existingGroup = AI_HISTORY_GROUPS.find((group) => group.toLocaleLowerCase() === groupName.toLocaleLowerCase());
+      const existingGroup = getAiHistoryGroups().find((group) => group.toLocaleLowerCase() === groupName.toLocaleLowerCase());
       if (!groupName || existingGroup) {
         aiRuntime.newGroupName = groupName;
         aiRuntime.newGroupError = groupName ? "分组名称已存在" : "请输入分组名称";
@@ -17083,6 +17124,30 @@
 
     const getAiHistoryItem = (historyId) => [...aiRuntime.groupedHistoryItems, ...aiRuntime.historyItems].find((item) => item.id === historyId);
 
+    const moveAiHistoryItemToGroup = (historyId, group) => {
+      const targetGroup = String(group || "").trim();
+      if (!historyId || !getAiHistoryGroups().includes(targetGroup)) return false;
+      let sourceList = aiRuntime.historyItems;
+      let sourceIndex = sourceList.findIndex((item) => item.id === historyId);
+      if (sourceIndex < 0) {
+        sourceList = aiRuntime.groupedHistoryItems;
+        sourceIndex = sourceList.findIndex((item) => item.id === historyId);
+      }
+      if (sourceIndex < 0) return false;
+      const [historyItem] = sourceList.splice(sourceIndex, 1);
+      historyItem.group = targetGroup;
+      const firstTargetIndex = aiRuntime.groupedHistoryItems.findIndex((item) => item.group === targetGroup);
+      aiRuntime.groupedHistoryItems.splice(firstTargetIndex < 0 ? aiRuntime.groupedHistoryItems.length : firstTargetIndex, 0, historyItem);
+      if (historyItem.isLocalFallback) {
+        persistAiCustomHistoryItems();
+      } else {
+        aiHistoryGroupAssignments[historyItem.id] = targetGroup;
+        persistAiHistoryGroupAssignments();
+      }
+      aiRuntime.historyGroupsExpanded = true;
+      return true;
+    };
+
     const setAiHistoryPinned = (historyId, pinned) => {
       const historyList = aiRuntime.groupedHistoryItems.some((item) => item.id === historyId) ? aiRuntime.groupedHistoryItems : aiRuntime.historyItems;
       const currentIndex = historyList.findIndex((item) => item.id === historyId);
@@ -17092,7 +17157,7 @@
       const firstUnpinnedIndex = historyList.findIndex((historyItem) => !historyItem.pinned);
       const insertIndex = firstUnpinnedIndex < 0 ? historyList.length : firstUnpinnedIndex;
       historyList.splice(insertIndex, 0, item);
-      if (historyList === aiRuntime.historyItems) persistAiCustomHistoryItems(aiRuntime.historyItems);
+      if (item.isLocalFallback) persistAiCustomHistoryItems();
       return true;
     };
 
@@ -17176,7 +17241,7 @@
       const firstUnpinnedIndex = aiRuntime.historyItems.findIndex((item) => !item.pinned);
       aiRuntime.historyItems.splice(firstUnpinnedIndex < 0 ? aiRuntime.historyItems.length : firstUnpinnedIndex, 0, historyItem);
       aiRuntime.activeHistoryId = historyItem.id;
-      persistAiCustomHistoryItems(aiRuntime.historyItems);
+      persistAiCustomHistoryItems();
       aiRuntime.view = "processing";
       aiRuntime.taskStep = 0;
       aiRuntime.taskDetailsExpanded = false;
@@ -17221,7 +17286,7 @@
       const activeItem = getActiveAiHistoryItem();
       if (activeItem?.isLocalFallback) {
         activeItem.cancelled = true;
-        persistAiCustomHistoryItems(aiRuntime.historyItems);
+        persistAiCustomHistoryItems();
       }
       refreshAiUi();
       requestAnimationFrame(() => document.querySelector(".ai-prompt-input")?.focus());
@@ -18006,7 +18071,8 @@
           openAiNewGroupDialog("conversation-move");
           return;
         }
-        aiRuntime.toast = `已移至分组：${group}`;
+        const moved = moveAiHistoryItemToGroup(aiRuntime.activeHistoryId, group);
+        aiRuntime.toast = moved ? `已移至分组：${group}` : "未找到可移动的对话";
         aiRuntime.conversationMenuOpen = false;
         aiRuntime.conversationMenuActiveIndex = -1;
         aiRuntime.conversationMoveOpen = false;
@@ -18094,7 +18160,8 @@
           openAiNewGroupDialog("history-move");
           return;
         }
-        aiRuntime.toast = `已移至分组：${group}`;
+        const moved = moveAiHistoryItemToGroup(aiRuntime.historyMenuId, group);
+        aiRuntime.toast = moved ? `已移至分组：${group}` : "未找到可移动的对话";
         aiRuntime.historyMenuId = null;
         aiRuntime.historyMenuActiveIndex = -1;
         aiRuntime.historyMoveOpen = false;
