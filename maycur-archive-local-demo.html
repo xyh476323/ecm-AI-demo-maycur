@@ -16483,13 +16483,54 @@
         // Local file previews can block storage; the newly created group remains available in memory.
       }
     };
-    const createAiHistoryItems = () => [
+    const AI_FALLBACK_RESPONSE = "当前系统未配置大模型，无法回答此问题";
+    const AI_CUSTOM_HISTORY_STORAGE_KEY = "maycur-archive-local-demo.ai-custom-history";
+    const createAiDefaultHistoryItems = () => [
       { id: "history-1", title: "帮我查找2025年7月份的采购单，采购人是徐毅恒的所有采购单", pinned: true },
       { id: "history-2", title: "2025年6月份的回单", pinned: true },
       { id: "history-3", title: "帮我导出24年5月份的银行回单", pinned: false },
       { id: "history-4", title: "导出24年的凭证统计表", pinned: false },
       { id: "history-5", title: "导出24年的凭证统计表", pinned: false }
     ];
+    const loadAiCustomHistoryItems = () => {
+      try {
+        const storedItems = JSON.parse(localStorage.getItem(AI_CUSTOM_HISTORY_STORAGE_KEY) || "[]");
+        if (!Array.isArray(storedItems)) return [];
+        return storedItems.map((item, index) => {
+          const prompt = String(item?.prompt || item?.title || "").trim();
+          if (!prompt) return null;
+          return {
+            id: String(item?.id || `custom-history-restored-${index}`),
+            title: String(item?.title || prompt).replace(/\s+/g, " ").trim(),
+            prompt,
+            response: AI_FALLBACK_RESPONSE,
+            pinned: Boolean(item?.pinned),
+            cancelled: Boolean(item?.cancelled),
+            isLocalFallback: true
+          };
+        }).filter(Boolean).slice(0, 30);
+      } catch (error) {
+        return [];
+      }
+    };
+    const persistAiCustomHistoryItems = (historyItems) => {
+      try {
+        const customItems = historyItems.filter((item) => item.isLocalFallback).slice(0, 30);
+        localStorage.setItem(AI_CUSTOM_HISTORY_STORAGE_KEY, JSON.stringify(customItems));
+      } catch (error) {
+        // Storage can be unavailable in local previews; the current session still keeps the conversation.
+      }
+    };
+    const createAiHistoryItems = () => {
+      const defaultItems = createAiDefaultHistoryItems();
+      const customItems = loadAiCustomHistoryItems();
+      return [
+        ...defaultItems.filter((item) => item.pinned),
+        ...customItems.filter((item) => item.pinned),
+        ...customItems.filter((item) => !item.pinned),
+        ...defaultItems.filter((item) => !item.pinned)
+      ];
+    };
     const createAiGroupedHistoryItems = () => [
       { id: "group-history-1", group: "26年审计项目", title: "导出24年的五月份的所有归档会计凭证", pinned: false },
       { id: "group-history-2", group: "26年审计项目", title: "导出24年的凭证统计表", pinned: false }
@@ -16567,6 +16608,7 @@
       toast: ""
     };
     let aiTaskTimer = null;
+    let aiCustomHistorySequence = 0;
 
     const persistAiLayoutPreferences = () => {
       try {
@@ -16635,8 +16677,12 @@
       </div>
     `;
 
-    const AI_TASK_STEPS = ["权限、配额、输入大小校验通过", "读取归档数据源并按状态聚合", "生成归档数据柱状图", "筛选状态为“预归档”的明细数据", "已生成 Excel 表格结果"];
-    const renderAiTaskSteps = (completed = false) => `<div class="ai-task-steps">${AI_TASK_STEPS.map((step, index) => {
+    const AI_PRESET_TASK_STEPS = ["权限、配额、输入大小校验通过", "读取归档数据源并按状态聚合", "生成归档数据柱状图", "筛选状态为“预归档”的明细数据", "已生成 Excel 表格结果"];
+    const AI_FALLBACK_TASK_STEPS = ["大模型识别中", "回答已生成"];
+    const getActiveAiHistoryItem = () => [...aiRuntime.groupedHistoryItems, ...aiRuntime.historyItems]
+      .find((item) => item.id === aiRuntime.activeHistoryId);
+    const getAiTaskSteps = () => getActiveAiHistoryItem()?.isLocalFallback ? AI_FALLBACK_TASK_STEPS : AI_PRESET_TASK_STEPS;
+    const renderAiTaskSteps = (completed = false) => `<div class="ai-task-steps">${getAiTaskSteps().map((step, index) => {
       const done = completed || index < aiRuntime.taskStep;
       const current = !completed && index === aiRuntime.taskStep;
       return `<div class="ai-task-step ${done ? "done" : ""} ${current ? "current" : ""}"><span class="ai-task-dot">${done ? "✓" : ""}</span><span>${step}</span></div>`;
@@ -16648,19 +16694,31 @@
       ? `<div class="ai-task-card is-complete"><button class="ai-task-card-title" type="button" data-ai-task-details-toggle aria-expanded="true"><span>任务已完成</span>${aiIcon("chevron-down.svg", "ai-task-chevron")}</button>${renderAiTaskSteps(true)}</div>`
       : `<button class="ai-status-card" type="button" data-ai-task-details-toggle aria-expanded="false"><span>任务已完成</span>${aiIcon("chevron-down.svg", "ai-status-chevron")}</button>`;
 
-    const renderAiTask = ({ resizable = false } = {}) => `
-      <div class="ai-chat-content">
-        <div class="ai-user-message">帮我找出单据号为MK-202607061631的付款申请单，生成 excel的格式供我浏览</div>
-        ${aiRuntime.view === "processing" ? `<div class="ai-thinking" role="status" aria-live="polite">正在思考</div>` : aiRuntime.view === "cancelled" ? `<div class="ai-cancelled-message" role="status" aria-live="polite">任务已取消</div>` : `<div class="ai-agent-message"><div class="ai-agent-bubble"><div class="ai-elapsed">已处理 3m28s</div><div class="ai-result-copy">我从系统内筛选出了 1 条 符合条件的 MK-202607061631 付款申请单，已为您生成 1份 Excel的文件。</div>${aiFileCard()}<div class="ai-reactions">${[
-          { action: "copy", icon: "copy.svg", label: "复制文件名" },
-          { action: "like", icon: aiRuntime.reactionVote === "like" ? "like-active.svg" : "like.svg", label: "点赞" },
-          { action: "dislike", icon: aiRuntime.reactionVote === "dislike" ? "dislike-active.svg" : "dislike.svg", label: "差评" },
-          { action: "refresh", icon: "refresh.svg", label: "重新生成" }
-        ].map(({ action, icon, label }) => `<button class="ai-reaction-button ${aiRuntime.reactionVote === action ? "is-active" : ""}" type="button" data-ai-reaction="${action}" data-tooltip="${label}" aria-label="${label}" ${action === "like" || action === "dislike" ? `aria-pressed="${aiRuntime.reactionVote === action}"` : ""}>${aiIcon(icon)}</button>`).join("")}</div></div></div>`}
-      </div>
-      ${aiRuntime.view === "processing" ? renderAiTaskCard() : aiRuntime.view === "result" ? renderAiCompletedTask() : ""}
-      <div class="ai-chat-composer">${renderAiPrompt({ resizable })}</div>
-    `;
+    const renderAiTask = ({ resizable = false } = {}) => {
+      const activeItem = getActiveAiHistoryItem();
+      const isFallback = Boolean(activeItem?.isLocalFallback);
+      const prompt = isFallback
+        ? activeItem.prompt
+        : "帮我找出单据号为MK-202607061631的付款申请单，生成 excel的格式供我浏览";
+      const reactions = [
+        { action: "copy", icon: "copy.svg", label: isFallback ? "复制回答" : "复制文件名" },
+        { action: "like", icon: aiRuntime.reactionVote === "like" ? "like-active.svg" : "like.svg", label: "点赞" },
+        { action: "dislike", icon: aiRuntime.reactionVote === "dislike" ? "dislike-active.svg" : "dislike.svg", label: "差评" },
+        { action: "refresh", icon: "refresh.svg", label: "重新生成" }
+      ];
+      const reactionsHtml = `<div class="ai-reactions">${reactions.map(({ action, icon, label }) => `<button class="ai-reaction-button ${aiRuntime.reactionVote === action ? "is-active" : ""}" type="button" data-ai-reaction="${action}" data-tooltip="${label}" aria-label="${label}" ${action === "like" || action === "dislike" ? `aria-pressed="${aiRuntime.reactionVote === action}"` : ""}>${aiIcon(icon)}</button>`).join("")}</div>`;
+      const resultHtml = isFallback
+        ? `<div class="ai-agent-message"><div class="ai-agent-bubble"><div class="ai-elapsed">已处理 1s</div><div class="ai-result-copy">${escapeHtml(activeItem.response || AI_FALLBACK_RESPONSE)}</div>${reactionsHtml}</div></div>`
+        : `<div class="ai-agent-message"><div class="ai-agent-bubble"><div class="ai-elapsed">已处理 3m28s</div><div class="ai-result-copy">我从系统内筛选出了 1 条 符合条件的 MK-202607061631 付款申请单，已为您生成 1份 Excel的文件。</div>${aiFileCard()}${reactionsHtml}</div></div>`;
+      return `
+        <div class="ai-chat-content">
+          <div class="ai-user-message">${escapeHtml(prompt)}</div>
+          ${aiRuntime.view === "processing" ? `<div class="ai-thinking" role="status" aria-live="polite">正在思考</div>` : aiRuntime.view === "cancelled" ? `<div class="ai-cancelled-message" role="status" aria-live="polite">任务已取消</div>` : resultHtml}
+        </div>
+        ${aiRuntime.view === "processing" ? renderAiTaskCard() : aiRuntime.view === "result" ? renderAiCompletedTask() : ""}
+        <div class="ai-chat-composer">${renderAiPrompt({ resizable })}</div>
+      `;
+    };
 
     const renderAiPreview = () => `<aside class="ai-preview" aria-label="Excel 文件预览"><div class="ai-preview-head"><div class="ai-preview-title"><button class="ai-icon-button" type="button" data-ai-preview-close aria-label="关闭预览">${aiIcon("sidebar-toggle.svg")}</button><span>MK-202607061631-付款申请.xlsx</span></div><div class="ai-preview-actions"><button class="ai-icon-button" type="button" aria-label="全屏预览">${aiIcon("fullscreen.svg")}</button></div></div><div class="ai-excel-sheet"><img class="ai-excel-preview-image" src="assets/ecm-images/archive-ai-excel-preview.png" alt="MK-202607061631 付款申请 Excel 示例单据"><span class="ai-excel-preview-bottom" aria-hidden="true"></span></div></aside>`;
 
@@ -16763,7 +16821,8 @@
 
     const renderAiHistoryItem = (item, child = false) => {
       const isProcessing = aiRuntime.view === "processing" && aiRuntime.activeHistoryId === item.id;
-      return `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""} ${isProcessing ? "is-processing" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${item.id}" data-ai-tooltip="${item.title}"><span class="ai-history-text">${item.title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${item.id}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${item.title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><span class="ai-history-action-slot">${isProcessing ? `<span class="ai-history-loading" role="status" aria-label="对话处理中"></span>` : ""}<button class="ai-history-more-button" type="button" data-ai-history-more="${item.id}" data-ai-tooltip="更多操作" aria-label="更多操作：${item.title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button></span>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
+      const title = escapeHtml(item.title);
+      return `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""} ${isProcessing ? "is-processing" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${escapeHtml(item.id)}" data-ai-tooltip="${title}"><span class="ai-history-text">${title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${escapeHtml(item.id)}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><span class="ai-history-action-slot">${isProcessing ? `<span class="ai-history-loading" role="status" aria-label="对话处理中"></span>` : ""}<button class="ai-history-more-button" type="button" data-ai-history-more="${escapeHtml(item.id)}" data-ai-tooltip="更多操作" aria-label="更多操作：${title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button></span>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
     };
 
     const renderAiHistory = () => `
@@ -16787,20 +16846,22 @@
       </section>
       <section class="ai-history-quick-section">
         <div class="ai-history-quick-label">最近对话</div>
-        <div class="ai-history-quick-list">${aiRuntime.historyItems.slice(0, 3).map((item) => `<button class="ai-history-quick-item" type="button" data-ai-history-item="${item.id}" data-ai-tooltip="${item.title}"><span class="ai-history-quick-title">${item.title}</span>${item.pinned ? aiIcon("pin-badge.svg", "ai-history-quick-pin") : ""}</button>`).join("")}</div>
+        <div class="ai-history-quick-list">${aiRuntime.historyItems.slice(0, 3).map((item) => `<button class="ai-history-quick-item" type="button" data-ai-history-item="${escapeHtml(item.id)}" data-ai-tooltip="${escapeHtml(item.title)}"><span class="ai-history-quick-title">${escapeHtml(item.title)}</span>${item.pinned ? aiIcon("pin-badge.svg", "ai-history-quick-pin") : ""}</button>`).join("")}</div>
       </section>
     </div>`;
 
     const renderAiCenter = () => {
       const rightPanel = aiRuntime.preview ? "preview" : (aiRuntime.filePanel ? "files" : "");
       const rightPanelWidth = rightPanel === "preview" ? aiRuntime.previewWidth : (rightPanel === "files" ? aiRuntime.filesWidth : 0);
+      const activeItem = getActiveAiHistoryItem();
+      const conversationTitle = activeItem?.isLocalFallback ? activeItem.title : "查找付款申请单";
       return `
         <section class="ai-center-page ${aiRuntime.preview ? "with-preview" : ""} ${aiRuntime.filePanel ? "with-files" : ""}" style="--ai-side-width:${aiRuntime.historyWidth}px;--ai-right-pane-width:${rightPanelWidth}px" data-ai-center-page>
           ${aiRuntime.historyCollapsed ? "" : `${renderAiHistory()}${renderAiResizeHandle("left")}`}
           <section class="ai-canvas">
             <div class="ai-main-area">
               <section class="ai-chat-stage" style="--ai-composer-height:${Math.round(aiRuntime.composerHeight)}px">
-                <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<div class="ai-history-quick-wrap"><button class="ai-top-icon" type="button" data-ai-history-toggle data-ai-no-tooltip aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>${renderAiHistoryQuickPreview()}</div>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title">查找付款申请单</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more data-ai-tooltip="更多操作" aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
+                <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<div class="ai-history-quick-wrap"><button class="ai-top-icon" type="button" data-ai-history-toggle data-ai-no-tooltip aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>${renderAiHistoryQuickPreview()}</div>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title" data-ai-tooltip="${escapeHtml(conversationTitle)}">${escapeHtml(conversationTitle)}</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more data-ai-tooltip="更多操作" aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
                 <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel aria-label="${aiRuntime.filePanel ? "收起文件库" : "展开文件库"}">${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-last-preview aria-label="打开上次查看的文件">${aiIcon("sidebar-toggle.svg")}</button></div>
                 ${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask({ resizable: true })}
               </section>
@@ -17031,6 +17092,7 @@
       const firstUnpinnedIndex = historyList.findIndex((historyItem) => !historyItem.pinned);
       const insertIndex = firstUnpinnedIndex < 0 ? historyList.length : firstUnpinnedIndex;
       historyList.splice(insertIndex, 0, item);
+      if (historyList === aiRuntime.historyItems) persistAiCustomHistoryItems(aiRuntime.historyItems);
       return true;
     };
 
@@ -17098,8 +17160,23 @@
       refreshAiUi();
     };
 
-    const startAiTask = () => {
+    const startAiTask = (promptText = aiRuntime.draft) => {
+      const prompt = String(promptText || "").trim();
+      if (!prompt) return;
       clearTimeout(aiTaskTimer);
+      const historyItem = {
+        id: `custom-history-${Date.now()}-${aiCustomHistorySequence += 1}`,
+        title: prompt.replace(/\s+/g, " "),
+        prompt,
+        response: AI_FALLBACK_RESPONSE,
+        pinned: false,
+        cancelled: false,
+        isLocalFallback: true
+      };
+      const firstUnpinnedIndex = aiRuntime.historyItems.findIndex((item) => !item.pinned);
+      aiRuntime.historyItems.splice(firstUnpinnedIndex < 0 ? aiRuntime.historyItems.length : firstUnpinnedIndex, 0, historyItem);
+      aiRuntime.activeHistoryId = historyItem.id;
+      persistAiCustomHistoryItems(aiRuntime.historyItems);
       aiRuntime.view = "processing";
       aiRuntime.taskStep = 0;
       aiRuntime.taskDetailsExpanded = false;
@@ -17118,13 +17195,14 @@
       aiRuntime.conversationMoveOpen = false;
       aiRuntime.conversationMoveActiveIndex = -1;
       aiRuntime.reactionVote = null;
+      aiRuntime.draft = "";
       aiRuntime.toast = "";
       const advance = () => {
         if (aiRuntime.view !== "processing") return;
         aiRuntime.taskStep += 1;
-        if (aiRuntime.taskStep >= 5) {
+        if (aiRuntime.taskStep >= AI_FALLBACK_TASK_STEPS.length) {
           aiRuntime.view = "result";
-          aiRuntime.toast = "已生成 MK-202607061631-付款申请.xlsx";
+          aiRuntime.toast = "回答已生成";
         }
         refreshAiUi();
         if (aiRuntime.view === "processing") aiTaskTimer = setTimeout(advance, 620);
@@ -17140,6 +17218,11 @@
       aiRuntime.view = "cancelled";
       aiRuntime.taskDetailsExpanded = false;
       aiRuntime.toast = "";
+      const activeItem = getActiveAiHistoryItem();
+      if (activeItem?.isLocalFallback) {
+        activeItem.cancelled = true;
+        persistAiCustomHistoryItems(aiRuntime.historyItems);
+      }
       refreshAiUi();
       requestAnimationFrame(() => document.querySelector(".ai-prompt-input")?.focus());
     };
@@ -17759,13 +17842,15 @@
       if (aiSearchHistory) {
         event.preventDefault();
         aiRuntime.activeHistoryId = aiSearchHistory.dataset.aiSearchHistory || aiRuntime.activeHistoryId;
+        const historyItem = getAiHistoryItem(aiRuntime.activeHistoryId);
         aiRuntime.searchOpen = false;
         aiRuntime.searchActiveIndex = -1;
-        aiRuntime.view = "result";
-        aiRuntime.taskStep = 5;
+        aiRuntime.view = historyItem?.cancelled ? "cancelled" : "result";
+        aiRuntime.taskStep = historyItem?.isLocalFallback ? AI_FALLBACK_TASK_STEPS.length : AI_PRESET_TASK_STEPS.length;
         aiRuntime.taskDetailsExpanded = false;
         aiRuntime.preview = false;
         aiRuntime.filePanel = false;
+        aiRuntime.draft = "";
         refreshAiUi();
         return;
       }
@@ -17852,7 +17937,7 @@
           aiRuntime.reactionVote = wasActive ? null : action;
           aiRuntime.toast = wasActive ? (action === "like" ? "已取消点赞" : "已取消差评") : (action === "like" ? "已点赞" : "已提交差评");
         } else if (action === "copy") {
-          aiRuntime.toast = "已复制文件名";
+          aiRuntime.toast = getActiveAiHistoryItem()?.isLocalFallback ? "已复制回答" : "已复制文件名";
         } else if (action === "refresh") {
           aiRuntime.toast = "已重新生成";
         }
@@ -18050,15 +18135,17 @@
       if (aiHistoryItem) {
         event.preventDefault();
         aiRuntime.activeHistoryId = aiHistoryItem.dataset.aiHistoryItem || aiRuntime.activeHistoryId;
+        const historyItem = getAiHistoryItem(aiRuntime.activeHistoryId);
         aiRuntime.conversationMenuOpen = false;
         aiRuntime.conversationMenuActiveIndex = -1;
         aiRuntime.conversationMoveOpen = false;
         aiRuntime.conversationMoveActiveIndex = -1;
-        aiRuntime.view = "result";
-        aiRuntime.taskStep = 5;
+        aiRuntime.view = historyItem?.cancelled ? "cancelled" : "result";
+        aiRuntime.taskStep = historyItem?.isLocalFallback ? AI_FALLBACK_TASK_STEPS.length : AI_PRESET_TASK_STEPS.length;
         aiRuntime.taskDetailsExpanded = false;
         aiRuntime.preview = false;
         aiRuntime.filePanel = false;
+        aiRuntime.draft = "";
         refreshAiUi();
         return;
       }
@@ -18934,7 +19021,7 @@
           aiPromptInput.focus();
           return;
         }
-        startAiTask();
+        startAiTask(aiPromptInput.value);
         return;
       }
 
@@ -19291,7 +19378,7 @@
         input?.focus();
         return;
       }
-      startAiTask();
+      startAiTask(input.value);
     });
 
     window.addEventListener("hashchange", () => {
