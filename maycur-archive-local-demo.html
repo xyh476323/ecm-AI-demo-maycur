@@ -9151,6 +9151,15 @@
     .ai-history-child { padding-left: 36px !important; }
     .ai-history-tool .ai-svg-icon,
     .ai-history-group .ai-svg-icon { width: 18px; height: 18px; }
+    .ai-history-group .ai-svg-icon.ai-group-chevron {
+      width: 12px;
+      height: 8px;
+      opacity: 0;
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .ai-history-group:hover .ai-group-chevron,
+    .ai-history-group:focus-visible .ai-group-chevron { opacity: .28; }
+    .ai-history-group[aria-expanded="false"] .ai-group-chevron { transform: rotate(-90deg); }
     .ai-history-main {
       min-width: 0;
       height: 34px;
@@ -16706,6 +16715,7 @@
       conversationMoveActiveIndex: -1,
       conversationPinned: false,
       historyGroupsExpanded: true,
+      collapsedHistoryGroups: new Set(),
       historyRecentExpanded: true,
       groupedHistoryItems: createAiGroupedHistoryItems(),
       historyItems: createAiHistoryItems(),
@@ -16985,7 +16995,10 @@
         <div class="ai-history-tools"><button class="ai-history-tool" type="button" data-ai-search-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.searchOpen}">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button" data-ai-new-group-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.newGroupOpen}">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
         <button class="ai-history-section-toggle" type="button" data-ai-history-section="groups" aria-expanded="${aiRuntime.historyGroupsExpanded}"><span>分组</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
         <div class="ai-history-section ai-history-groups" ${aiRuntime.historyGroupsExpanded ? "" : "hidden"}>
-          ${getAiHistoryGroups().map((group) => `<button class="ai-history-group" type="button" data-ai-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>${aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("")}`).join("")}
+          ${getAiHistoryGroups().map((group) => {
+            const expanded = !aiRuntime.collapsedHistoryGroups.has(group);
+            return `<button class="ai-history-group" type="button" data-ai-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}" aria-expanded="${expanded}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span>${aiIcon("chevron-down.svg", "ai-group-chevron")}</button>${expanded ? aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("") : ""}`;
+          }).join("")}
         </div>
         <button class="ai-history-section-toggle" type="button" data-ai-history-section="recent" aria-expanded="${aiRuntime.historyRecentExpanded}"><span>最近对话</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
         <div class="ai-history-section ai-history-list" ${aiRuntime.historyRecentExpanded ? "" : "hidden"}>${aiRuntime.historyItems.map((item) => renderAiHistoryItem(item)).join("")}</div>
@@ -17155,6 +17168,7 @@
       AI_HISTORY_GROUPS.push(groupName);
       persistAiHistoryGroups();
       aiRuntime.historyGroupsExpanded = true;
+      aiRuntime.collapsedHistoryGroups.delete(groupName);
       aiRuntime.newGroupOpen = false;
       aiRuntime.newGroupName = "";
       aiRuntime.newGroupError = "";
@@ -17316,6 +17330,7 @@
         persistAiHistoryGroupAssignments();
       }
       aiRuntime.historyGroupsExpanded = true;
+      aiRuntime.collapsedHistoryGroups.delete(targetGroup);
       return true;
     };
 
@@ -18229,10 +18244,25 @@
       const aiQuickHistoryGroup = event.target.closest("[data-ai-quick-history-group]");
       if (aiQuickHistoryGroup) {
         event.preventDefault();
+        const groupName = aiQuickHistoryGroup.dataset.aiQuickHistoryGroup;
         aiRuntime.historyCollapsed = false;
         aiRuntime.historyGroupsExpanded = true;
+        aiRuntime.collapsedHistoryGroups.delete(groupName);
         refreshAiUi();
-        requestAnimationFrame(() => document.querySelector("[data-ai-history-section=\"groups\"]")?.focus());
+        requestAnimationFrame(() => Array.from(document.querySelectorAll("[data-ai-history-group]"))
+          .find((button) => button.dataset.aiHistoryGroup === groupName)?.focus());
+        return;
+      }
+
+      const aiHistoryGroup = event.target.closest("[data-ai-history-group]");
+      if (aiHistoryGroup) {
+        event.preventDefault();
+        const groupName = aiHistoryGroup.dataset.aiHistoryGroup;
+        if (aiRuntime.collapsedHistoryGroups.has(groupName)) aiRuntime.collapsedHistoryGroups.delete(groupName);
+        else aiRuntime.collapsedHistoryGroups.add(groupName);
+        refreshAiUi();
+        requestAnimationFrame(() => Array.from(document.querySelectorAll("[data-ai-history-group]"))
+          .find((button) => button.dataset.aiHistoryGroup === groupName)?.focus());
         return;
       }
 
