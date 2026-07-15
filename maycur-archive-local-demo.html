@@ -10249,8 +10249,9 @@
       inset: 0;
       z-index: 130;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
+      padding-top: clamp(160px, 29.3vh, 264px);
       background: rgba(0, 0, 0, .08);
     }
     .ai-new-group-dialog {
@@ -10336,7 +10337,7 @@
       background: #333333;
       color: #fff;
     }
-    .ai-new-group-button.primary:hover { border-color: #1f1f1f; background: #1f1f1f; }
+    .ai-new-group-button.primary:hover { border-color: #555555; background: #555555; }
     .ai-search-overlay {
       position: fixed;
       inset: 0;
@@ -16755,11 +16756,11 @@
       `;
     };
 
-    const renderAiPreview = () => `<aside class="ai-preview" aria-label="Excel 文件预览"><div class="ai-preview-head"><div class="ai-preview-title"><button class="ai-icon-button" type="button" data-ai-preview-close aria-label="关闭预览">${aiIcon("sidebar-toggle.svg")}</button><span>MK-202607061631-付款申请.xlsx</span></div><div class="ai-preview-actions"><button class="ai-icon-button" type="button" aria-label="全屏预览">${aiIcon("fullscreen.svg")}</button></div></div><div class="ai-excel-sheet"><img class="ai-excel-preview-image" src="assets/ecm-images/archive-ai-excel-preview.png" alt="MK-202607061631 付款申请 Excel 示例单据"><span class="ai-excel-preview-bottom" aria-hidden="true"></span></div></aside>`;
+    const renderAiPreview = () => `<aside class="ai-preview" aria-label="Excel 文件预览"><div class="ai-preview-head"><div class="ai-preview-title"><button class="ai-icon-button" type="button" data-ai-preview-close data-ai-no-tooltip aria-label="关闭预览">${aiIcon("sidebar-toggle.svg")}</button><span>MK-202607061631-付款申请.xlsx</span></div><div class="ai-preview-actions"><button class="ai-icon-button" type="button" aria-label="全屏预览">${aiIcon("fullscreen.svg")}</button></div></div><div class="ai-excel-sheet"><img class="ai-excel-preview-image" src="assets/ecm-images/archive-ai-excel-preview.png" alt="MK-202607061631 付款申请 Excel 示例单据"><span class="ai-excel-preview-bottom" aria-hidden="true"></span></div></aside>`;
 
     const renderAiFilesPanel = () => {
       const files = aiRuntime.fileTab === "generated" ? [AI_FILES[0]] : AI_FILES.slice(1);
-      return `<aside class="ai-files-panel" aria-label="聊天中的文件"><div class="ai-preview-head"><span>聊天中的文件</span><button class="ai-icon-button" type="button" data-ai-file-panel aria-label="关闭文件列表">${aiIcon("close.svg")}</button></div><div class="ai-design-tabs"><button class="ai-design-tab ${aiRuntime.fileTab === "upload" ? "active" : ""}" type="button" data-ai-file-tab="upload">上传文件</button><button class="ai-design-tab ${aiRuntime.fileTab === "generated" ? "active" : ""}" type="button" data-ai-file-tab="generated">生成文件</button></div><div class="ai-files-list">${files.map((file, index) => {
+      return `<aside class="ai-files-panel" aria-label="聊天中的文件"><div class="ai-preview-head"><span>聊天中的文件</span><button class="ai-icon-button" type="button" data-ai-file-panel data-ai-no-tooltip aria-label="关闭文件列表">${aiIcon("close.svg")}</button></div><div class="ai-design-tabs"><button class="ai-design-tab ${aiRuntime.fileTab === "upload" ? "active" : ""}" type="button" data-ai-file-tab="upload">上传文件</button><button class="ai-design-tab ${aiRuntime.fileTab === "generated" ? "active" : ""}" type="button" data-ai-file-tab="generated">生成文件</button></div><div class="ai-files-list">${files.map((file, index) => {
         const rowId = `${aiRuntime.fileTab}-${index}`;
         const menuOpen = aiRuntime.fileRowMenuId === rowId;
         return `<div class="ai-files-row ${menuOpen ? "menu-open" : ""}">${aiFileIcon(file)}<span>${file[1]}</span><button class="ai-files-row-more" type="button" data-ai-file-row-more="${rowId}" data-ai-tooltip="更多操作" aria-label="更多操作：${file[1]}" aria-haspopup="menu" aria-expanded="${menuOpen}">${aiIcon("more.svg")}</button>${menuOpen ? `<div class="ai-file-row-menu" role="menu" aria-label="${file[1]} 文件操作"><button class="ai-file-row-option ${aiRuntime.fileRowMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" data-ai-download="${file[1]}" aria-selected="${aiRuntime.fileRowMenuActiveIndex === 0}">${aiIcon("download-menu.svg")}<span>下载</span></button></div>` : ""}</div>`;
@@ -16809,7 +16810,7 @@
     const renderAiNewGroupOverlay = () => `<div class="ai-new-group-overlay" data-ai-new-group-backdrop>
       <form class="ai-new-group-dialog" data-ai-new-group-form role="dialog" aria-modal="true" aria-labelledby="aiNewGroupTitle">
         <span class="ai-new-group-title" id="aiNewGroupTitle">新建分组</span>
-        <button class="ai-new-group-close" type="button" data-ai-new-group-close aria-label="关闭新建分组弹窗">${aiIcon("close.svg")}</button>
+        <button class="ai-new-group-close" type="button" data-ai-new-group-close data-ai-no-tooltip aria-label="关闭新建分组弹窗">${aiIcon("close.svg")}</button>
         <input class="ai-new-group-input" type="text" value="${escapeHtml(aiRuntime.newGroupName)}" data-ai-new-group-input placeholder="请为分组命名" aria-label="分组名称" aria-invalid="${Boolean(aiRuntime.newGroupError)}" aria-describedby="aiNewGroupStatus" autocomplete="off">
         <span class="ai-new-group-status" id="aiNewGroupStatus" aria-live="polite">${escapeHtml(aiRuntime.newGroupError)}</span>
         <div class="ai-new-group-actions">
@@ -16921,7 +16922,7 @@
       const drawer = document.getElementById("aiQuickDrawer");
       if (!drawer) return;
       drawer.classList.toggle("open", aiRuntime.quickOpen);
-      drawer.innerHTML = aiRuntime.quickOpen ? `<section class="ai-workbench"><header class="ai-workbench-head"><span class="ai-workbench-name">每刻档案AI助手</span><div class="ai-head-actions"><button class="ai-icon-button ai-drag-handle" type="button" aria-label="移动 AI 助手窗口">${aiIcon("move.svg")}</button><button class="ai-icon-button" type="button" data-ai-go-center aria-label="进入 AI 应用中心">${aiIcon("fullscreen.svg")}</button><button class="ai-icon-button" type="button" data-ai-quick-close aria-label="关闭 AI 助手">${aiIcon("close.svg")}</button></div></header><div class="ai-main-area"><section class="ai-chat-stage">${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}</section></div>${aiIcon("resize-handle.svg", "ai-resize-handle")}</section>` : "";
+      drawer.innerHTML = aiRuntime.quickOpen ? `<section class="ai-workbench"><header class="ai-workbench-head"><span class="ai-workbench-name">每刻档案AI助手</span><div class="ai-head-actions"><button class="ai-icon-button ai-drag-handle" type="button" aria-label="移动 AI 助手窗口">${aiIcon("move.svg")}</button><button class="ai-icon-button" type="button" data-ai-go-center aria-label="进入 AI 应用中心">${aiIcon("fullscreen.svg")}</button><button class="ai-icon-button" type="button" data-ai-quick-close data-ai-no-tooltip aria-label="关闭 AI 助手">${aiIcon("close.svg")}</button></div></header><div class="ai-main-area"><section class="ai-chat-stage">${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}</section></div>${aiIcon("resize-handle.svg", "ai-resize-handle")}</section>` : "";
     };
 
     let aiTooltipTarget = null;
@@ -17014,7 +17015,6 @@
       aiRuntime.conversationMoveOpen = false;
       aiRuntime.conversationMoveActiveIndex = -1;
       refreshAiUi();
-      requestAnimationFrame(() => document.querySelector("[data-ai-new-group-input]")?.focus());
     };
 
     const closeAiNewGroupDialog = ({ restoreFocus = true } = {}) => {
