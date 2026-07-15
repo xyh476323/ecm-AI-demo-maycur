@@ -9543,7 +9543,12 @@
       cursor: pointer;
       font: 14px/20px "PingFang SC", sans-serif;
     }
-    .ai-files-button:hover { border-color: #d9d9d9; }
+    .ai-files-button:hover,
+    .ai-files-button:focus-visible {
+      border-color: #d9d9d9;
+      background: #f7f7f8;
+      color: #0f1419;
+    }
     .ai-files-button .ai-svg-icon { width: 14px; height: 15px; }
     .ai-main-area { position: relative; z-index: 1; min-width: 0; flex: 1; display: flex; overflow: hidden; }
     .ai-chat-stage {
