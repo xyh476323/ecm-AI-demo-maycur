@@ -9167,26 +9167,30 @@
     }
     .ai-history-main .ai-history-text { display: block; width: 100%; }
     .ai-history-pin-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 2;
       width: 20px;
       height: 20px;
-      flex: 0 0 20px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-left: auto;
       padding: 0;
       border: 0;
       border-radius: 4px;
       background: transparent;
       cursor: pointer;
       opacity: 0;
+      transition: right .12s ease, opacity .12s ease;
     }
     .ai-history-pin-button:hover { background: rgba(0, 0, 0, .05); }
     .ai-history-pin-button .ai-history-pin { width: 20px; height: 20px; }
-    .ai-history-pin-button.is-pinned,
+    .ai-history-pin-button.is-pinned { opacity: 1; }
     .ai-history-item:hover .ai-history-pin-button,
     .ai-history-item:focus-within .ai-history-pin-button,
-    .ai-history-item.menu-open .ai-history-pin-button { opacity: 1; }
+    .ai-history-item.menu-open .ai-history-pin-button { right: 24px; opacity: 1; }
+    .ai-history-item.is-processing.is-pinned .ai-history-pin-button { right: 24px; }
     .ai-history-more-button {
       width: 20px;
       height: 20px;
@@ -9210,11 +9214,19 @@
       width: 20px;
       height: 20px;
       flex: 0 0 20px;
+      transition: width .12s ease, flex-basis .12s ease;
     }
+    .ai-history-item:hover .ai-history-action-slot,
+    .ai-history-item:focus-within .ai-history-action-slot,
+    .ai-history-item.menu-open .ai-history-action-slot,
+    .ai-history-item.is-processing.is-pinned .ai-history-action-slot { width: 44px; flex-basis: 44px; }
     .ai-history-action-slot .ai-history-more-button,
     .ai-history-loading {
       position: absolute;
-      inset: 0;
+      top: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
     }
     .ai-history-loading {
       display: inline-flex;
@@ -16963,7 +16975,7 @@
     const renderAiHistoryItem = (item, child = false) => {
       const isProcessing = aiRuntime.view === "processing" && aiRuntime.activeHistoryId === item.id;
       const title = escapeHtml(item.title);
-      return `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""} ${isProcessing ? "is-processing" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${escapeHtml(item.id)}" data-ai-tooltip="${title}"><span class="ai-history-text">${title}</span></button><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${escapeHtml(item.id)}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button><span class="ai-history-action-slot">${isProcessing ? `<span class="ai-history-loading" role="status" aria-label="对话处理中"></span>` : ""}<button class="ai-history-more-button" type="button" data-ai-history-more="${escapeHtml(item.id)}" data-ai-tooltip="更多操作" aria-label="更多操作：${title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button></span>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
+      return `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${item.pinned ? "is-pinned" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""} ${isProcessing ? "is-processing" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${escapeHtml(item.id)}" data-ai-tooltip="${title}"><span class="ai-history-text">${title}</span></button><span class="ai-history-action-slot"><button class="ai-history-pin-button ${item.pinned ? "is-pinned" : ""}" type="button" data-ai-history-pin-toggle="${escapeHtml(item.id)}" aria-label="${item.pinned ? "取消置顶" : "置顶"}：${title}" aria-pressed="${item.pinned}">${aiIcon("pin-badge.svg", "ai-history-pin")}</button>${isProcessing ? `<span class="ai-history-loading" role="status" aria-label="对话处理中"></span>` : ""}<button class="ai-history-more-button" type="button" data-ai-history-more="${escapeHtml(item.id)}" data-ai-tooltip="更多操作" aria-label="更多操作：${title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button></span>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
     };
 
     const renderAiHistory = () => `
