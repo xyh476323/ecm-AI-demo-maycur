@@ -9319,6 +9319,13 @@
     .ai-history-group-option.keyboard-active { background: #f8f8f8; }
     .ai-history-group-option .ai-svg-icon { width: 22px; height: 22px; flex: 0 0 22px; }
     .ai-history-group-option .ai-new-group-add-icon { width: 22px; height: 22px; }
+    .ai-history-group > span,
+    .ai-history-group-option > span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .ai-history-group-divider { height: 1px; margin: 4px 0; background: #eeeeee; }
     .ai-history .ai-mini-mark { display: none; }
     .ai-panel-resizer {
@@ -10232,6 +10239,99 @@
     .ai-file-row-option:hover,
     .ai-file-row-option.keyboard-active { background: #f8f8f8; }
     .ai-file-row-option .ai-svg-icon { width: 22px; height: 22px; flex: 0 0 22px; }
+    .ai-new-group-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 130;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, .08);
+    }
+    .ai-new-group-dialog {
+      position: relative;
+      width: min(460px, calc(100vw - 32px));
+      height: 160px;
+      padding: 16px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 9px 28px 8px rgba(0, 0, 0, .05), 0 3px 6px -4px rgba(0, 0, 0, .12), 0 6px 16px rgba(0, 0, 0, .08);
+    }
+    .ai-new-group-title {
+      display: block;
+      color: rgba(0, 0, 0, .85);
+      font: 500 16px/20px "PingFang SC", sans-serif;
+    }
+    .ai-new-group-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+    }
+    .ai-new-group-close:hover { background: #f8f8f8; }
+    .ai-new-group-close .ai-svg-icon { width: 14px; height: 14px; opacity: .45; }
+    .ai-new-group-input {
+      position: absolute;
+      top: 52px;
+      left: 16px;
+      width: calc(100% - 32px);
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid #eeeeee;
+      border-radius: 8px;
+      outline: 0;
+      background: #fff;
+      color: rgba(0, 0, 0, .85);
+      font: 14px/22px "PingFang SC", sans-serif;
+    }
+    .ai-new-group-input::placeholder { color: rgba(0, 0, 0, .28); }
+    .ai-new-group-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22, 119, 255, .1); }
+    .ai-new-group-input[aria-invalid="true"] { border-color: #f53137; box-shadow: 0 0 0 2px rgba(245, 49, 55, .08); }
+    .ai-new-group-status {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .ai-new-group-actions {
+      position: absolute;
+      right: 16px;
+      bottom: 24px;
+      display: flex;
+      gap: 8px;
+    }
+    .ai-new-group-button {
+      width: 66px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid #eeeeee;
+      border-radius: 6px;
+      background: #fff;
+      color: rgba(0, 0, 0, .85);
+      cursor: pointer;
+      font: 14px/22px "PingFang SC", sans-serif;
+    }
+    .ai-new-group-button:hover { background: #f8f8f8; }
+    .ai-new-group-button.primary {
+      border-color: #333333;
+      background: #333333;
+      color: #fff;
+    }
+    .ai-new-group-button.primary:hover { border-color: #1f1f1f; background: #1f1f1f; }
     .ai-search-overlay {
       position: fixed;
       inset: 0;
@@ -16356,7 +16456,28 @@
       { scenario: "业务管理问答", label: "业务管理问答" },
       { scenario: "借阅管理问答", label: "借阅管理问答" }
     ];
-    const AI_HISTORY_GROUPS = ["26年审计项目", "5月份凭证统计"];
+    const AI_DEFAULT_HISTORY_GROUPS = ["26年审计项目", "5月份凭证统计"];
+    const AI_HISTORY_GROUPS_STORAGE_KEY = "maycur-archive-local-demo.ai-history-groups";
+    const loadAiHistoryGroups = () => {
+      try {
+        const storedGroups = JSON.parse(localStorage.getItem(AI_HISTORY_GROUPS_STORAGE_KEY) || "[]");
+        if (!Array.isArray(storedGroups)) return [...AI_DEFAULT_HISTORY_GROUPS];
+        return [...new Set([
+          ...AI_DEFAULT_HISTORY_GROUPS,
+          ...storedGroups.map((group) => String(group || "").trim()).filter(Boolean)
+        ])];
+      } catch (error) {
+        return [...AI_DEFAULT_HISTORY_GROUPS];
+      }
+    };
+    const AI_HISTORY_GROUPS = loadAiHistoryGroups();
+    const persistAiHistoryGroups = () => {
+      try {
+        localStorage.setItem(AI_HISTORY_GROUPS_STORAGE_KEY, JSON.stringify(AI_HISTORY_GROUPS));
+      } catch (error) {
+        // Local file previews can block storage; the newly created group remains available in memory.
+      }
+    };
     const createAiHistoryItems = () => [
       { id: "history-1", title: "帮我查找2025年7月份的采购单，采购人是徐毅恒的所有采购单", pinned: true },
       { id: "history-2", title: "2025年6月份的回单", pinned: true },
@@ -16419,6 +16540,10 @@
       searchTab: "history",
       searchQuery: "",
       searchActiveIndex: -1,
+      newGroupOpen: false,
+      newGroupName: "",
+      newGroupError: "",
+      newGroupSource: "history",
       reactionVote: null,
       draft: "",
       view: "welcome",
@@ -16583,8 +16708,21 @@
       </section>
     </div>`;
 
+    const renderAiNewGroupOverlay = () => `<div class="ai-new-group-overlay" data-ai-new-group-backdrop>
+      <form class="ai-new-group-dialog" data-ai-new-group-form role="dialog" aria-modal="true" aria-labelledby="aiNewGroupTitle">
+        <span class="ai-new-group-title" id="aiNewGroupTitle">新建分组</span>
+        <button class="ai-new-group-close" type="button" data-ai-new-group-close aria-label="关闭新建分组弹窗">${aiIcon("close.svg")}</button>
+        <input class="ai-new-group-input" type="text" value="${escapeHtml(aiRuntime.newGroupName)}" data-ai-new-group-input placeholder="请为分组命名" aria-label="分组名称" aria-invalid="${Boolean(aiRuntime.newGroupError)}" aria-describedby="aiNewGroupStatus" autocomplete="off">
+        <span class="ai-new-group-status" id="aiNewGroupStatus" aria-live="polite">${escapeHtml(aiRuntime.newGroupError)}</span>
+        <div class="ai-new-group-actions">
+          <button class="ai-new-group-button" type="button" data-ai-new-group-cancel>取 消</button>
+          <button class="ai-new-group-button primary" type="submit">保 存</button>
+        </div>
+      </form>
+    </div>`;
+
     const renderAiHistoryMoveMenu = () => `<div class="ai-history-move-submenu" role="menu" aria-label="选择分组">
-      ${AI_HISTORY_GROUPS.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.historyMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-history-group-option="${group}" aria-selected="${aiRuntime.historyMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${group}</span></button>`).join("")}
+      ${AI_HISTORY_GROUPS.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.historyMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-history-group-option="${escapeHtml(group)}" aria-selected="${aiRuntime.historyMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>`).join("")}
       <div class="ai-history-group-divider" aria-hidden="true"></div>
       <button class="ai-history-group-option ${aiRuntime.historyMoveActiveIndex === AI_HISTORY_GROUPS.length ? "keyboard-active" : ""}" type="button" data-ai-history-group-option="__new__" aria-selected="${aiRuntime.historyMoveActiveIndex === AI_HISTORY_GROUPS.length}">${aiIcon("new-group-add.svg", "ai-new-group-add-icon")}<span>新增分组</span></button>
     </div>`;
@@ -16604,7 +16742,7 @@
     };
 
     const renderAiConversationMoveMenu = () => `<div class="ai-history-move-submenu" role="menu" aria-label="选择分组">
-      ${AI_HISTORY_GROUPS.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.conversationMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-conversation-group-option="${group}" aria-selected="${aiRuntime.conversationMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${group}</span></button>`).join("")}
+      ${AI_HISTORY_GROUPS.map((group, index) => `<button class="ai-history-group-option ${aiRuntime.conversationMoveActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-conversation-group-option="${escapeHtml(group)}" aria-selected="${aiRuntime.conversationMoveActiveIndex === index}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>`).join("")}
       <div class="ai-history-group-divider" aria-hidden="true"></div>
       <button class="ai-history-group-option ${aiRuntime.conversationMoveActiveIndex === AI_HISTORY_GROUPS.length ? "keyboard-active" : ""}" type="button" data-ai-conversation-group-option="__new__" aria-selected="${aiRuntime.conversationMoveActiveIndex === AI_HISTORY_GROUPS.length}">${aiIcon("new-group-add.svg", "ai-new-group-add-icon")}<span>新增分组</span></button>
     </div>`;
@@ -16627,10 +16765,10 @@
       <aside class="ai-history ${aiRuntime.historyMenuId !== null ? "menu-open" : ""}" aria-label="AI 会话历史">
         <div class="ai-history-head"><span class="ai-history-title">我的项目</span><button class="ai-history-toggle" type="button" data-ai-history-toggle aria-label="收起会话栏">${aiIcon("sidebar-toggle.svg")}</button></div>
         <button class="ai-new-chat" type="button" data-ai-new-chat>${aiIcon("new-chat.svg")}<span>新建对话</span>${aiIcon("new-chat-shortcut.svg", "ai-shortcut-icon")}</button>
-        <div class="ai-history-tools"><button class="ai-history-tool" type="button" data-ai-search-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.searchOpen}">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
+        <div class="ai-history-tools"><button class="ai-history-tool" type="button" data-ai-search-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.searchOpen}">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button" data-ai-new-group-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.newGroupOpen}">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
         <button class="ai-history-section-toggle" type="button" data-ai-history-section="groups" aria-expanded="${aiRuntime.historyGroupsExpanded}"><span>分组</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
         <div class="ai-history-section ai-history-groups" ${aiRuntime.historyGroupsExpanded ? "" : "hidden"}>
-          ${AI_HISTORY_GROUPS.map((group) => `<button class="ai-history-group" type="button">${aiIcon("new-group.svg")}<span>${group}</span></button>${aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("")}`).join("")}
+          ${AI_HISTORY_GROUPS.map((group) => `<button class="ai-history-group" type="button" data-ai-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span></button>${aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("")}`).join("")}
         </div>
         <button class="ai-history-section-toggle" type="button" data-ai-history-section="recent" aria-expanded="${aiRuntime.historyRecentExpanded}"><span>最近对话</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
         <div class="ai-history-section ai-history-list" ${aiRuntime.historyRecentExpanded ? "" : "hidden"}>${aiRuntime.historyItems.map((item) => renderAiHistoryItem(item)).join("")}</div>
@@ -16640,7 +16778,7 @@
     const renderAiHistoryQuickPreview = () => `<div class="ai-history-quick-popover" tabindex="-1" aria-label="快速查看历史对话">
       <section class="ai-history-quick-section">
         <div class="ai-history-quick-label">分组</div>
-        <div class="ai-history-quick-list">${AI_HISTORY_GROUPS.map((group) => `<button class="ai-history-quick-item" type="button" data-ai-quick-history-group="${group}">${aiIcon("new-group.svg")}<span class="ai-history-quick-title">${group}</span></button>`).join("")}</div>
+        <div class="ai-history-quick-list">${AI_HISTORY_GROUPS.map((group) => `<button class="ai-history-quick-item" type="button" data-ai-quick-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}">${aiIcon("new-group.svg")}<span class="ai-history-quick-title">${escapeHtml(group)}</span></button>`).join("")}</div>
       </section>
       <section class="ai-history-quick-section">
         <div class="ai-history-quick-label">最近对话</div>
@@ -16666,6 +16804,7 @@
             </div>
           </section>
           ${aiRuntime.searchOpen ? renderAiSearchOverlay() : ""}
+          ${aiRuntime.newGroupOpen ? renderAiNewGroupOverlay() : ""}
           ${aiRuntime.toast ? `<span class="ai-toast">${aiRuntime.toast}</span>` : ""}
         </section>
       `;
@@ -16751,6 +16890,64 @@
       hideAiTooltip();
       if (routeFromHash().module === "ai-center") document.getElementById("pageBody").innerHTML = renderAiCenter();
       renderAiQuickDrawer();
+    };
+
+    const openAiNewGroupDialog = (source = "history") => {
+      aiRuntime.newGroupOpen = true;
+      aiRuntime.newGroupName = "";
+      aiRuntime.newGroupError = "";
+      aiRuntime.newGroupSource = source;
+      aiRuntime.searchOpen = false;
+      aiRuntime.historyMenuId = null;
+      aiRuntime.historyMenuActiveIndex = -1;
+      aiRuntime.historyMoveOpen = false;
+      aiRuntime.historyMoveActiveIndex = -1;
+      aiRuntime.conversationMenuOpen = false;
+      aiRuntime.conversationMenuActiveIndex = -1;
+      aiRuntime.conversationMoveOpen = false;
+      aiRuntime.conversationMoveActiveIndex = -1;
+      refreshAiUi();
+      requestAnimationFrame(() => document.querySelector("[data-ai-new-group-input]")?.focus());
+    };
+
+    const closeAiNewGroupDialog = ({ restoreFocus = true } = {}) => {
+      aiRuntime.newGroupOpen = false;
+      aiRuntime.newGroupName = "";
+      aiRuntime.newGroupError = "";
+      refreshAiUi();
+      if (restoreFocus) requestAnimationFrame(() => document.querySelector("[data-ai-new-group-trigger]")?.focus());
+    };
+
+    const saveAiNewGroup = (form) => {
+      const input = form?.querySelector("[data-ai-new-group-input]");
+      const groupName = String(input?.value || "").trim();
+      const existingGroup = AI_HISTORY_GROUPS.find((group) => group.toLocaleLowerCase() === groupName.toLocaleLowerCase());
+      if (!groupName || existingGroup) {
+        aiRuntime.newGroupName = groupName;
+        aiRuntime.newGroupError = groupName ? "分组名称已存在" : "请输入分组名称";
+        refreshAiUi();
+        requestAnimationFrame(() => {
+          const nextInput = document.querySelector("[data-ai-new-group-input]");
+          nextInput?.focus();
+          if (existingGroup) nextInput?.select();
+        });
+        return false;
+      }
+      AI_HISTORY_GROUPS.push(groupName);
+      persistAiHistoryGroups();
+      aiRuntime.historyGroupsExpanded = true;
+      aiRuntime.newGroupOpen = false;
+      aiRuntime.newGroupName = "";
+      aiRuntime.newGroupError = "";
+      aiRuntime.toast = `已新建分组：${groupName}`;
+      refreshAiUi();
+      requestAnimationFrame(() => {
+        const groupButton = Array.from(document.querySelectorAll("[data-ai-history-group]"))
+          .find((button) => button.dataset.aiHistoryGroup === groupName);
+        groupButton?.scrollIntoView({ block: "nearest" });
+        groupButton?.focus();
+      });
+      return true;
     };
 
     const getAiResizeStateKey = (handle) => {
@@ -17493,6 +17690,26 @@
         requestAnimationFrame(() => aiPromptSurface.querySelector(".ai-prompt-input")?.focus());
       }
 
+      const aiNewGroupTrigger = event.target.closest("[data-ai-new-group-trigger]");
+      if (aiNewGroupTrigger) {
+        event.preventDefault();
+        openAiNewGroupDialog("history");
+        return;
+      }
+
+      const aiNewGroupClose = event.target.closest("[data-ai-new-group-close], [data-ai-new-group-cancel]");
+      if (aiNewGroupClose) {
+        event.preventDefault();
+        closeAiNewGroupDialog();
+        return;
+      }
+
+      if (event.target.matches("[data-ai-new-group-backdrop]")) {
+        event.preventDefault();
+        closeAiNewGroupDialog();
+        return;
+      }
+
       const aiSearchTrigger = event.target.closest("[data-ai-search-trigger]");
       if (aiSearchTrigger) {
         event.preventDefault();
@@ -17695,7 +17912,11 @@
         event.preventDefault();
         event.stopPropagation();
         const group = aiConversationGroupOption.dataset.aiConversationGroupOption;
-        aiRuntime.toast = group === "__new__" ? "已打开新增分组" : `已移至分组：${group}`;
+        if (group === "__new__") {
+          openAiNewGroupDialog("conversation-move");
+          return;
+        }
+        aiRuntime.toast = `已移至分组：${group}`;
         aiRuntime.conversationMenuOpen = false;
         aiRuntime.conversationMenuActiveIndex = -1;
         aiRuntime.conversationMoveOpen = false;
@@ -17779,7 +18000,11 @@
         event.preventDefault();
         event.stopPropagation();
         const group = aiHistoryGroupOption.dataset.aiHistoryGroupOption;
-        aiRuntime.toast = group === "__new__" ? "已打开新增分组" : `已移至分组：${group}`;
+        if (group === "__new__") {
+          openAiNewGroupDialog("history-move");
+          return;
+        }
+        aiRuntime.toast = `已移至分组：${group}`;
         aiRuntime.historyMenuId = null;
         aiRuntime.historyMenuActiveIndex = -1;
         aiRuntime.historyMoveOpen = false;
@@ -18577,6 +18802,34 @@
     });
 
     document.addEventListener("keydown", (event) => {
+      const aiNewGroupInput = event.target.closest?.("[data-ai-new-group-input]");
+      if (aiRuntime.newGroupOpen && aiNewGroupInput && event.key === "Enter" && !event.isComposing && event.keyCode !== 229) {
+        event.preventDefault();
+        saveAiNewGroup(aiNewGroupInput.closest("[data-ai-new-group-form]"));
+        return;
+      }
+      if (aiRuntime.newGroupOpen && event.key === "Escape") {
+        event.preventDefault();
+        closeAiNewGroupDialog();
+        return;
+      }
+      if (aiRuntime.newGroupOpen && event.key === "Tab") {
+        const dialog = document.querySelector("[data-ai-new-group-form]");
+        const focusable = Array.from(dialog?.querySelectorAll("button:not(:disabled), input:not(:disabled)") || []);
+        if (focusable.length) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+        return;
+      }
+
       const aiComposerResizeHandle = event.target.closest?.("[data-ai-composer-resize]");
       if (aiComposerResizeHandle && ["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
         event.preventDefault();
@@ -18943,6 +19196,17 @@
     });
 
     document.addEventListener("input", (event) => {
+      const aiNewGroupInput = event.target.closest("[data-ai-new-group-input]");
+      if (aiNewGroupInput) {
+        aiRuntime.newGroupName = aiNewGroupInput.value;
+        if (aiRuntime.newGroupError) {
+          aiRuntime.newGroupError = "";
+          aiNewGroupInput.setAttribute("aria-invalid", "false");
+          const status = aiNewGroupInput.closest("[data-ai-new-group-form]")?.querySelector(".ai-new-group-status");
+          if (status) status.textContent = "";
+        }
+        return;
+      }
       const aiSearchInput = event.target.closest("[data-ai-search-input]");
       if (aiSearchInput) {
         aiRuntime.searchQuery = aiSearchInput.value;
@@ -19006,6 +19270,11 @@
     });
 
     document.addEventListener("submit", (event) => {
+      if (event.target.matches("[data-ai-new-group-form]")) {
+        event.preventDefault();
+        saveAiNewGroup(event.target);
+        return;
+      }
       if (!event.target.matches("[data-ai-prompt-form]")) return;
       event.preventDefault();
       if (aiRuntime.view === "processing") {
