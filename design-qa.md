@@ -53,3 +53,43 @@
 - P3：设计稿使用示例文案“测试”，本地演示使用当前预设历史记录；属于数据差异，不影响组件还原。
 
 final result: passed
+
+---
+
+# Design QA：快捷侧拉窗口
+
+- source visual truth path: `/var/folders/yk/m7mdj7lj5391fsv16bv7qd4h0000gn/T/codex-clipboard-591e54f4-3db8-4894-9633-bfc62fc18e82.png`
+- implementation URL: `http://localhost:4173/maycur-archive-local-demo.html#/home`
+- implementation screenshot path: `/tmp/quick-drawer-crop-exact.jpg`
+- side-by-side comparison path: `/tmp/quick-drawer-comparison.jpg`
+- viewport: `1280 × 747`
+- state: 访问码已通过、AI 首页、快捷侧拉窗打开
+
+## Findings
+
+- 未发现 P0/P1/P2 问题。
+- 侧拉窗实际宽度为 490px、高度为 697px，与设计截图换算后的 CSS 尺寸一致。
+- 头部高度校准为 62px，并显式同步 flex 基准，标题、分隔线与三个操作按钮的纵向位置与设计稿一致。
+- 移除侧拉窗重复的左侧描边，避免内容整体右移 1px；主视觉相对侧拉窗为 `x=65.42px, y=180px`。
+- 输入框宽高为 `438 × 140px`，相对侧拉窗为 `x=26px, y=348px`，与设计稿一致。
+- 复用现有头像、输入框、智能体选择、上传、发送、拖拽、全屏与关闭组件，没有新增替代图标或占位素材。
+
+## Interaction Verification
+
+- 快捷按钮可以打开侧拉窗。
+- 输入文案后发送按钮进入可用状态。
+- “进入 AI 应用中心”按钮切换至 `#/ai-center`。
+- 关闭按钮可以关闭侧拉窗。
+- 页面控制台错误：0。
+
+## Comparison History
+
+- 初次比对：头部分隔线及下方内容整体低 2px，左边缘存在额外 1px 描边。
+- 修正：头部由 64px 调整为 62px，并移除重复左边框。
+- 复核：参考图与实现图的头部、主视觉、输入框及底部留白均对齐。
+
+## Open Questions
+
+- 无。
+
+final result: passed
