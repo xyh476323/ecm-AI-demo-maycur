@@ -8993,16 +8993,41 @@
     .ai-quick-drawer .ai-welcome-copy { display: none; }
     .ai-quick-drawer .ai-chat-content, .ai-quick-drawer .ai-chat-composer { width: calc(100% - 36px); }
     .ai-quick-link { border: 0; background: transparent; color: var(--mk-primary); cursor: pointer; font-size: 12px; }
-    .ai-toast { position: absolute; right: 16px; bottom: 16px; z-index: 10; padding: 8px 10px; border-radius: 3px; background: rgba(0,0,0,.76); color: #fff; font-size: 12px; }
+    .ai-toast {
+      position: fixed;
+      top: calc(var(--mk-topbar) + 16px);
+      left: 50%;
+      z-index: 1500;
+      max-width: min(480px, calc(100vw - 32px));
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 2px;
+      background: rgba(0, 0, 0, .75);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+      color: #fff;
+      font: 400 13px/20px "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-align: center;
+      overflow-wrap: anywhere;
+      pointer-events: none;
+      transform: translateX(-50%);
+      animation: ai-toast-enter .16s ease-out;
+    }
+    @keyframes ai-toast-enter {
+      from { opacity: 0; transform: translate(-50%, -4px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
     @media (max-width: 1180px) { .ai-history { width: 204px; flex-basis: 204px; } .ai-preview { width: 340px; flex-basis: 340px; } }
 
     /* Figma 1:1 override: 档案 AI 功能页 / 1440 × 900 */
     .topnav-item.ai-nav-item .ai-new-badge {
       position: absolute;
-      top: 2px;
-      right: 6px;
-      width: 32px;
-      height: 14px;
+      top: 4px;
+      right: 4px;
+      width: 26px;
+      height: 16px;
       display: block;
       pointer-events: none;
     }
@@ -9035,6 +9060,20 @@
     }
     .ai-history.menu-open { z-index: 12; }
     .ai-history.collapsed { display: none; }
+    .ai-history-scroll {
+      min-height: 0;
+      flex: 1;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .ai-history-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 11;
+      padding-bottom: 8px;
+      background: #fafafb;
+    }
     .ai-history-head {
       height: 64px;
       flex: 0 0 64px;
@@ -9070,7 +9109,7 @@
       height: 36px;
       flex: 0 0 36px;
       justify-content: flex-start;
-      margin: 0 12px 8px;
+      margin: 0 12px;
       padding: 0 12px;
       border: 1px solid #eeeeee;
       border-radius: 8px;
@@ -9136,7 +9175,7 @@
     .ai-history-section-toggle[aria-expanded="false"] .ai-section-chevron { transform: rotate(-90deg); }
     .ai-history-section[hidden] { display: none; }
     .ai-history-groups { flex: 0 0 auto; }
-    .ai-history-list { flex: 1; padding: 0 12px 16px; overflow: auto; }
+    .ai-history-list { flex: 0 0 auto; padding: 0 12px 16px; overflow: visible; }
     .ai-history-list .ai-history-item,
     .ai-history-groups .ai-history-child {
       position: relative;
@@ -9413,6 +9452,7 @@
     .ai-icon-button .ai-svg-icon,
     .ai-history-toggle .ai-svg-icon,
     .ai-top-icon .ai-svg-icon { width: 16px; height: 16px; }
+    .ai-icon-button .ai-quick-new-chat-icon { width: 16px; height: 16px; }
     .ai-workbench-head { position: relative; z-index: 1; display: none; }
     .ai-canvas-top-left,
     .ai-canvas-top-right {
@@ -9507,7 +9547,9 @@
     .ai-conversation-title-wrap {
       position: relative;
       min-width: 0;
-      max-width: 100%;
+      width: auto;
+      max-width: calc(30cqi + 36px);
+      flex: 0 1 auto;
       height: 32px;
       display: inline-flex;
       align-items: center;
@@ -9515,7 +9557,9 @@
     }
     .ai-conversation-title {
       min-width: 0;
-      max-width: 100%;
+      width: auto;
+      max-width: 30cqi;
+      flex: 0 1 auto;
       height: 32px;
       display: inline-flex;
       align-items: center;
@@ -9530,6 +9574,7 @@
     .ai-conversation-more-button {
       width: 32px;
       height: 32px;
+      flex: 0 0 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -9624,7 +9669,7 @@
       width: 144px;
       height: 176px;
       border-radius: 0;
-      background: url("assets/ecm-images/archive-ai-assistant.png") center bottom / 144px 176px no-repeat;
+      background: url("assets/ecm-images/archive-ai-assistant-animated-slow.webp") center bottom / contain no-repeat;
       box-shadow: none;
     }
     .ai-avatar::before,
@@ -9656,6 +9701,7 @@
       box-shadow: 0 12px 28px rgba(67, 62, 160, .08);
     }
     .ai-welcome > .ai-prompt { width: 100%; height: 140px; }
+    .ai-welcome > .ai-prompt.has-attachments { height: 180px; }
     .ai-prompt:focus-within { border-color: #e8e8e8; box-shadow: 0 12px 28px rgba(67, 62, 160, .1); }
     .ai-center-page .ai-welcome > .ai-prompt,
     .ai-center-page .ai-welcome > .ai-prompt:focus-within {
@@ -9671,6 +9717,89 @@
       align-items: flex-start;
       gap: 8px;
     }
+    .ai-prompt-attachments {
+      position: absolute;
+      top: 12px;
+      right: 28px;
+      left: 16px;
+      z-index: 4;
+      height: 48px;
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+    .ai-prompt-attachments::-webkit-scrollbar { display: none; }
+    .ai-prompt-attachment {
+      position: relative;
+      width: 220px;
+      max-width: 100%;
+      min-width: 0;
+      height: 48px;
+      flex: 0 0 220px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-sizing: border-box;
+      padding: 6px 26px 6px 8px;
+      border: 1px solid #eeeeee;
+      border-radius: 8px;
+      background: #fff;
+      color: rgba(0, 0, 0, .85);
+    }
+    .ai-prompt-attachment-icon {
+      width: 32px;
+      height: 32px;
+      display: block;
+      flex: 0 0 32px;
+      object-fit: contain;
+    }
+    .ai-prompt-attachment-copy {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1px;
+    }
+    .ai-prompt-attachment-name {
+      min-width: 0;
+      overflow: hidden;
+      color: rgba(0, 0, 0, .85);
+      font: 500 13px/18px "PingFang SC", sans-serif;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ai-prompt-attachment-type {
+      color: rgba(0, 0, 0, .4);
+      font: 12px/16px "PingFang SC", sans-serif;
+      text-transform: uppercase;
+    }
+    .ai-prompt-attachment-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(15, 20, 25, .88);
+      cursor: pointer;
+    }
+    .ai-prompt-attachment-remove:hover { background: #000; }
+    .ai-prompt-attachment-remove:focus-visible { outline: 2px solid rgba(0, 136, 255, .25); outline-offset: 1px; }
+    .ai-prompt-attachment-remove .ai-svg-icon {
+      width: 8px;
+      height: 8px;
+      filter: brightness(0) invert(1);
+    }
+    .ai-prompt.has-attachments .ai-prompt-entry { top: 72px; }
     .ai-prompt-hint {
       position: static;
       display: flex;
@@ -9715,6 +9844,7 @@
     .ai-prompt-input::placeholder { color: rgba(0, 0, 0, .28); }
     .ai-prompt.has-agent .ai-prompt-entry {
       display: block;
+      overflow: hidden;
     }
     .ai-prompt.has-agent .ai-selected-agent-prefix {
       position: absolute;
@@ -9722,6 +9852,7 @@
       left: 0;
       z-index: 1;
       pointer-events: none;
+      will-change: transform;
     }
     .ai-prompt.has-agent .ai-prompt-input {
       min-height: 0;
@@ -9922,21 +10053,31 @@
       position: absolute;
       top: 72px;
       right: 24px;
-      bottom: 154px;
+      bottom: calc(24px + var(--ai-composer-height, 120px) - 20px);
       left: 24px;
       width: auto;
       max-width: 760px;
       margin: 0 auto;
-      padding: 0;
+      padding: 0 0 calc(var(--ai-task-panel-height, 0px) + 36px);
       overflow-x: hidden;
       overflow-y: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
       transform: none;
     }
+    .ai-chat-content::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    .ai-conversation-turn + .ai-conversation-turn { margin-top: 28px; }
+    .ai-user-message-wrap {
+      position: relative;
+      width: fit-content;
+      max-width: min(440px, 100%);
+      margin: 0 0 2px auto;
+      padding-bottom: 28px;
+    }
     .ai-user-message {
-      width: min(440px, 100%);
+      width: auto;
       max-width: 100%;
-      min-height: 64px;
-      margin: 0 0 30px auto;
+      margin: 0;
       padding: 12px 14px;
       border-radius: 12px;
       background: rgba(0, 0, 0, .04);
@@ -9944,6 +10085,19 @@
       font-size: 14px;
       line-height: 20px;
       overflow-wrap: anywhere;
+    }
+    .ai-user-message-wrap .ai-user-copy-button {
+      position: absolute;
+      bottom: 4px;
+      right: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s ease, background-color .15s ease;
+    }
+    .ai-user-message-wrap:hover .ai-user-copy-button,
+    .ai-user-message-wrap:focus-within .ai-user-copy-button {
+      opacity: 1;
+      pointer-events: auto;
     }
     .ai-thinking {
       display: inline-block;
@@ -9978,7 +10132,7 @@
     .ai-agent-message .ai-avatar { display: none; }
     .ai-agent-bubble { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: rgba(0,0,0,.85); font-size: 14px; line-height: 22px; }
     .ai-agent-name { display: none; }
-    .ai-elapsed { padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; color: rgba(0,0,0,.24); font-size: 12px; }
+    .ai-elapsed { padding-bottom: 6px; border-bottom: 1px solid #f0f0f0; color: rgba(0,0,0,.24); font-size: 12px; }
     .ai-result-copy { min-width: 0; padding-top: 16px; overflow-wrap: anywhere; }
     .ai-file-card {
       position: relative;
@@ -9993,7 +10147,20 @@
       cursor: pointer;
     }
     .ai-file-type { width: 28px; height: 28px; display: block; flex: 0 0 28px; border-radius: 0; background: transparent; object-fit: contain; }
-    .ai-file-info { transition: padding-right .12s ease; }
+    .ai-file-info {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: padding-right .12s ease;
+    }
     .ai-file-info strong { max-width: 100%; color: rgba(0,0,0,.85); font-size: 13px; font-weight: 600; }
     .ai-file-info span { color: rgba(0,0,0,.4); font-size: 12px; }
     .ai-file-download {
@@ -10022,10 +10189,41 @@
       opacity: 1;
       pointer-events: auto;
     }
-    .ai-reactions { display: flex; gap: 12px; margin-top: 8px; }
+    .ai-response-area { position: relative; }
+    .ai-response-area:focus-visible { outline: 2px solid rgba(0, 136, 255, .2); outline-offset: 4px; }
+    .ai-response-area::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      right: 0;
+      left: 0;
+      z-index: 1;
+      height: 36px;
+    }
+    .ai-reactions {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: opacity .15s ease, visibility .15s ease;
+    }
+    .ai-response-area:hover .ai-reactions,
+    .ai-response-area:focus-within .ai-reactions {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+    }
+    .ai-reaction-actions { display: inline-flex; align-items: center; gap: 12px; }
     .ai-reaction-button { position: relative; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; cursor: pointer; overflow: visible; }
     .ai-reaction-button:hover { background: #f0f0f2; }
     .ai-reaction-button .ai-svg-icon { width: 16px; height: 16px; }
+    .ai-task-steps-button .ai-svg-icon { opacity: .57; }
+    .ai-answer-time { margin-left: 16px; color: rgba(0, 0, 0, .28); font-size: 13px; line-height: 20px; white-space: nowrap; }
     .ai-global-tooltip {
       position: fixed;
       top: 0;
@@ -10070,11 +10268,41 @@
       border: 1px solid #efefef;
       border-bottom: 0;
       border-radius: 16px 16px 0 0;
-      background: #fafafa;
+      background: rgba(255, 255, 255, .8);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
       overflow-x: hidden;
       overflow-y: auto;
       transform: translateX(-50%);
     }
+    .ai-task-status-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      z-index: 2;
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgba(0, 0, 0, .28);
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s ease;
+    }
+    .ai-task-card:hover .ai-task-status-close,
+    .ai-task-card:focus-within .ai-task-status-close,
+    .ai-status-card:hover .ai-task-status-close,
+    .ai-status-card:focus-within .ai-task-status-close {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .ai-task-status-close:focus-visible { outline: 2px solid rgba(0, 136, 255, .2); outline-offset: 1px; }
+    .ai-task-status-close-icon { width: 10px; height: 10px; display: block; }
     .ai-task-card-title {
       display: flex;
       align-items: center;
@@ -10088,7 +10316,7 @@
     }
     button.ai-task-card-title { cursor: pointer; }
     .ai-task-card-title .ai-task-chevron { width: 12px; height: 8px; opacity: .35; }
-    .ai-task-card.is-complete .ai-task-card-title { color: rgba(0,0,0,.28); font-size: 13px; }
+    .ai-task-card.is-complete .ai-task-card-title { color: rgba(0,0,0,.6); font-size: 13px; }
     .ai-task-steps { gap: 5px; margin: 0; }
     .ai-task-step { position: relative; align-items: center; gap: 8px; color: rgba(0,0,0,.42); font-size: 12px; line-height: 18px; }
     .ai-task-step > span:last-child { min-width: 0; flex: 1; overflow-wrap: anywhere; }
@@ -10133,20 +10361,41 @@
       left: 50%;
       z-index: 1;
       width: min(450px, calc(100% - 32px));
-      height: 42px;
+      min-height: 35px;
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 0 16px;
+      padding: 8px 16px;
       border: 1px solid #efefef;
       border-bottom: 0;
       border-radius: 16px 16px 0 0;
-      background: #fafafa;
-      color: rgba(0,0,0,.28);
+      background: rgba(255, 255, 255, .8);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      color: rgba(0,0,0,.6);
       font: 13px/18px "PingFang SC", sans-serif;
       text-align: left;
-      cursor: pointer;
+      cursor: default;
       transform: translateX(-50%);
+    }
+    .ai-status-card-main {
+      flex: 1;
+      min-width: 0;
+      height: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0 28px 0 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .ai-status-card .ai-task-status-close {
+      top: 50%;
+      transform: translateY(-50%);
     }
     .ai-status-card .ai-status-chevron {
       width: 8px;
@@ -10165,6 +10414,16 @@
       overflow: hidden;
       container: ai-right-pane / inline-size;
     }
+    .ai-preview.is-fullscreen {
+      position: fixed;
+      inset: var(--mk-topbar) 0 0;
+      z-index: 120;
+      width: auto;
+      min-width: 0;
+      max-width: none;
+      flex: none;
+    }
+    .ai-preview-actions .is-exit-fullscreen .ai-svg-icon { transform: rotate(180deg); }
     .ai-preview-head { height: 64px; padding: 0 16px; border-bottom: 1px solid #eeeeee; color: rgba(0,0,0,.72); font-size: 13px; }
     .ai-files-panel > .ai-preview-head { color: rgba(0, 0, 0, .85); font-size: 14px; font-weight: 500; }
     .ai-preview-title { min-width: 0; flex: 1; display: flex; align-items: center; }
@@ -10174,6 +10433,90 @@
     .ai-excel-sheet { position: relative; flex: 1; overflow: hidden; background: #fff; }
     .ai-excel-preview-image { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: top center; }
     .ai-excel-preview-bottom { position: absolute; right: 0; bottom: 0; left: 0; z-index: 1; height: 36px; border-top: 1px solid #e5e5e5; background: #f7f7f7 url("assets/ecm-images/archive-ai-excel-preview.png") center bottom / 100% auto no-repeat; }
+    .ai-local-preview { min-height: 0; flex: 1; display: grid; place-items: center; overflow: auto; background: #f8f9fb; }
+    .ai-local-preview img { max-width: 100%; max-height: 100%; display: block; object-fit: contain; }
+    .ai-local-preview-frame { width: 100%; min-height: 0; flex: 1; border: 0; background: #fff; }
+    .ai-preview-empty { min-height: 0; flex: 1; display: grid; place-items: center; padding: 24px; color: rgba(0,0,0,.48); text-align: center; font-size: 13px; }
+    .ai-real-preview {
+      min-width: 0;
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #f8f9fb;
+    }
+    .ai-preview-state {
+      min-height: 0;
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: rgba(0, 0, 0, .48);
+      text-align: center;
+      font-size: 13px;
+    }
+    .ai-preview-state-inner { display: inline-flex; align-items: center; gap: 8px; }
+    .ai-preview-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0, 136, 255, .18);
+      border-top-color: #0088ff;
+      border-radius: 50%;
+      animation: ai-preview-spin .8s linear infinite;
+    }
+    @keyframes ai-preview-spin { to { transform: rotate(360deg); } }
+    .ai-workbook-preview { min-height: 0; flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+    .ai-workbook-tabs {
+      min-height: 38px;
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      padding: 0 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-bottom: 1px solid rgba(0, 0, 0, .08);
+      background: #fafafa;
+      scrollbar-width: thin;
+    }
+    .ai-workbook-tab {
+      position: relative;
+      min-width: 76px;
+      max-width: 180px;
+      height: 37px;
+      flex: 0 0 auto;
+      padding: 0 12px;
+      border: 0;
+      background: transparent;
+      color: rgba(0, 0, 0, .56);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font: 400 12px/37px "PingFang SC", sans-serif;
+      cursor: pointer;
+    }
+    .ai-workbook-tab:hover { background: rgba(0, 0, 0, .04); }
+    .ai-workbook-tab.active { color: rgba(0, 0, 0, .85); font-weight: 600; }
+    .ai-workbook-tab.active::after { content: ""; position: absolute; right: 12px; bottom: 0; left: 12px; height: 2px; background: #0088ff; }
+    .ai-workbook-scroll { min-width: 0; min-height: 0; flex: 1; overflow: auto; background: #fff; }
+    .ai-workbook-table { min-width: 100%; border-spacing: 0; border-collapse: separate; color: rgba(0, 0, 0, .78); font: 400 12px/20px "PingFang SC", sans-serif; }
+    .ai-workbook-table td {
+      min-width: 88px;
+      max-width: 280px;
+      height: 30px;
+      padding: 4px 8px;
+      border-right: 1px solid rgba(0, 0, 0, .08);
+      border-bottom: 1px solid rgba(0, 0, 0, .08);
+      background: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .ai-workbook-table tr:first-child td { background: #f7f8fa; color: rgba(0, 0, 0, .85); font-weight: 600; }
+    .ai-docx-preview { min-height: 0; flex: 1; overflow: auto; background: #f0f2f5; }
+    .ai-docx-preview .docx-wrapper { min-height: 100%; padding: 16px; background: #f0f2f5; }
+    .ai-docx-preview .docx-wrapper > section.docx { margin: 0 auto 16px; box-shadow: 0 1px 4px rgba(0, 0, 0, .08); }
     .ai-files-panel {
       width: var(--ai-right-pane-width);
       min-width: 180px;
@@ -10212,7 +10555,20 @@
     .ai-files-row.active,
     .ai-files-row.menu-open { background: #f0f0f2; }
     .ai-files-row .ai-file-type { width: 18px; height: 18px; flex-basis: 18px; }
-    .ai-files-row > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+    .ai-files-row-main {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .ai-files-row-main > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
     .ai-files-row-more {
       width: 20px;
       height: 20px;
@@ -10508,10 +10864,19 @@
       opacity: 0;
       pointer-events: none;
     }
-    .ai-search-results { display: grid; gap: 8px; margin-top: 12px; }
+    .ai-search-results {
+      width: 100%;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
     .ai-search-results:empty { display: none; }
     .ai-search-history-result {
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
       height: 32px;
       display: flex;
       align-items: center;
@@ -10525,7 +10890,10 @@
       text-align: left;
     }
     .ai-search-history-result > span {
+      width: 100%;
       min-width: 0;
+      flex: 1;
+      display: block;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -10565,54 +10933,305 @@
       font: 13px/20px "PingFang SC", sans-serif;
     }
     .ai-quick-trigger {
-      right: 12px;
-      bottom: 140px;
+      right: 8px;
+      bottom: 141px;
       width: 53px;
       height: 76px;
       padding: 0;
+      overflow: visible;
+      isolation: isolate;
       border: 0;
       border-radius: 0;
-      background: url("assets/ecm-images/archive-ai-quick-entry.png") center / 53px 76px no-repeat;
+      background: transparent;
       box-shadow: none;
       font-size: 0;
     }
-    .ai-quick-trigger:hover { box-shadow: none; transform: translateY(-2px); }
-    .ai-quick-trigger .ai-quick-orb { display: none; }
-    .ai-quick-drawer { width: 490px; border-left: 0; background: #fff; }
-    .ai-quick-drawer .ai-workbench { --ai-chat-background-size: auto 190px; background: #fff; }
-    .ai-quick-drawer .ai-workbench-head { height: 62px; flex: 0 0 62px; display: flex; }
-    .ai-quick-drawer .ai-head-actions { gap: 8px; }
-    .ai-quick-drawer .ai-drag-handle { cursor: move; }
-    .ai-quick-drawer .ai-resize-handle { position: absolute; right: 2px; bottom: 2px; z-index: 4; width: 10px; height: 10px; }
-    .ai-quick-drawer .ai-welcome { top: 118px; left: 50%; width: 438px; transform: translateX(-50%); }
-    .ai-quick-drawer .ai-welcome-profile { height: 150px; transform: scale(.82); transform-origin: top center; }
-    .ai-quick-drawer .ai-avatar {
-      top: -8px;
-      left: 46px;
-      width: 125px;
-      height: 165px;
-      background-image: url("assets/ecm-images/archive-ai-drawer-assistant.png");
-      background-size: 125px 165px;
+    .ai-quick-trigger::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 50px;
+      height: 57px;
+      background: url("assets/ecm-images/archive-ai-drawer-assistant.png") center / 50px 57px no-repeat;
+      pointer-events: none;
     }
-    .ai-quick-drawer .ai-welcome-greeting { top: 50px; left: 195px; font-size: 20px; line-height: 30px; }
-    .ai-quick-drawer .ai-welcome-copy { display: block; font-size: 14px; }
-    .ai-quick-drawer .ai-welcome > .ai-prompt { width: 438px; height: 140px; }
-    .ai-quick-drawer .ai-suggestions { display: none; }
-    .ai-quick-drawer .ai-chat-content {
+    .ai-quick-trigger:hover { box-shadow: none; transform: translateY(-2px); }
+    .ai-quick-trigger .ai-quick-orb {
+      position: absolute;
       right: auto;
+      bottom: 0;
+      left: 2px;
+      z-index: 1;
+      width: 51px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #eee;
+      border-radius: 999px;
+      background: #fff;
+      color: transparent;
+      font-size: 0;
+      box-shadow: none;
+    }
+    .ai-quick-trigger .ai-quick-orb::after {
+      content: "AI助手";
+      background: linear-gradient(-39.8235deg, #c030ff 6.7631%, #4979ff 90.855%);
+      color: transparent;
+      font: 500 13px/18px "PingFang SC", sans-serif;
+      white-space: nowrap;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    .ai-quick-drawer {
+      width: 438px;
+      max-width: calc(100vw - 8px);
+      flex-direction: row;
+      align-items: stretch;
+      justify-content: flex-end;
+      overflow: hidden;
+      box-sizing: border-box;
+      border: 0;
+      border-left: 1px solid rgba(255, 255, 255, .96);
+      border-radius: 8px 0 0 8px;
+      outline: 0;
+      background: linear-gradient(160deg, #f1f3ff 0%, #f8fbff 58%, #fff 100%);
+      box-shadow: 0 0 20px rgba(0, 0, 0, .1);
+    }
+    .ai-quick-resizer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 30;
+      width: 8px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: col-resize;
+      touch-action: none;
+    }
+    .ai-quick-resizer::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 1px;
+      background: rgba(255, 255, 255, .96);
+      transition: width .15s ease, background-color .15s ease;
+    }
+    .ai-quick-resizer:hover::after,
+    .ai-quick-resizer:focus-visible::after,
+    .ai-quick-resizer.is-resizing::after { width: 2px; background: #0088ff; }
+    .ai-quick-resizer:focus-visible { outline: 0; }
+    .ai-quick-drawer.floating .ai-quick-resizer { display: none; }
+    .ai-quick-drawer.floating {
+      inset: auto;
+      width: 438px;
+      height: 666px;
+      max-width: calc(100vw - 16px);
+      max-height: calc(100vh - var(--mk-topbar) - 8px);
+      border: 1px solid rgba(255, 255, 255, .96);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, .1);
+      overflow: hidden;
+    }
+    .ai-quick-drawer .ai-quick-shell {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: inherit;
+      background: linear-gradient(157deg, #f0f2ff 0%, #f8fbff 48%, #fff 100%);
+    }
+    .ai-quick-drawer.floating .ai-quick-shell { width: 100%; flex-basis: 100%; border-radius: inherit; }
+    .ai-quick-drawer .ai-workbench::before { display: none; }
+    .ai-quick-drawer .ai-workbench-head {
+      position: relative;
+      z-index: 14;
+      height: 64px;
+      flex: 0 0 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border: 0;
+      background: transparent;
+    }
+    .ai-quick-drawer .ai-head-actions { margin-left: auto; gap: 8px; }
+    .ai-quick-drawer .ai-head-actions .ai-icon-button,
+    .ai-quick-drawer .ai-head-actions .ai-icon-button:hover {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .ai-quick-drawer [data-ai-quick-close] .ai-svg-icon { width: 14px; height: 14px; }
+    .ai-quick-drawer .ai-drag-handle { cursor: move; touch-action: none; }
+    .ai-quick-drawer .ai-main-area,
+    .ai-quick-drawer .ai-chat-stage { min-width: 0; min-height: 0; width: 100%; }
+    .ai-quick-welcome {
+      position: absolute;
+      top: 50%;
+      left: 32px;
+      width: 382px;
+      height: 340px;
+      transform: translateY(-82%);
+    }
+    .ai-quick-drawer:not(.floating) .ai-quick-welcome {
       left: 50%;
-      width: min(438px, calc(100% - 36px));
+      transform: translate(-50%, -82%);
+    }
+    .ai-quick-welcome .ai-welcome-profile {
+      position: relative;
+      width: 346.5px;
+      height: 160px;
+      margin: 0 0 0 18px;
+      transform: none;
+    }
+    .ai-quick-welcome .ai-avatar {
+      top: 0;
+      left: 0;
+      width: 131px;
+      height: 160px;
+      background-image: url("assets/ecm-images/archive-ai-assistant-animated-slow.webp");
+      background-size: contain;
+    }
+    .ai-quick-welcome .ai-welcome-greeting {
+      top: 43px;
+      left: 131px;
+      width: 216px;
+      font-size: 18px;
+      line-height: 30px;
+      white-space: nowrap;
+    }
+    .ai-quick-welcome .ai-welcome-copy { display: block; margin-top: 3px; font-size: 13px; line-height: 20px; }
+    .ai-quick-scenes {
+      position: absolute;
+      top: 160px;
+      left: 0;
+      width: 382px;
+      height: 180px;
+      box-sizing: border-box;
+      padding: 16px 24px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .4) 0%, rgba(255, 255, 255, 0) 100%);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+    .ai-quick-scenes::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      box-sizing: border-box;
+      padding: 1px;
+      border-radius: inherit;
+      background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0) 100%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    .ai-quick-scenes-title { display: block; color: rgba(0, 0, 0, .4); font: 13px/18px "PingFang SC", sans-serif; }
+    .ai-quick-scenes .ai-suggestions {
+      position: absolute;
+      top: 50px;
+      left: 24px;
+      width: 264px;
+      height: 72px;
+      display: grid;
+      grid-template-columns: repeat(2, 124px);
+      grid-auto-rows: 30px;
+      gap: 12px 16px;
+      margin: 0;
+    }
+    .ai-quick-scenes .ai-suggestion {
+      width: 124px;
+      height: 30px;
+      justify-content: flex-start;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 15px;
+      background: #fff;
+      font-size: 13px;
+    }
+    .ai-quick-scenes .ai-suggestion:hover { background: #f8f8f8; }
+    .ai-quick-drawer .ai-chat-content {
+      top: 0;
+      right: 24px;
+      bottom: calc(24px + var(--ai-quick-composer-height, 110px) - 20px);
+      left: 24px;
+      width: auto;
       max-width: none;
-      transform: translateX(-50%);
+      padding-bottom: 0;
+      transform: none;
     }
     .ai-quick-drawer .ai-chat-composer {
       right: auto;
-      left: 50%;
-      width: min(438px, calc(100% - 36px));
-      max-width: none;
-      transform: translateX(-50%);
+      bottom: 24px;
+      left: 24px;
+      width: 390px;
+      height: var(--ai-quick-composer-height, 110px);
+      max-width: calc(100% - 48px);
+      transform: none;
     }
-    .ai-quick-drawer .ai-chat-composer .ai-prompt { width: 100%; }
+    .ai-quick-drawer:not(.floating) .ai-chat-composer {
+      right: 24px;
+      width: auto;
+      max-width: none;
+    }
+    .ai-quick-drawer .ai-chat-composer .ai-prompt {
+      width: 100%;
+      height: var(--ai-quick-composer-height, 110px);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+    .ai-quick-drawer .ai-prompt-entry { top: 12px; right: 16px; bottom: 48px; left: 16px; }
+    .ai-quick-drawer .ai-prompt.has-attachments .ai-prompt-entry { top: 68px; }
+    .ai-quick-drawer .ai-prompt-footer { right: 12px; bottom: 12px; left: 12px; }
+    .ai-quick-drawer .ai-user-message-wrap { max-width: min(300px, 80%); }
+    .ai-quick-drawer .ai-user-message { max-width: 100%; }
+    .ai-quick-drawer .ai-task-card,
+    .ai-quick-drawer .ai-status-card { display: none; }
+    .ai-quick-history {
+      position: absolute !important;
+      top: 0;
+      left: 0;
+      z-index: 15;
+      width: 250px !important;
+      min-width: 250px;
+      max-width: 250px;
+      height: 100%;
+      flex: none;
+      border-right: 1px solid rgba(0, 0, 0, .08);
+      background: #fafafb;
+      box-shadow: 6px 0 18px rgba(0, 0, 0, .06);
+    }
+    .ai-quick-shell > .ai-search-overlay,
+    .ai-quick-shell > .ai-new-group-overlay,
+    .ai-quick-shell > .ai-delete-overlay {
+      position: absolute;
+      inset: 0;
+      padding-top: 160px;
+    }
+    .ai-quick-shell > .ai-search-overlay .ai-search-panel,
+    .ai-quick-shell > .ai-new-group-overlay .ai-new-group-dialog,
+    .ai-quick-shell > .ai-delete-overlay .ai-delete-dialog {
+      width: calc(100% - 32px);
+      max-width: 406px;
+    }
+    body.ai-quick-dragging { cursor: move; user-select: none; }
+    body.ai-quick-resizing { cursor: col-resize; user-select: none; }
+    .ai-quick-drawer.floating .ai-chat-composer {
+      right: auto;
+      width: calc(100% - 48px);
+    }
     .ai-center-page.with-preview .ai-canvas-top-right .ai-top-icon { display: none; }
     @container ai-chat-stage (max-width: 520px) {
       .ai-chat-content {
@@ -10754,6 +11373,9 @@
   <aside id="aiQuickDrawer" class="ai-quick-drawer" aria-label="档案 AI 助手"></aside>
 
   <script src="assets/ecm-icons/js-icon-candidates/iconfont-20260113.js"></script>
+  <script src="assets/vendor/jszip.min.js"></script>
+  <script src="assets/vendor/docx-preview.min.js"></script>
+  <script src="assets/vendor/xlsx.full.min.js"></script>
   <script>
     const DEMO_ACCESS_CODE = "maycur2026";
     const ACCESS_GATE_STORAGE_KEY = "maycur-archive-local-demo.access-verified.v2";
@@ -16530,6 +17152,8 @@
       XLS: "file-xlsx.svg",
       PDF: "file-pdf.svg",
       DOC: "file-docx.svg",
+      PPT: "file-docx.svg",
+      MAIL: "file-docx.svg",
       HTM: "file-html.svg",
       ZIP: "file-zip.svg",
       OFD: "file-ofd.svg",
@@ -16571,9 +17195,69 @@
       }
     };
     const AI_FALLBACK_RESPONSE = "当前系统未配置大模型，无法回答此问题";
+    const AI_PRESET_PROMPT = "帮我找出单据号为MK-202607061631的付款申请单，生成 excel的格式供我浏览";
+    const AI_PRESET_RESPONSE = "我从系统内筛选出了 1 条 符合条件的 MK-202607061631 付款申请单，已为您生成 1份 Excel的文件。";
+    const AI_DEFAULT_ANSWER_TIME = "2026/07/16 10:10";
+    const formatAiAnswerTime = (date = new Date()) => {
+      const pad = (value) => String(value).padStart(2, "0");
+      return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    };
+    const copyAiTextToClipboard = async (value) => {
+      const text = String(value || "");
+      if (!text) return false;
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (error) {
+        // Fall through to the compatibility copy path below.
+      }
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      textarea.style.pointerEvents = "none";
+      document.body.appendChild(textarea);
+      textarea.select();
+      let copied = false;
+      try {
+        copied = document.execCommand("copy");
+      } catch (error) {
+        copied = false;
+      }
+      textarea.remove();
+      return copied;
+    };
     const AI_CUSTOM_HISTORY_STORAGE_KEY = "maycur-archive-local-demo.ai-custom-history";
     const AI_HISTORY_GROUP_ASSIGNMENTS_STORAGE_KEY = "maycur-archive-local-demo.ai-history-group-assignments";
     const AI_DELETED_HISTORY_STORAGE_KEY = "maycur-archive-local-demo.ai-deleted-history";
+    const AI_HISTORY_RENAMES_STORAGE_KEY = "maycur-archive-local-demo.ai-history-renames";
+    const AI_HISTORY_THREADS_STORAGE_KEY = "maycur-archive-local-demo.ai-history-threads";
+    const AI_HISTORY_PIN_STATES_STORAGE_KEY = "maycur-archive-local-demo.ai-history-pin-states";
+    const loadAiHistoryPinStates = () => {
+      try {
+        const storedStates = JSON.parse(localStorage.getItem(AI_HISTORY_PIN_STATES_STORAGE_KEY) || "{}");
+        if (!storedStates || typeof storedStates !== "object" || Array.isArray(storedStates)) return {};
+        return Object.fromEntries(Object.entries(storedStates)
+          .map(([historyId, pinned]) => [String(historyId || "").trim(), Boolean(pinned)])
+          .filter(([historyId]) => historyId));
+      } catch (error) {
+        return {};
+      }
+    };
+    const aiHistoryPinStates = loadAiHistoryPinStates();
+    const persistAiHistoryPinStates = () => {
+      try {
+        localStorage.setItem(AI_HISTORY_PIN_STATES_STORAGE_KEY, JSON.stringify(aiHistoryPinStates));
+      } catch (error) {
+        // Storage can be unavailable in local previews; current-session pin state still remains synchronized.
+      }
+    };
+    const applyAiHistoryPinnedState = (item) => Object.prototype.hasOwnProperty.call(aiHistoryPinStates, item.id)
+      ? { ...item, pinned: aiHistoryPinStates[item.id] }
+      : item;
     const loadAiDeletedHistoryIds = () => {
       try {
         const storedIds = JSON.parse(localStorage.getItem(AI_DELETED_HISTORY_STORAGE_KEY) || "[]");
@@ -16610,30 +17294,139 @@
         // Storage can be unavailable in local previews; the current session still keeps the assignment.
       }
     };
+    const loadAiHistoryRenames = () => {
+      try {
+        const storedRenames = JSON.parse(localStorage.getItem(AI_HISTORY_RENAMES_STORAGE_KEY) || "{}");
+        if (!storedRenames || typeof storedRenames !== "object" || Array.isArray(storedRenames)) return {};
+        return Object.fromEntries(Object.entries(storedRenames)
+          .map(([historyId, title]) => [String(historyId || "").trim(), String(title || "").replace(/\s+/g, " ").trim()])
+          .filter(([historyId, title]) => historyId && title));
+      } catch (error) {
+        return {};
+      }
+    };
+    const aiHistoryRenames = loadAiHistoryRenames();
+    const persistAiHistoryRenames = () => {
+      try {
+        localStorage.setItem(AI_HISTORY_RENAMES_STORAGE_KEY, JSON.stringify(aiHistoryRenames));
+      } catch (error) {
+        // Storage can be unavailable in local previews; the current session still keeps the renamed title.
+      }
+    };
+    const applyAiHistoryRename = (item) => ({ ...item, title: aiHistoryRenames[item.id] || item.title });
+    const normalizeAiConversationMessage = (message, index = 0) => {
+      const prompt = String(message?.prompt || "").trim();
+      if (!prompt) return null;
+      const kind = message?.kind === "preset" ? "preset" : "fallback";
+      return {
+        id: String(message?.id || `message-restored-${index}`),
+        prompt,
+        response: String(message?.response || (kind === "preset" ? AI_PRESET_RESPONSE : AI_FALLBACK_RESPONSE)),
+        answeredAt: String(message?.answeredAt || AI_DEFAULT_ANSWER_TIME),
+        cancelled: Boolean(message?.cancelled),
+        feedback: message?.feedback === "like" || message?.feedback === "dislike" ? message.feedback : null,
+        kind
+      };
+    };
+    const loadAiHistoryThreads = () => {
+      try {
+        const storedThreads = JSON.parse(localStorage.getItem(AI_HISTORY_THREADS_STORAGE_KEY) || "{}");
+        if (!storedThreads || typeof storedThreads !== "object" || Array.isArray(storedThreads)) return {};
+        return Object.fromEntries(Object.entries(storedThreads).map(([historyId, messages]) => [
+          String(historyId || "").trim(),
+          Array.isArray(messages) ? messages.map(normalizeAiConversationMessage).filter(Boolean).slice(-30) : []
+        ]).filter(([historyId, messages]) => historyId && messages.length));
+      } catch (error) {
+        return {};
+      }
+    };
+    const aiHistoryThreads = loadAiHistoryThreads();
+    const applyAiHistoryThread = (item) => aiHistoryThreads[item.id]?.length
+      ? { ...item, messages: aiHistoryThreads[item.id].map((message) => ({ ...message })) }
+      : item;
+    const getAiConversationMessages = (item) => {
+      if (!item) return [];
+      const storedMessages = Array.isArray(item.messages)
+        ? item.messages.map(normalizeAiConversationMessage).filter(Boolean)
+        : [];
+      if (storedMessages.length) {
+        item.messages = storedMessages;
+        return item.messages;
+      }
+      const kind = item.isLocalFallback ? "fallback" : "preset";
+      return [{
+        id: `${item.id || "history"}-message-1`,
+        prompt: String(item.prompt || (kind === "preset" ? AI_PRESET_PROMPT : item.title) || "").trim(),
+        response: String(item.response || (kind === "preset" ? AI_PRESET_RESPONSE : AI_FALLBACK_RESPONSE)),
+        answeredAt: String(item.answeredAt || AI_DEFAULT_ANSWER_TIME),
+        cancelled: Boolean(item.cancelled),
+        kind
+      }].map(normalizeAiConversationMessage).filter(Boolean);
+    };
+    const ensureAiConversationMessages = (item) => {
+      if (!item) return [];
+      const messages = getAiConversationMessages(item);
+      item.messages = messages;
+      return messages;
+    };
+    const getAiLatestConversationMessage = (item) => {
+      const messages = getAiConversationMessages(item);
+      return messages[messages.length - 1] || null;
+    };
+    const persistAiHistoryThread = (item) => {
+      if (!item?.id || !Array.isArray(item.messages)) return;
+      const normalizedMessages = item.messages.map(normalizeAiConversationMessage).filter(Boolean).slice(-30);
+      item.messages = normalizedMessages;
+      const firstMessage = normalizedMessages[0];
+      const latestMessage = normalizedMessages[normalizedMessages.length - 1];
+      if (firstMessage) item.prompt = firstMessage.prompt;
+      if (latestMessage) {
+        item.response = latestMessage.response;
+        item.answeredAt = latestMessage.answeredAt;
+        item.cancelled = latestMessage.cancelled;
+      }
+      aiHistoryThreads[item.id] = normalizedMessages;
+      try {
+        localStorage.setItem(AI_HISTORY_THREADS_STORAGE_KEY, JSON.stringify(aiHistoryThreads));
+      } catch (error) {
+        // Storage can be unavailable in local previews; the current session still keeps the message thread.
+      }
+    };
     const createAiDefaultHistoryItems = () => [
-      { id: "history-1", title: "帮我查找2025年7月份的采购单，采购人是徐毅恒的所有采购单", pinned: true },
-      { id: "history-2", title: "2025年6月份的回单", pinned: true },
-      { id: "history-3", title: "帮我导出24年5月份的银行回单", pinned: false },
-      { id: "history-4", title: "导出24年的凭证统计表", pinned: false },
-      { id: "history-5", title: "导出24年的凭证统计表", pinned: false }
-    ];
+      { id: "history-1", title: "帮我查找2025年7月份的采购单，采购人是徐毅恒的所有采购单", pinned: true, answeredAt: AI_DEFAULT_ANSWER_TIME },
+      { id: "history-2", title: "2025年6月份的回单", pinned: true, answeredAt: AI_DEFAULT_ANSWER_TIME },
+      { id: "history-3", title: "帮我导出24年5月份的银行回单", pinned: false, answeredAt: AI_DEFAULT_ANSWER_TIME },
+      { id: "history-4", title: "导出24年的凭证统计表", pinned: false, answeredAt: AI_DEFAULT_ANSWER_TIME },
+      { id: "history-5", title: "导出24年的凭证统计表", pinned: false, answeredAt: AI_DEFAULT_ANSWER_TIME }
+    ].map(applyAiHistoryRename).map(applyAiHistoryPinnedState).map(applyAiHistoryThread);
     const loadAiCustomHistoryItems = () => {
       try {
         const storedItems = JSON.parse(localStorage.getItem(AI_CUSTOM_HISTORY_STORAGE_KEY) || "[]");
         if (!Array.isArray(storedItems)) return [];
         return storedItems.map((item, index) => {
-          const prompt = String(item?.prompt || item?.title || "").trim();
+          const restoredItem = applyAiHistoryThread(item || {});
+          const restoredMessages = Array.isArray(restoredItem.messages)
+            ? restoredItem.messages.map(normalizeAiConversationMessage).filter(Boolean)
+            : [];
+          const prompt = String(restoredMessages[0]?.prompt || restoredItem?.prompt || restoredItem?.title || "").trim();
           if (!prompt) return null;
-          return {
-            id: String(item?.id || `custom-history-restored-${index}`),
-            title: String(item?.title || prompt).replace(/\s+/g, " ").trim(),
+          const normalizedItem = {
+            id: String(restoredItem?.id || `custom-history-restored-${index}`),
+            title: String(restoredItem?.title || prompt).replace(/\s+/g, " ").trim(),
             prompt,
-            response: AI_FALLBACK_RESPONSE,
-            pinned: Boolean(item?.pinned),
-            cancelled: Boolean(item?.cancelled),
-            group: String(item?.group || "").trim(),
+            response: String(restoredItem?.response || AI_FALLBACK_RESPONSE),
+            pinned: Object.prototype.hasOwnProperty.call(aiHistoryPinStates, String(restoredItem?.id || ""))
+              ? aiHistoryPinStates[String(restoredItem?.id || "")]
+              : Boolean(restoredItem?.pinned),
+            cancelled: Boolean(restoredItem?.cancelled),
+            answeredAt: String(restoredItem?.answeredAt || AI_DEFAULT_ANSWER_TIME),
+            group: String(restoredItem?.group || "").trim(),
             isLocalFallback: true
           };
+          normalizedItem.messages = restoredMessages.length
+            ? restoredMessages
+            : getAiConversationMessages(normalizedItem);
+          return normalizedItem;
         }).filter(Boolean).slice(0, 30);
       } catch (error) {
         return [];
@@ -16663,9 +17456,9 @@
     };
     const createAiGroupedHistoryItems = () => {
       const defaultGroupedItems = [
-        { id: "group-history-1", group: "26年审计项目", title: "导出24年的五月份的所有归档会计凭证", pinned: false },
-        { id: "group-history-2", group: "26年审计项目", title: "导出24年的凭证统计表", pinned: false }
-      ].map((item) => ({ ...item, group: aiHistoryGroupAssignments[item.id] || item.group }));
+        { id: "group-history-1", group: "26年审计项目", title: "导出24年的五月份的所有归档会计凭证", pinned: false, answeredAt: AI_DEFAULT_ANSWER_TIME },
+        { id: "group-history-2", group: "26年审计项目", title: "导出24年的凭证统计表", pinned: false, answeredAt: AI_DEFAULT_ANSWER_TIME }
+      ].map(applyAiHistoryRename).map(applyAiHistoryPinnedState).map(applyAiHistoryThread).map((item) => ({ ...item, group: aiHistoryGroupAssignments[item.id] || item.group }));
       const assignedDefaultItems = createAiDefaultHistoryItems()
         .filter((item) => aiHistoryGroupAssignments[item.id])
         .map((item) => ({ ...item, group: aiHistoryGroupAssignments[item.id] }));
@@ -16682,7 +17475,7 @@
     }[scenario] || scenario);
     const getAiPromptAgentIndent = (scenario) => 34 + ([...getAiPromptAgentLabel(scenario)].length * 14);
     const AI_LAYOUT_STORAGE_KEY = "maycur-archive-local-demo.ai-layout";
-    const AI_LAYOUT_DEFAULTS = { historyWidth: 250, filesWidth: 317, previewWidth: 628, composerHeight: 120 };
+    const AI_LAYOUT_DEFAULTS = { historyWidth: 250, filesWidth: 317, previewWidth: 628, composerHeight: 120, quickDrawerWidth: 438 };
     const loadAiLayoutPreferences = () => {
       try {
         return { ...AI_LAYOUT_DEFAULTS, ...JSON.parse(localStorage.getItem(AI_LAYOUT_STORAGE_KEY) || "{}") };
@@ -16695,6 +17488,17 @@
     const aiIcon = (name, className = "ai-svg-icon") => `<img class="${className} ai-svg-icon" src="${AI_ICON_BASE}/${name}" alt="" aria-hidden="true">`;
     const aiFileIcon = (file, className = "ai-file-type") => aiIcon(AI_FILE_ICONS[file[0]] || AI_FILE_ICONS.IMG, className);
     const aiScenarioIcon = (scenario) => aiIcon(AI_SCENARIO_ICONS[scenario] || AI_SCENARIO_ICONS[AI_SCENARIOS[0]], "ai-scenario-icon");
+    const createAiRuntimeFileList = (source, files) => files.map((file, index) => [
+      file[0],
+      file[1],
+      file[2],
+      {
+        ...(file[3] || {}),
+        id: file[3]?.id || `${source}-${index}`,
+        source
+      }
+    ]);
+    const getAiFileState = (file) => file?.[3] || {};
     const aiRuntime = {
       historyCollapsed: true,
       scenario: "智能检索",
@@ -16714,10 +17518,10 @@
       conversationMenuActiveIndex: -1,
       conversationMoveOpen: false,
       conversationMoveActiveIndex: -1,
-      conversationPinned: false,
       historyGroupsExpanded: true,
       collapsedHistoryGroups: new Set(),
       historyRecentExpanded: true,
+      historyScrollTop: 0,
       groupedHistoryItems: createAiGroupedHistoryItems(),
       historyItems: createAiHistoryItems(),
       activeHistoryId: "history-1",
@@ -16729,14 +17533,25 @@
       newGroupName: "",
       newGroupError: "",
       newGroupSource: "history",
+      renameOpen: false,
+      renameHistoryId: "",
+      renameName: "",
+      renameError: "",
+      renameSource: "history",
       deleteConfirmOpen: false,
       deleteHistoryId: "",
-      reactionVote: null,
       draft: "",
       view: "welcome",
       taskStep: 0,
+      taskMessageId: "",
       taskDetailsExpanded: false,
+      taskStatusDismissed: false,
       preview: false,
+      previewFullscreen: false,
+      uploadedFiles: createAiRuntimeFileList("upload", AI_SEARCH_UPLOAD_FILES),
+      generatedFiles: createAiRuntimeFileList("generated", AI_SEARCH_GENERATED_FILES),
+      composerAttachmentIds: [],
+      activePreviewFileId: "generated-0",
       filePanel: false,
       fileTab: "upload",
       fileRowMenuId: null,
@@ -16745,16 +17560,154 @@
       historyWidth: normalizeAiLayoutWidth(aiLayoutPreferences.historyWidth, AI_LAYOUT_DEFAULTS.historyWidth, 180, 420),
       filesWidth: normalizeAiLayoutWidth(aiLayoutPreferences.filesWidth, AI_LAYOUT_DEFAULTS.filesWidth, 180, 520),
       previewWidth: normalizeAiLayoutWidth(aiLayoutPreferences.previewWidth, AI_LAYOUT_DEFAULTS.previewWidth, 180, 780),
+      quickDrawerWidth: normalizeAiLayoutWidth(aiLayoutPreferences.quickDrawerWidth, AI_LAYOUT_DEFAULTS.quickDrawerWidth, 240, 780),
       quickOpen: false,
+      quickHistoryOpen: false,
+      quickMode: "drawer",
+      quickX: null,
+      quickY: null,
       toast: ""
     };
     let aiTaskTimer = null;
+    let aiToastTimer = null;
     let aiCustomHistorySequence = 0;
+
+    const clearAiToast = () => {
+      clearTimeout(aiToastTimer);
+      aiToastTimer = null;
+      aiRuntime.toast = "";
+    };
+
+    const setAiToast = (message, duration = 1500) => {
+      clearTimeout(aiToastTimer);
+      aiToastTimer = null;
+      aiRuntime.toast = String(message || "").trim();
+      if (!aiRuntime.toast) return;
+      aiToastTimer = setTimeout(() => {
+        if (!aiRuntime.toast) return;
+        aiRuntime.toast = "";
+        aiToastTimer = null;
+        refreshAiUi();
+      }, duration);
+    };
 
     const getAiHistoryGroups = () => [...new Set([
       ...AI_HISTORY_GROUPS,
       ...aiRuntime.groupedHistoryItems.map((item) => String(item.group || "").trim()).filter(Boolean)
     ])];
+
+    const getAiFilesByScope = (scope) => scope === "generated" ? aiRuntime.generatedFiles : aiRuntime.uploadedFiles;
+    const getAiAllFiles = () => [...aiRuntime.generatedFiles, ...aiRuntime.uploadedFiles];
+    const getAiFileById = (fileId) => getAiAllFiles().find((file) => getAiFileState(file).id === fileId) || null;
+    const getAiComposerAttachments = () => aiRuntime.composerAttachmentIds.map(getAiFileById).filter(Boolean);
+    const getAiComposerDisplayHeight = () => getAiComposerAttachments().length
+      ? Math.min(210, Math.max(160, aiRuntime.composerHeight + 60))
+      : aiRuntime.composerHeight;
+    const getAiQuickComposerDisplayHeight = () => getAiComposerAttachments().length ? 166 : 110;
+    const getAiActivePreviewFile = () => getAiFileById(aiRuntime.activePreviewFileId) || aiRuntime.generatedFiles[0] || aiRuntime.uploadedFiles[0] || null;
+    const openAiFilePreview = (fileId) => {
+      const file = getAiFileById(fileId);
+      if (!file) return false;
+      aiRuntime.activePreviewFileId = getAiFileState(file).id;
+      aiRuntime.preview = true;
+      aiRuntime.previewFullscreen = false;
+      aiRuntime.filePanel = false;
+      aiRuntime.fileRowMenuId = null;
+      aiRuntime.fileRowMenuActiveIndex = -1;
+      return true;
+    };
+
+    const AI_UPLOAD_MAX_FILES = 10;
+    const AI_UPLOAD_MAX_BYTES = 100 * 1024 * 1024;
+    const AI_UPLOAD_ACCEPT = ".xls,.xlsx,.xlsm,.doc,.docx,.pptx,.pdf,.jpg,.jpeg,.png,.ofd,.eml,.msg,.zip,.rar,.csv";
+    const formatAiFileSize = (size) => {
+      const bytes = Math.max(0, Number(size) || 0);
+      if (bytes < 1024) return `${bytes}B`;
+      if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(bytes < 10 * 1024 * 1024 ? 1 : 0)}MB`;
+    };
+    const getAiUploadedFileType = (file) => {
+      const extension = String(file?.name || "").split(".").pop()?.toLowerCase() || "";
+      if (["xls", "xlsx", "xlsm"].includes(extension)) return "XLS";
+      if (extension === "pdf") return "PDF";
+      if (["doc", "docx"].includes(extension)) return "DOC";
+      if (["ppt", "pptx"].includes(extension)) return "PPT";
+      if (["eml", "msg"].includes(extension)) return "MAIL";
+      if (["htm", "html"].includes(extension)) return "HTM";
+      if (["zip", "rar"].includes(extension)) return "ZIP";
+      if (extension === "ofd") return "OFD";
+      if (["jpg", "jpeg", "png", "webp", "gif"].includes(extension) || String(file?.type || "").startsWith("image/")) return "IMG";
+      return "CSV";
+    };
+    const getAiUploadedFileLabel = (type) => ({
+      XLS: "Excel文件",
+      PDF: "PDF文件",
+      DOC: "Office文件",
+      PPT: "演示文稿",
+      MAIL: "邮件文件",
+      HTM: "HTML文件",
+      ZIP: "压缩文件",
+      OFD: "OFD文件",
+      CSV: "通用文件",
+      IMG: "图片文件"
+    }[type] || "文件");
+    const createAiUploadedFileRecord = (file, index) => {
+      const type = getAiUploadedFileType(file);
+      return [type, file.name, `${getAiUploadedFileLabel(type)} · ${formatAiFileSize(file.size)}`, {
+        id: `upload-local-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 7)}`,
+        source: "upload",
+        objectUrl: URL.createObjectURL(file),
+        mime: file.type || "application/octet-stream",
+        localFile: file
+      }];
+    };
+    const addAiUploadedFiles = (fileList) => {
+      const selectedFiles = Array.from(fileList || []);
+      if (!selectedFiles.length) return;
+      const availableSlots = Math.max(0, AI_UPLOAD_MAX_FILES - aiRuntime.uploadedFiles.filter((file) => getAiFileState(file).localFile).length);
+      if (!availableSlots) {
+        setAiToast("最多可上传 10 个本地文件");
+        refreshAiUi();
+        return;
+      }
+      const oversizedFiles = selectedFiles.filter((file) => file.size > AI_UPLOAD_MAX_BYTES);
+      const acceptedFiles = selectedFiles.filter((file) => file.size <= AI_UPLOAD_MAX_BYTES).slice(0, availableSlots);
+      if (acceptedFiles.length) {
+        const uploadedRecords = acceptedFiles.map(createAiUploadedFileRecord);
+        aiRuntime.uploadedFiles.unshift(...uploadedRecords);
+        aiRuntime.composerAttachmentIds = [...new Set([
+          ...aiRuntime.composerAttachmentIds,
+          ...uploadedRecords.map((file) => getAiFileState(file).id)
+        ])];
+        aiRuntime.fileTab = "upload";
+        aiRuntime.filePanel = true;
+        aiRuntime.preview = false;
+        aiRuntime.previewFullscreen = false;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+      }
+      const ignoredCount = Math.max(0, selectedFiles.length - oversizedFiles.length - acceptedFiles.length);
+      const message = acceptedFiles.length
+        ? `已上传 ${acceptedFiles.length} 个文件${oversizedFiles.length || ignoredCount ? `，跳过 ${oversizedFiles.length + ignoredCount} 个` : ""}`
+        : "所选文件超过单个 100MB 限制";
+      setAiToast(message);
+      refreshAiUi();
+    };
+    const openAiLocalFilePicker = (kind = "file") => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.multiple = true;
+      input.accept = kind === "image" ? "image/jpeg,image/png,image/webp,image/gif" : AI_UPLOAD_ACCEPT;
+      input.style.position = "fixed";
+      input.style.left = "-9999px";
+      input.addEventListener("change", () => {
+        addAiUploadedFiles(input.files);
+        input.remove();
+      }, { once: true });
+      input.addEventListener("cancel", () => input.remove(), { once: true });
+      document.body.appendChild(input);
+      input.click();
+    };
 
     const persistAiLayoutPreferences = () => {
       try {
@@ -16762,7 +17715,8 @@
           historyWidth: aiRuntime.historyWidth,
           filesWidth: aiRuntime.filesWidth,
           previewWidth: aiRuntime.previewWidth,
-          composerHeight: aiRuntime.composerHeight
+          composerHeight: aiRuntime.composerHeight,
+          quickDrawerWidth: aiRuntime.quickDrawerWidth
         }));
       } catch (error) {
         // Local file previews can block storage; the current in-memory layout still remains usable.
@@ -16776,35 +17730,51 @@
       return `<div class="ai-panel-resizer ai-panel-resizer-${side}" role="separator" tabindex="0" aria-label="${isLeft ? "调整左侧会话栏宽度" : "调整右侧栏宽度"}" aria-orientation="vertical" aria-valuemin="180" aria-valuemax="${max}" aria-valuenow="${Math.round(value)}" data-ai-resize-handle="${side}" ${panel ? `data-ai-resize-panel="${panel}"` : ""}></div>`;
     };
 
-    const aiFileCard = (file = AI_FILES[0]) => `
-      <div class="ai-file-card">
-        ${aiFileIcon(file)}
-        <span class="ai-file-info" data-ai-preview-result><strong>${file[1]}</strong><span>${file[2]}</span></span>
-        <button class="ai-file-download" type="button" data-ai-download="${file[1]}" aria-label="下载：${file[1]}">${aiIcon("download.svg", "ai-file-download-icon")}</button>
-      </div>
-    `;
+    const aiFileCard = (file = aiRuntime.generatedFiles[0]) => {
+      if (!file) return "";
+      const fileId = getAiFileState(file).id;
+      return `
+        <div class="ai-file-card">
+          ${aiFileIcon(file)}
+          <button class="ai-file-info" type="button" data-ai-preview-file-id="${escapeHtml(fileId)}"><strong>${escapeHtml(file[1])}</strong><span>${escapeHtml(file[2])}</span></button>
+          <button class="ai-file-download" type="button" data-ai-download="${escapeHtml(file[1])}" data-ai-download-file-id="${escapeHtml(fileId)}" aria-label="下载：${escapeHtml(file[1])}">${aiIcon("download.svg", "ai-file-download-icon")}</button>
+        </div>
+      `;
+    };
 
     const renderAiScenarioDropdown = () => `
       <div class="ai-dropdown-wrap">
-        <button class="ai-agent-trigger ${aiRuntime.scenarioOpen ? "open" : ""}" type="button" data-ai-scenario-trigger aria-expanded="${aiRuntime.scenarioOpen}">${aiIcon("agent-select.svg", "ai-agent-icon")}<span>${aiRuntime.selectedAgent || (aiRuntime.view === "welcome" ? "智能体" : aiRuntime.scenario)}</span>${aiIcon("chevron-down.svg", "ai-chevron-icon")}</button>
-        ${aiRuntime.scenarioOpen ? `<div class="ai-select-menu" role="menu" aria-label="选择智能体">${AI_SCENARIOS.map((item, index) => `<button class="ai-select-option ${aiRuntime.scenarioActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-scenario-option="${item}" aria-selected="${aiRuntime.scenarioActiveIndex === index}">${aiScenarioIcon(item)}<span>${item}</span></button>`).join("")}</div>` : ""}
+        <button class="ai-agent-trigger ${aiRuntime.scenarioOpen ? "open" : ""}" type="button" data-ai-scenario-trigger aria-haspopup="menu" aria-expanded="${aiRuntime.scenarioOpen}">${aiIcon("agent-select.svg", "ai-agent-icon")}<span>${aiRuntime.selectedAgent || (aiRuntime.view === "welcome" ? "智能体" : aiRuntime.scenario)}</span>${aiIcon("chevron-down.svg", "ai-chevron-icon")}</button>
+        ${aiRuntime.scenarioOpen ? `<div class="ai-select-menu" role="menu" aria-label="选择智能体">${AI_SCENARIOS.map((item, index) => `<button class="ai-select-option ${aiRuntime.scenarioActiveIndex === index ? "keyboard-active" : ""}" type="button" role="menuitemradio" data-ai-scenario-option="${item}" aria-checked="${aiRuntime.selectedScenarioKey === item}">${aiScenarioIcon(item)}<span>${item}</span></button>`).join("")}</div>` : ""}
       </div>
     `;
 
+    const renderAiPromptAttachments = () => {
+      const attachments = getAiComposerAttachments();
+      if (!attachments.length) return "";
+      return `<div class="ai-prompt-attachments" aria-label="待发送附件">${attachments.map((file) => {
+        const fileId = getAiFileState(file).id;
+        const filename = String(file[1] || "");
+        const extension = filename.includes(".") ? filename.split(".").pop()?.toUpperCase() : (file[0] || "FILE");
+        return `<div class="ai-prompt-attachment">${aiFileIcon(file, "ai-prompt-attachment-icon")}<span class="ai-prompt-attachment-copy"><span class="ai-prompt-attachment-name" data-ai-tooltip="${escapeHtml(file[1])}">${escapeHtml(file[1])}</span><span class="ai-prompt-attachment-type">${escapeHtml(extension)}</span></span><button class="ai-prompt-attachment-remove" type="button" data-ai-attachment-remove="${escapeHtml(fileId)}" data-ai-no-tooltip aria-label="移除附件：${escapeHtml(file[1])}">${aiIcon("close.svg")}</button></div>`;
+      }).join("")}</div>`;
+    };
+
     const renderAiPrompt = ({ welcome = false, resizable = false } = {}) => `
-      <form class="ai-prompt ${aiRuntime.draft ? "has-value" : ""} ${aiRuntime.selectedScenarioKey ? "has-agent" : ""}" data-ai-prompt-form>
+      <form class="ai-prompt ${aiRuntime.draft ? "has-value" : ""} ${aiRuntime.selectedScenarioKey ? "has-agent" : ""} ${getAiComposerAttachments().length ? "has-attachments" : ""}" data-ai-prompt-form>
         ${resizable ? `<svg class="ai-composer-resize-handle" width="8" height="8" viewBox="0 0 8 8" fill="none" role="separator" tabindex="0" focusable="true" data-ai-composer-resize aria-label="调整对话框高度" aria-orientation="vertical" aria-valuemin="96" aria-valuemax="210" aria-valuenow="${Math.round(aiRuntime.composerHeight)}"><path d="M0 0C4.41828 0 8 3.58172 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}
+        ${renderAiPromptAttachments()}
         <div class="ai-prompt-entry"${aiRuntime.selectedScenarioKey ? ` style="--ai-agent-prefix-indent:${getAiPromptAgentIndent(aiRuntime.selectedScenarioKey)}px"` : ""}>
           ${aiRuntime.selectedScenarioKey
             ? `<span class="ai-selected-agent-prefix">${aiScenarioIcon(aiRuntime.selectedScenarioKey)}<span>${getAiPromptAgentLabel(aiRuntime.selectedScenarioKey)}</span></span>`
             : `<span class="ai-prompt-hint">${aiIcon("at.svg", "ai-at-icon")}</span>`}
           <textarea class="ai-prompt-input" name="aiPrompt" autocomplete="off" aria-label="向档案 AI 助手提问" placeholder="${aiRuntime.selectedScenarioKey ? "向我发出指令" : welcome ? "可快速选择业务场景，向我发出指令！" : `${aiRuntime.selectedAgent || aiRuntime.scenario} 向我发出指令`}">${escapeHtml(aiRuntime.draft)}</textarea>
         </div>
-        <div class="ai-mention-menu" role="menu" aria-label="快捷选择智能体" ${aiRuntime.mentionOpen ? "" : "hidden"}>${AI_MENTION_AGENTS.map((agent, index) => `<button class="ai-mention-option ${aiRuntime.mentionActiveIndex === index ? "keyboard-active" : ""}" type="button" data-ai-mention-option="${agent.scenario}" data-ai-mention-label="${agent.label}" aria-selected="${aiRuntime.mentionActiveIndex === index}">${agent.label}</button>`).join("")}</div>
+        <div class="ai-mention-menu" role="menu" aria-label="快捷选择智能体" ${aiRuntime.mentionOpen ? "" : "hidden"}>${AI_MENTION_AGENTS.map((agent, index) => `<button class="ai-mention-option ${aiRuntime.mentionActiveIndex === index ? "keyboard-active" : ""}" type="button" role="menuitemradio" data-ai-mention-option="${agent.scenario}" data-ai-mention-label="${agent.label}" aria-checked="${aiRuntime.selectedScenarioKey === agent.scenario}">${agent.label}</button>`).join("")}</div>
         <div class="ai-prompt-footer">
           <div class="ai-dropdown-wrap">
-            <button class="ai-add-button" type="button" data-ai-file-trigger aria-expanded="${aiRuntime.fileOpen}" aria-label="上传文件">${aiIcon("upload.svg")}</button>
-            ${aiRuntime.fileOpen ? `<div class="ai-select-menu ai-upload-menu" role="menu" aria-label="上传内容"><button class="ai-select-option ai-upload-option ${aiRuntime.fileActiveIndex === 0 ? "keyboard-active" : ""}" type="button" data-ai-file-option="file" aria-selected="${aiRuntime.fileActiveIndex === 0}">${aiIcon("upload-file.svg", "ai-upload-option-icon")}<span>上传文件</span><span class="ai-upload-tip" aria-hidden="true">可同时上传10个文件(每个 100 MB)支持 xls、xlsx、xlsm、doc、docx、pptx、pdf、jpg、png、jpeg、ofd、eml、msg、zip、rar、csv 等多种格式</span></button><button class="ai-select-option ai-upload-option ${aiRuntime.fileActiveIndex === 1 ? "keyboard-active" : ""}" type="button" data-ai-file-option="image" aria-selected="${aiRuntime.fileActiveIndex === 1}">${aiIcon("upload-image.svg", "ai-upload-option-icon")}<span>上传图片</span></button></div>` : ""}
+            <button class="ai-add-button" type="button" data-ai-file-trigger aria-haspopup="menu" aria-expanded="${aiRuntime.fileOpen}" aria-label="上传文件">${aiIcon("upload.svg")}</button>
+            ${aiRuntime.fileOpen ? `<div class="ai-select-menu ai-upload-menu" role="menu" aria-label="上传内容"><button class="ai-select-option ai-upload-option ${aiRuntime.fileActiveIndex === 0 ? "keyboard-active" : ""}" type="button" role="menuitem" data-ai-file-option="file">${aiIcon("upload-file.svg", "ai-upload-option-icon")}<span>上传文件</span><span class="ai-upload-tip" aria-hidden="true">可同时上传10个文件(每个 100 MB)支持 xls、xlsx、xlsm、doc、docx、pptx、pdf、jpg、png、jpeg、ofd、eml、msg、zip、rar、csv 等多种格式</span></button><button class="ai-select-option ai-upload-option ${aiRuntime.fileActiveIndex === 1 ? "keyboard-active" : ""}" type="button" role="menuitem" data-ai-file-option="image">${aiIcon("upload-image.svg", "ai-upload-option-icon")}<span>上传图片</span></button></div>` : ""}
           </div>
           ${renderAiScenarioDropdown()}
           <button class="ai-send ${aiRuntime.view === "processing" || aiRuntime.draft.trim() ? "ready" : ""}" type="submit" aria-label="${aiRuntime.view === "processing" ? "结束生成" : "发送问题"}" ${aiRuntime.view !== "processing" && !aiRuntime.draft.trim() ? "disabled" : ""}>${aiRuntime.view === "processing" ? aiIcon("stop.svg", "ai-stop-icon") : aiIcon("send.svg")}</button>
@@ -16827,53 +17797,260 @@
     const AI_FALLBACK_TASK_STEPS = ["大模型识别中", "回答已生成"];
     const getActiveAiHistoryItem = () => [...aiRuntime.groupedHistoryItems, ...aiRuntime.historyItems]
       .find((item) => item.id === aiRuntime.activeHistoryId);
-    const getAiTaskSteps = () => getActiveAiHistoryItem()?.isLocalFallback ? AI_FALLBACK_TASK_STEPS : AI_PRESET_TASK_STEPS;
+    const getActiveAiConversationMessage = () => getAiLatestConversationMessage(getActiveAiHistoryItem());
+    const getAiTaskMessage = () => {
+      const activeItem = getActiveAiHistoryItem();
+      const messages = getAiConversationMessages(activeItem);
+      return messages.find((message) => message.id === aiRuntime.taskMessageId) || messages[messages.length - 1] || null;
+    };
+    const getAiTaskSteps = () => getAiTaskMessage()?.kind === "preset" ? AI_PRESET_TASK_STEPS : AI_FALLBACK_TASK_STEPS;
     const renderAiTaskSteps = (completed = false) => `<div class="ai-task-steps">${getAiTaskSteps().map((step, index) => {
       const done = completed || index < aiRuntime.taskStep;
       const current = !completed && index === aiRuntime.taskStep;
       return `<div class="ai-task-step ${done ? "done" : ""} ${current ? "current" : ""}"><span class="ai-task-dot">${done ? "✓" : ""}</span><span>${step}</span></div>`;
     }).join("")}</div>`;
 
-    const renderAiTaskCard = () => `<div class="ai-task-card"><div class="ai-task-card-title"><span>任务进行中</span>${aiIcon("chevron-down.svg", "ai-task-chevron")}</div>${renderAiTaskSteps()}</div>`;
+    const renderAiTaskCloseButton = () => `<button class="ai-task-status-close" type="button" data-ai-task-status-close data-ai-no-tooltip aria-label="关闭任务步骤栏"><svg class="ai-task-status-close-icon" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 1L9 9M9 1L1 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>`;
 
-    const renderAiCompletedTask = () => aiRuntime.taskDetailsExpanded
-      ? `<div class="ai-task-card is-complete"><button class="ai-task-card-title" type="button" data-ai-task-details-toggle aria-expanded="true"><span>任务已完成</span>${aiIcon("chevron-down.svg", "ai-task-chevron")}</button>${renderAiTaskSteps(true)}</div>`
-      : `<button class="ai-status-card" type="button" data-ai-task-details-toggle aria-expanded="false"><span>任务已完成</span>${aiIcon("chevron-down.svg", "ai-status-chevron")}</button>`;
+    const renderAiTaskCard = () => aiRuntime.taskStatusDismissed ? "" : `<div class="ai-task-card"><div class="ai-task-card-title"><span>任务进行中</span>${aiIcon("chevron-down.svg", "ai-task-chevron")}</div>${renderAiTaskCloseButton()}${renderAiTaskSteps()}</div>`;
 
-    const renderAiTask = ({ resizable = false } = {}) => {
+    const renderAiCompletedTask = () => aiRuntime.taskStatusDismissed ? "" : aiRuntime.taskDetailsExpanded
+      ? `<div class="ai-task-card is-complete"><button class="ai-task-card-title" type="button" data-ai-task-details-toggle aria-expanded="true"><span>任务已完成</span>${aiIcon("chevron-down.svg", "ai-task-chevron")}</button>${renderAiTaskCloseButton()}${renderAiTaskSteps(true)}</div>`
+      : `<div class="ai-status-card"><button class="ai-status-card-main" type="button" data-ai-task-details-toggle aria-expanded="false"><span>任务已完成</span>${aiIcon("chevron-down.svg", "ai-status-chevron")}</button>${renderAiTaskCloseButton()}</div>`;
+
+    const renderAiTask = ({ resizable = false, quick = false } = {}) => {
       const activeItem = getActiveAiHistoryItem();
-      const isFallback = Boolean(activeItem?.isLocalFallback);
-      const prompt = isFallback
-        ? activeItem.prompt
-        : "帮我找出单据号为MK-202607061631的付款申请单，生成 excel的格式供我浏览";
-      const reactions = [
-        { action: "copy", icon: "copy.svg", label: isFallback ? "复制回答" : "复制文件名" },
-        { action: "like", icon: aiRuntime.reactionVote === "like" ? "like-active.svg" : "like.svg", label: "点赞" },
-        { action: "dislike", icon: aiRuntime.reactionVote === "dislike" ? "dislike-active.svg" : "dislike.svg", label: "差评" },
-        { action: "refresh", icon: "refresh.svg", label: "重新生成" }
-      ];
-      const reactionsHtml = `<div class="ai-reactions">${reactions.map(({ action, icon, label }) => `<button class="ai-reaction-button ${aiRuntime.reactionVote === action ? "is-active" : ""}" type="button" data-ai-reaction="${action}" data-tooltip="${label}" aria-label="${label}" ${action === "like" || action === "dislike" ? `aria-pressed="${aiRuntime.reactionVote === action}"` : ""}>${aiIcon(icon)}</button>`).join("")}</div>`;
-      const resultHtml = isFallback
-        ? `<div class="ai-agent-message"><div class="ai-agent-bubble"><div class="ai-elapsed">已处理 1s</div><div class="ai-result-copy">${escapeHtml(activeItem.response || AI_FALLBACK_RESPONSE)}</div>${reactionsHtml}</div></div>`
-        : `<div class="ai-agent-message"><div class="ai-agent-bubble"><div class="ai-elapsed">已处理 3m28s</div><div class="ai-result-copy">我从系统内筛选出了 1 条 符合条件的 MK-202607061631 付款申请单，已为您生成 1份 Excel的文件。</div>${aiFileCard()}${reactionsHtml}</div></div>`;
+      const messages = getAiConversationMessages(activeItem);
+      const messagesHtml = messages.map((message, index) => {
+        const isLatest = index === messages.length - 1;
+        const isPreset = message.kind === "preset";
+        const messageFeedback = message.feedback === "like" || message.feedback === "dislike" ? message.feedback : null;
+        const reactions = [
+          { action: "copy", icon: "copy.svg", label: "复制回答" },
+          { action: "like", icon: messageFeedback === "like" ? "like-active.svg" : "like.svg", label: "点赞" },
+          { action: "dislike", icon: messageFeedback === "dislike" ? "dislike-active.svg" : "dislike.svg", label: "差评" },
+          { action: "refresh", icon: "refresh.svg", label: "重新生成" }
+        ];
+        const reactionButtonsHtml = `${reactions.map(({ action, icon, label }) => `<button class="ai-reaction-button ${messageFeedback === action ? "is-active" : ""}" type="button" data-ai-reaction="${action}" data-ai-reaction-message="${escapeHtml(message.id)}" data-tooltip="${label}" aria-label="${label}" ${action === "like" || action === "dislike" ? `aria-pressed="${messageFeedback === action}"` : ""}>${aiIcon(icon)}</button>`).join("")}${quick ? "" : `<button class="ai-reaction-button ai-task-steps-button" type="button" data-ai-task-steps="${escapeHtml(message.id)}" data-tooltip="查看任务步骤" aria-label="查看此条回答的任务步骤">${aiIcon("agent-select.svg")}</button>`}`;
+        const reactionsHtml = `<div class="ai-reactions"><span class="ai-reaction-actions">${reactionButtonsHtml}</span><span class="ai-answer-time">${escapeHtml(message.answeredAt || AI_DEFAULT_ANSWER_TIME)}</span></div>`;
+        const resultHtml = isPreset
+          ? `<div class="ai-agent-message"><div class="ai-agent-bubble"><div class="ai-elapsed">已处理 3m28s</div><div class="ai-response-area" tabindex="0" aria-label="回答操作区域"><div class="ai-result-copy">${escapeHtml(message.response || AI_PRESET_RESPONSE)}</div>${aiFileCard()}${reactionsHtml}</div></div></div>`
+          : `<div class="ai-agent-message"><div class="ai-agent-bubble"><div class="ai-elapsed">已处理 1s</div><div class="ai-response-area" tabindex="0" aria-label="回答操作区域"><div class="ai-result-copy">${escapeHtml(message.response || AI_FALLBACK_RESPONSE)}</div>${reactionsHtml}</div></div></div>`;
+        const answerHtml = isLatest && aiRuntime.view === "processing"
+          ? `<div class="ai-thinking" role="status" aria-live="polite">正在思考</div>`
+          : (message.cancelled || (isLatest && aiRuntime.view === "cancelled"))
+            ? `<div class="ai-cancelled-message" role="status" aria-live="polite">任务已取消</div>`
+            : resultHtml;
+        return `<div class="ai-conversation-turn" data-ai-message-id="${escapeHtml(message.id)}"><div class="ai-user-message-wrap"><div class="ai-user-message">${escapeHtml(message.prompt)}</div><button class="ai-reaction-button ai-user-copy-button" type="button" data-ai-user-copy data-tooltip="复制" aria-label="复制用户消息">${aiIcon("copy.svg")}</button></div>${answerHtml}</div>`;
+      }).join("");
+      const taskMessage = getAiTaskMessage();
+      const latestMessage = messages[messages.length - 1] || null;
+      const taskMessageIsLatest = Boolean(taskMessage && latestMessage && taskMessage.id === latestMessage.id);
+      const taskPanelHtml = quick || aiRuntime.taskStatusDismissed || !taskMessage || taskMessage.cancelled
+        ? ""
+        : aiRuntime.view === "processing" && taskMessageIsLatest
+          ? renderAiTaskCard()
+          : renderAiCompletedTask();
       return `
-        <div class="ai-chat-content">
-          <div class="ai-user-message">${escapeHtml(prompt)}</div>
-          ${aiRuntime.view === "processing" ? `<div class="ai-thinking" role="status" aria-live="polite">正在思考</div>` : aiRuntime.view === "cancelled" ? `<div class="ai-cancelled-message" role="status" aria-live="polite">任务已取消</div>` : resultHtml}
-        </div>
-        ${aiRuntime.view === "processing" ? renderAiTaskCard() : aiRuntime.view === "result" ? renderAiCompletedTask() : ""}
+        <div class="ai-chat-content">${messagesHtml}</div>
+        ${taskPanelHtml}
         <div class="ai-chat-composer">${renderAiPrompt({ resizable })}</div>
       `;
     };
 
-    const renderAiPreview = () => `<aside class="ai-preview" aria-label="Excel 文件预览"><div class="ai-preview-head"><div class="ai-preview-title"><button class="ai-icon-button" type="button" data-ai-preview-close data-ai-no-tooltip aria-label="关闭预览">${aiIcon("sidebar-toggle.svg")}</button><span>MK-202607061631-付款申请.xlsx</span></div><div class="ai-preview-actions"><button class="ai-icon-button" type="button" aria-label="全屏预览">${aiIcon("fullscreen.svg")}</button></div></div><div class="ai-excel-sheet"><img class="ai-excel-preview-image" src="assets/ecm-images/archive-ai-excel-preview.png" alt="MK-202607061631 付款申请 Excel 示例单据"><span class="ai-excel-preview-bottom" aria-hidden="true"></span></div></aside>`;
+    const getAiFileExtension = (file) => String(file?.[1] || "").split(".").pop()?.toLowerCase() || "";
+    const getAiPreviewKind = (file) => {
+      const fileState = getAiFileState(file);
+      const extension = getAiFileExtension(file);
+      const mime = String(fileState.mime || "").toLowerCase();
+      if (mime.startsWith("image/") || ["jpg", "jpeg", "png", "webp", "gif"].includes(extension)) return "image";
+      if (mime === "application/pdf" || extension === "pdf") return "pdf";
+      if (["xls", "xlsx", "xlsm", "csv"].includes(extension)) return "workbook";
+      if (extension === "docx") return "docx";
+      if (["htm", "html"].includes(extension)) return "html";
+      return "unsupported";
+    };
+    const renderAiPreviewState = (message, { loading = false } = {}) => `<div class="ai-preview-state" role="status" aria-live="polite"><span class="ai-preview-state-inner">${loading ? `<span class="ai-preview-spinner" aria-hidden="true"></span>` : ""}<span>${escapeHtml(message)}</span></span></div>`;
+    let aiPreviewHydrationSequence = 0;
+
+    const parseAiCsvText = (source) => {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let quoted = false;
+      for (let index = 0; index < source.length; index += 1) {
+        const character = source[index];
+        if (quoted) {
+          if (character === '"' && source[index + 1] === '"') {
+            field += '"';
+            index += 1;
+          } else if (character === '"') {
+            quoted = false;
+          } else {
+            field += character;
+          }
+          continue;
+        }
+        if (character === '"') {
+          quoted = true;
+        } else if (character === ",") {
+          row.push(field);
+          field = "";
+        } else if (character === "\n") {
+          row.push(field);
+          rows.push(row);
+          row = [];
+          field = "";
+        } else if (character !== "\r") {
+          field += character;
+        }
+      }
+      if (field || row.length) {
+        row.push(field);
+        rows.push(row);
+      }
+      return rows;
+    };
+
+    const readAiLocalFileText = (file, encoding = "utf-8") => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => resolve(String(reader.result || "")), { once: true });
+      reader.addEventListener("error", () => reject(reader.error || new Error("FILE_READ_FAILED")), { once: true });
+      reader.readAsText(file, encoding);
+    });
+
+    const getAiWorkbookPreview = async (file) => {
+      const fileState = getAiFileState(file);
+      if (fileState.workbookPreview) return fileState.workbookPreview;
+      if (!window.XLSX) throw new Error("XLSX_PREVIEW_UNAVAILABLE");
+      const extension = getAiFileExtension(file);
+      let workbook;
+      if (extension === "csv") {
+        const csvText = await readAiLocalFileText(fileState.localFile);
+        workbook = window.XLSX.utils.book_new();
+        window.XLSX.utils.book_append_sheet(
+          workbook,
+          window.XLSX.utils.aoa_to_sheet(parseAiCsvText(csvText.replace(/^\uFEFF/, ""))),
+          "CSV"
+        );
+      } else {
+        const fileBuffer = await fileState.localFile.arrayBuffer();
+        workbook = window.XLSX.read(fileBuffer, {
+          type: "array",
+          cellDates: true,
+          cellNF: true
+        });
+      }
+      const sheets = workbook.SheetNames.map((name, index) => ({
+        name,
+        html: window.XLSX.utils.sheet_to_html(workbook.Sheets[name], { id: `aiWorkbookSheet${index}` })
+      }));
+      if (!sheets.length) throw new Error("EMPTY_WORKBOOK");
+      fileState.workbookPreview = sheets;
+      return sheets;
+    };
+
+    const mountAiWorkbookSheet = (host, sheets, activeIndex = 0) => {
+      const normalizedIndex = Math.max(0, Math.min(activeIndex, sheets.length - 1));
+      host.setAttribute("aria-busy", "false");
+      host.innerHTML = `<div class="ai-workbook-preview"><div class="ai-workbook-tabs" role="tablist" aria-label="工作表">${sheets.map((sheet, index) => `<button class="ai-workbook-tab ${index === normalizedIndex ? "active" : ""}" type="button" role="tab" data-ai-workbook-tab="${index}" aria-selected="${index === normalizedIndex}" title="${escapeHtml(sheet.name)}">${escapeHtml(sheet.name)}</button>`).join("")}</div><div class="ai-workbook-scroll" role="tabpanel"></div></div>`;
+      const renderSheet = (index) => {
+        const parsedDocument = new DOMParser().parseFromString(sheets[index].html, "text/html");
+        const table = parsedDocument.querySelector("table");
+        const scroll = host.querySelector(".ai-workbook-scroll");
+        if (!table || !scroll) throw new Error("INVALID_WORKSHEET");
+        table.removeAttribute("style");
+        table.className = "ai-workbook-table";
+        scroll.replaceChildren(table);
+        scroll.scrollTo({ top: 0, left: 0 });
+        host.querySelectorAll("[data-ai-workbook-tab]").forEach((button, buttonIndex) => {
+          const selected = buttonIndex === index;
+          button.classList.toggle("active", selected);
+          button.setAttribute("aria-selected", String(selected));
+        });
+      };
+      host.querySelectorAll("[data-ai-workbook-tab]").forEach((button) => {
+        button.addEventListener("click", () => renderSheet(Number(button.dataset.aiWorkbookTab) || 0));
+      });
+      renderSheet(normalizedIndex);
+    };
+
+    const hydrateAiActivePreview = async () => {
+      const sequence = ++aiPreviewHydrationSequence;
+      const host = document.querySelector("[data-ai-real-preview]");
+      if (!host) return;
+      const file = getAiFileById(host.dataset.aiRealPreview || "");
+      const fileState = getAiFileState(file);
+      if (!file?.length || !fileState.localFile) return;
+      const kind = getAiPreviewKind(file);
+      try {
+        if (kind === "workbook") {
+          const sheets = await getAiWorkbookPreview(file);
+          if (sequence !== aiPreviewHydrationSequence || !host.isConnected) return;
+          mountAiWorkbookSheet(host, sheets);
+          return;
+        }
+        if (kind === "docx") {
+          if (!window.docx?.renderAsync) throw new Error("DOCX_PREVIEW_UNAVAILABLE");
+          host.innerHTML = `<div class="ai-docx-preview" data-ai-docx-preview></div>`;
+          const container = host.querySelector("[data-ai-docx-preview]");
+          await window.docx.renderAsync(fileState.localFile, container, null, {
+            className: "ai-docx-document",
+            inWrapper: true,
+            ignoreWidth: false,
+            ignoreHeight: false,
+            ignoreFonts: false,
+            breakPages: true,
+            useBase64URL: true
+          });
+          if (sequence !== aiPreviewHydrationSequence || !host.isConnected) return;
+          host.setAttribute("aria-busy", "false");
+          return;
+        }
+      } catch (error) {
+        if (sequence !== aiPreviewHydrationSequence || !host.isConnected) return;
+        host.setAttribute("aria-busy", "false");
+        host.innerHTML = renderAiPreviewState("文件内容解析失败，请确认文件未损坏、未加密，并重试。");
+        console.warn("AI file preview failed", error);
+      }
+    };
+
+    const renderAiPreviewContent = (file) => {
+      const fileState = getAiFileState(file);
+      const previewKind = getAiPreviewKind(file);
+      if (fileState.objectUrl && previewKind === "image") {
+        return `<div class="ai-local-preview"><img src="${escapeHtml(fileState.objectUrl)}" alt="${escapeHtml(file[1])} 本地图片预览"></div>`;
+      }
+      if (fileState.objectUrl && previewKind === "pdf") {
+        return `<iframe class="ai-local-preview-frame" src="${escapeHtml(fileState.objectUrl)}" title="${escapeHtml(file[1])} PDF 预览"></iframe>`;
+      }
+      if (fileState.objectUrl && previewKind === "html") {
+        return `<iframe class="ai-local-preview-frame" src="${escapeHtml(fileState.objectUrl)}" sandbox title="${escapeHtml(file[1])} HTML 预览"></iframe>`;
+      }
+      if (fileState.localFile && ["workbook", "docx"].includes(previewKind)) {
+        return `<div class="ai-real-preview" data-ai-real-preview="${escapeHtml(fileState.id)}" aria-busy="true">${renderAiPreviewState("正在解析文件内容…", { loading: true })}</div>`;
+      }
+      if (fileState.localFile) {
+        return `<div class="ai-preview-empty" role="status">此格式需要本地转换服务后才能真实预览，当前可通过更多操作下载原文件。</div>`;
+      }
+      if (file[0] === "XLS") {
+        return `<div class="ai-excel-sheet"><img class="ai-excel-preview-image" src="assets/ecm-images/archive-ai-excel-preview.png" alt="${escapeHtml(file[1])} Excel 示例单据"><span class="ai-excel-preview-bottom" aria-hidden="true"></span></div>`;
+      }
+      return `<div class="ai-preview-empty" role="status">当前演示数据未包含此文件的真实源文件，可上传本地文件进行内容预览。</div>`;
+    };
+
+    const renderAiPreview = () => {
+      const file = getAiActivePreviewFile();
+      if (!file) return "";
+      return `<aside class="ai-preview ${aiRuntime.previewFullscreen ? "is-fullscreen" : ""}" aria-label="文件预览"><div class="ai-preview-head"><div class="ai-preview-title"><button class="ai-icon-button" type="button" data-ai-preview-close data-ai-no-tooltip aria-label="关闭预览">${aiIcon("sidebar-toggle.svg")}</button><span>${escapeHtml(file[1])}</span></div><div class="ai-preview-actions"><button class="ai-icon-button ${aiRuntime.previewFullscreen ? "is-exit-fullscreen" : ""}" type="button" data-ai-preview-fullscreen aria-label="${aiRuntime.previewFullscreen ? "退出全屏预览" : "全屏预览"}" aria-pressed="${aiRuntime.previewFullscreen}">${aiIcon("fullscreen.svg")}</button></div></div>${renderAiPreviewContent(file)}</aside>`;
+    };
 
     const renderAiFilesPanel = () => {
-      const files = aiRuntime.fileTab === "generated" ? [AI_FILES[0]] : AI_FILES.slice(1);
-      return `<aside class="ai-files-panel" aria-label="聊天中的文件"><div class="ai-preview-head"><span>聊天中的文件</span><button class="ai-icon-button" type="button" data-ai-file-panel data-ai-no-tooltip aria-label="关闭文件列表">${aiIcon("close.svg")}</button></div><div class="ai-design-tabs"><button class="ai-design-tab ${aiRuntime.fileTab === "upload" ? "active" : ""}" type="button" data-ai-file-tab="upload">上传文件</button><button class="ai-design-tab ${aiRuntime.fileTab === "generated" ? "active" : ""}" type="button" data-ai-file-tab="generated">生成文件</button></div><div class="ai-files-list">${files.map((file, index) => {
-        const rowId = `${aiRuntime.fileTab}-${index}`;
+      const files = getAiFilesByScope(aiRuntime.fileTab);
+      return `<aside class="ai-files-panel" aria-label="聊天中的文件"><div class="ai-preview-head"><span>聊天中的文件</span><button class="ai-icon-button" type="button" data-ai-file-panel data-ai-no-tooltip aria-label="关闭文件列表">${aiIcon("close.svg")}</button></div><div class="ai-design-tabs" role="tablist" aria-label="文件范围"><button class="ai-design-tab ${aiRuntime.fileTab === "upload" ? "active" : ""}" type="button" role="tab" id="aiFileTabUpload" data-ai-file-tab="upload" aria-selected="${aiRuntime.fileTab === "upload"}" aria-controls="aiFilesList" tabindex="${aiRuntime.fileTab === "upload" ? "0" : "-1"}">上传文件</button><button class="ai-design-tab ${aiRuntime.fileTab === "generated" ? "active" : ""}" type="button" role="tab" id="aiFileTabGenerated" data-ai-file-tab="generated" aria-selected="${aiRuntime.fileTab === "generated"}" aria-controls="aiFilesList" tabindex="${aiRuntime.fileTab === "generated" ? "0" : "-1"}">生成文件</button></div><div class="ai-files-list" id="aiFilesList" role="tabpanel" aria-labelledby="${aiRuntime.fileTab === "upload" ? "aiFileTabUpload" : "aiFileTabGenerated"}">${files.map((file, index) => {
+        const rowId = getAiFileState(file).id || `${aiRuntime.fileTab}-${index}`;
         const menuOpen = aiRuntime.fileRowMenuId === rowId;
-        return `<div class="ai-files-row ${menuOpen ? "menu-open" : ""}">${aiFileIcon(file)}<span>${file[1]}</span><button class="ai-files-row-more" type="button" data-ai-file-row-more="${rowId}" data-ai-tooltip="更多操作" aria-label="更多操作：${file[1]}" aria-haspopup="menu" aria-expanded="${menuOpen}">${aiIcon("more.svg")}</button>${menuOpen ? `<div class="ai-file-row-menu" role="menu" aria-label="${file[1]} 文件操作"><button class="ai-file-row-option ${aiRuntime.fileRowMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" data-ai-download="${file[1]}" aria-selected="${aiRuntime.fileRowMenuActiveIndex === 0}">${aiIcon("download-menu.svg")}<span>下载</span></button></div>` : ""}</div>`;
+        return `<div class="ai-files-row ${menuOpen ? "menu-open" : ""}"><button class="ai-files-row-main" type="button" data-ai-preview-file-id="${escapeHtml(rowId)}" aria-label="预览：${escapeHtml(file[1])}">${aiFileIcon(file)}<span>${escapeHtml(file[1])}</span></button><button class="ai-files-row-more" type="button" data-ai-file-row-more="${escapeHtml(rowId)}" data-ai-tooltip="更多操作" aria-label="更多操作：${escapeHtml(file[1])}" aria-haspopup="menu" aria-expanded="${menuOpen}">${aiIcon("more.svg")}</button>${menuOpen ? `<div class="ai-file-row-menu" role="menu" aria-label="${escapeHtml(file[1])} 文件操作"><button class="ai-file-row-option ${aiRuntime.fileRowMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" role="menuitem" data-ai-download="${escapeHtml(file[1])}" data-ai-download-file-id="${escapeHtml(rowId)}">${aiIcon("download-menu.svg")}<span>下载</span></button></div>` : ""}</div>`;
       }).join("")}</div></aside>`;
     };
 
@@ -16889,9 +18066,14 @@
       if (!keyword) return [];
       if (aiRuntime.searchTab === "history") {
         return [...aiRuntime.groupedHistoryItems, ...aiRuntime.historyItems]
-          .filter((item) => normalizeAiSearchText(item.title).includes(keyword));
+          .filter((item) => {
+            const searchableMessages = getAiConversationMessages(item)
+              .flatMap((message) => [message.prompt, message.response]);
+            return [item.title, ...searchableMessages]
+              .some((value) => normalizeAiSearchText(value).includes(keyword));
+          });
       }
-      const files = aiRuntime.searchTab === "generated" ? AI_SEARCH_GENERATED_FILES : AI_SEARCH_UPLOAD_FILES;
+      const files = getAiFilesByScope(aiRuntime.searchTab);
       return files.filter((file) => normalizeAiSearchText(file[1]).includes(keyword));
     };
 
@@ -16903,17 +18085,18 @@
         return results.map((item, index) => `<button class="ai-search-history-result ${aiRuntime.searchActiveIndex === index ? "keyboard-active" : ""}" type="button" role="option" data-ai-search-result data-ai-search-history="${item.id}" aria-selected="${aiRuntime.searchActiveIndex === index}" data-ai-tooltip="${escapeHtml(item.title)}"><span>${escapeHtml(item.title)}</span></button>`).join("");
       }
       return results.map((file, index) => {
-        const rowId = `search-${aiRuntime.searchTab}-${index}`;
+        const fileId = getAiFileState(file).id || `${aiRuntime.searchTab}-${index}`;
+        const rowId = `search-${fileId}`;
         const menuOpen = aiRuntime.fileRowMenuId === rowId;
-        return `<div class="ai-search-file-result ai-files-row ${menuOpen ? "menu-open" : ""}"><button class="ai-search-file-main ${aiRuntime.searchActiveIndex === index ? "keyboard-active" : ""}" type="button" role="option" data-ai-search-result data-ai-search-file="${escapeHtml(file[1])}" aria-selected="${aiRuntime.searchActiveIndex === index}">${aiFileIcon(file)}<span>${escapeHtml(file[1])}</span></button><button class="ai-files-row-more" type="button" data-ai-file-row-more="${rowId}" data-ai-tooltip="更多操作" aria-label="更多操作：${escapeHtml(file[1])}" aria-haspopup="menu" aria-expanded="${menuOpen}">${aiIcon("more.svg")}</button>${menuOpen ? `<div class="ai-file-row-menu" role="menu" aria-label="${escapeHtml(file[1])} 文件操作"><button class="ai-file-row-option ${aiRuntime.fileRowMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" data-ai-download="${escapeHtml(file[1])}" aria-selected="${aiRuntime.fileRowMenuActiveIndex === 0}">${aiIcon("download-menu.svg")}<span>下载</span></button></div>` : ""}</div>`;
+        return `<div class="ai-search-file-result ai-files-row ${menuOpen ? "menu-open" : ""}"><button class="ai-search-file-main ${aiRuntime.searchActiveIndex === index ? "keyboard-active" : ""}" type="button" role="option" data-ai-search-result data-ai-search-file-id="${escapeHtml(fileId)}" aria-selected="${aiRuntime.searchActiveIndex === index}">${aiFileIcon(file)}<span>${escapeHtml(file[1])}</span></button><button class="ai-files-row-more" type="button" data-ai-file-row-more="${escapeHtml(rowId)}" data-ai-tooltip="更多操作" aria-label="更多操作：${escapeHtml(file[1])}" aria-haspopup="menu" aria-expanded="${menuOpen}">${aiIcon("more.svg")}</button>${menuOpen ? `<div class="ai-file-row-menu" role="menu" aria-label="${escapeHtml(file[1])} 文件操作"><button class="ai-file-row-option ${aiRuntime.fileRowMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" role="menuitem" data-ai-download="${escapeHtml(file[1])}" data-ai-download-file-id="${escapeHtml(fileId)}">${aiIcon("download-menu.svg")}<span>下载</span></button></div>` : ""}</div>`;
       }).join("");
     };
 
     const renderAiSearchOverlay = () => `<div class="ai-search-overlay" data-ai-search-backdrop>
-      <section class="ai-search-panel" data-ai-search-panel role="dialog" aria-modal="true" aria-label="搜索">
-        <div class="ai-search-tabs" role="tablist" aria-label="搜索范围">${AI_SEARCH_TABS.map((tab) => `<button class="ai-search-tab ${aiRuntime.searchTab === tab.id ? "active" : ""}" type="button" role="tab" data-ai-search-tab="${tab.id}" aria-selected="${aiRuntime.searchTab === tab.id}">${tab.label}</button>`).join("")}</div>
-        <div class="ai-search-input-wrap"><input class="ai-search-input" type="search" value="${escapeHtml(aiRuntime.searchQuery)}" data-ai-search-input placeholder="请输入搜索内容" aria-label="搜索内容" autocomplete="off"><button class="ai-search-clear" type="button" data-ai-search-clear data-ai-tooltip="清除" aria-label="清除搜索内容">${aiIcon("clear.svg")}</button></div>
-        <div class="ai-search-results" role="listbox" aria-label="搜索结果" aria-live="polite">${renderAiSearchResults()}</div>
+      <section class="ai-search-panel" data-ai-search-panel role="dialog" aria-modal="true" aria-label="搜索" tabindex="-1">
+        <div class="ai-search-tabs" role="tablist" aria-label="搜索范围">${AI_SEARCH_TABS.map((tab) => `<button class="ai-search-tab ${aiRuntime.searchTab === tab.id ? "active" : ""}" type="button" role="tab" id="aiSearchTab-${tab.id}" data-ai-search-tab="${tab.id}" aria-selected="${aiRuntime.searchTab === tab.id}" aria-controls="aiSearchResults" tabindex="${aiRuntime.searchTab === tab.id ? "0" : "-1"}">${tab.label}</button>`).join("")}</div>
+        <div class="ai-search-input-wrap"><input class="ai-search-input" type="search" value="${escapeHtml(aiRuntime.searchQuery)}" data-ai-search-input placeholder="请输入搜索内容" aria-label="搜索内容" aria-controls="aiSearchResults" autocomplete="off"><button class="ai-search-clear" type="button" data-ai-search-clear data-ai-tooltip="清除" aria-label="清除搜索内容">${aiIcon("clear.svg")}</button></div>
+        <div class="ai-search-results" id="aiSearchResults" role="listbox" aria-label="搜索结果" aria-labelledby="aiSearchTab-${aiRuntime.searchTab}" aria-live="polite">${renderAiSearchResults()}</div>
       </section>
     </div>`;
 
@@ -16925,6 +18108,19 @@
         <span class="ai-new-group-status" id="aiNewGroupStatus" aria-live="polite">${escapeHtml(aiRuntime.newGroupError)}</span>
         <div class="ai-new-group-actions">
           <button class="ai-new-group-button" type="button" data-ai-new-group-cancel>取 消</button>
+          <button class="ai-new-group-button primary" type="submit">保 存</button>
+        </div>
+      </form>
+    </div>`;
+
+    const renderAiRenameOverlay = () => `<div class="ai-new-group-overlay" data-ai-rename-backdrop>
+      <form class="ai-new-group-dialog" data-ai-rename-form role="dialog" aria-modal="true" aria-labelledby="aiRenameTitle">
+        <span class="ai-new-group-title" id="aiRenameTitle">重命名</span>
+        <button class="ai-new-group-close" type="button" data-ai-rename-close data-ai-no-tooltip aria-label="关闭重命名弹窗">${aiIcon("close.svg")}</button>
+        <input class="ai-new-group-input" type="text" value="${escapeHtml(aiRuntime.renameName)}" data-ai-rename-input placeholder="请输入新的命名" aria-label="新的对话名称" aria-invalid="${Boolean(aiRuntime.renameError)}" aria-describedby="aiRenameStatus" autocomplete="off">
+        <span class="ai-new-group-status" id="aiRenameStatus" aria-live="polite">${escapeHtml(aiRuntime.renameError)}</span>
+        <div class="ai-new-group-actions">
+          <button class="ai-new-group-button" type="button" data-ai-rename-cancel>取 消</button>
           <button class="ai-new-group-button primary" type="submit">保 存</button>
         </div>
       </form>
@@ -16974,14 +18170,17 @@
       </div>`;
     };
 
-    const renderAiConversationMenu = () => `<div class="ai-history-context-menu ai-conversation-context-menu" role="menu" aria-label="当前对话操作">
-      <button class="ai-history-context-option ${aiRuntime.conversationMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" data-ai-conversation-action="rename" aria-selected="${aiRuntime.conversationMenuActiveIndex === 0}">${aiIcon("rename.svg")}<span>重命名</span></button>
-      <button class="ai-history-context-option ${aiRuntime.conversationMenuActiveIndex === 1 ? "keyboard-active" : ""}" type="button" data-ai-conversation-action="${aiRuntime.conversationPinned ? "unpin" : "pin"}" aria-selected="${aiRuntime.conversationMenuActiveIndex === 1}">${aiIcon(aiRuntime.conversationPinned ? "unpin.svg" : "pin.svg")}<span>${aiRuntime.conversationPinned ? "取消置顶" : "置顶"}</span></button>
-      <div class="ai-history-move-wrap ${aiRuntime.conversationMoveOpen ? "submenu-open" : ""}">
-        <button class="ai-history-context-option ${aiRuntime.conversationMenuActiveIndex === 2 ? "keyboard-active" : ""}" type="button" data-ai-conversation-action="move" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMoveOpen}" aria-selected="${aiRuntime.conversationMenuActiveIndex === 2}">${aiIcon("move-to-group.svg")}<span>移至分组</span>${aiIcon("chevron-down.svg", "ai-context-chevron")}</button>
-        ${renderAiConversationMoveMenu()}
-      </div>
-    </div>`;
+    const renderAiConversationMenu = () => {
+      const pinned = Boolean(getActiveAiHistoryItem()?.pinned);
+      return `<div class="ai-history-context-menu ai-conversation-context-menu" role="menu" aria-label="当前对话操作">
+        <button class="ai-history-context-option ${aiRuntime.conversationMenuActiveIndex === 0 ? "keyboard-active" : ""}" type="button" role="menuitem" data-ai-conversation-action="rename">${aiIcon("rename.svg")}<span>重命名</span></button>
+        <button class="ai-history-context-option ${aiRuntime.conversationMenuActiveIndex === 1 ? "keyboard-active" : ""}" type="button" role="menuitem" data-ai-conversation-action="${pinned ? "unpin" : "pin"}">${aiIcon(pinned ? "unpin.svg" : "pin.svg")}<span>${pinned ? "取消置顶" : "置顶"}</span></button>
+        <div class="ai-history-move-wrap ${aiRuntime.conversationMoveOpen ? "submenu-open" : ""}">
+          <button class="ai-history-context-option ${aiRuntime.conversationMenuActiveIndex === 2 ? "keyboard-active" : ""}" type="button" role="menuitem" data-ai-conversation-action="move" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMoveOpen}">${aiIcon("move-to-group.svg")}<span>移至分组</span>${aiIcon("chevron-down.svg", "ai-context-chevron")}</button>
+          ${renderAiConversationMoveMenu()}
+        </div>
+      </div>`;
+    };
 
     const renderAiHistoryItem = (item, child = false) => {
       const isProcessing = aiRuntime.view === "processing" && aiRuntime.activeHistoryId === item.id;
@@ -16989,20 +18188,24 @@
       return `<div class="ai-history-item ${child ? "ai-history-child" : ""} ${item.pinned ? "is-pinned" : ""} ${aiRuntime.activeHistoryId === item.id && aiRuntime.view !== "welcome" ? "active" : ""} ${aiRuntime.historyMenuId === item.id ? "menu-open" : ""} ${isProcessing ? "is-processing" : ""}"><button class="ai-history-main" type="button" data-ai-history-item="${escapeHtml(item.id)}" data-ai-tooltip="${title}"><span class="ai-history-text">${title}</span></button><span class="ai-history-action-slot">${item.pinned ? `<button class="ai-history-pin-button is-pinned" type="button" data-ai-history-pin-toggle="${escapeHtml(item.id)}" aria-label="取消置顶：${title}" aria-pressed="true">${aiIcon("pin-badge.svg", "ai-history-pin")}</button>` : ""}${isProcessing ? `<span class="ai-history-loading" role="status" aria-label="对话处理中"></span>` : ""}<button class="ai-history-more-button" type="button" data-ai-history-more="${escapeHtml(item.id)}" data-ai-tooltip="更多操作" aria-label="更多操作：${title}" aria-haspopup="menu" aria-expanded="${aiRuntime.historyMenuId === item.id}">${aiIcon("more.svg", "ai-history-more")}</button></span>${aiRuntime.historyMenuId === item.id ? renderAiHistoryMenu(item) : ""}</div>`;
     };
 
-    const renderAiHistory = () => `
-      <aside class="ai-history ${aiRuntime.historyMenuId !== null ? "menu-open" : ""}" aria-label="AI 会话历史">
-        <div class="ai-history-head"><span class="ai-history-title">我的项目</span><button class="ai-history-toggle" type="button" data-ai-history-toggle aria-label="收起会话栏">${aiIcon("sidebar-toggle.svg")}</button></div>
-        <button class="ai-new-chat" type="button" data-ai-new-chat>${aiIcon("new-chat.svg")}<span>新建对话</span>${aiIcon("new-chat-shortcut.svg", "ai-shortcut-icon")}</button>
-        <div class="ai-history-tools"><button class="ai-history-tool" type="button" data-ai-search-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.searchOpen}">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button" data-ai-new-group-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.newGroupOpen}">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
-        <button class="ai-history-section-toggle" type="button" data-ai-history-section="groups" aria-expanded="${aiRuntime.historyGroupsExpanded}"><span>分组</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
-        <div class="ai-history-section ai-history-groups" ${aiRuntime.historyGroupsExpanded ? "" : "hidden"}>
-          ${getAiHistoryGroups().map((group) => {
-            const expanded = !aiRuntime.collapsedHistoryGroups.has(group);
-            return `<button class="ai-history-group" type="button" data-ai-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}" aria-expanded="${expanded}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span>${aiIcon("chevron-down.svg", "ai-group-chevron")}</button>${expanded ? aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("") : ""}`;
-          }).join("")}
+    const renderAiHistory = ({ quick = false } = {}) => `
+      <aside class="ai-history ${quick ? "ai-quick-history" : ""} ${aiRuntime.historyMenuId !== null ? "menu-open" : ""}" aria-label="AI 会话历史">
+        <div class="ai-history-scroll" data-ai-history-scroll>
+          <div class="ai-history-sticky">
+            <div class="ai-history-head"><span class="ai-history-title">我的项目</span><button class="ai-history-toggle" type="button" ${quick ? "data-ai-quick-history-toggle" : "data-ai-history-toggle"} aria-label="${quick ? "关闭历史对话" : "收起会话栏"}">${aiIcon("sidebar-toggle.svg")}</button></div>
+            <button class="ai-new-chat" type="button" data-ai-new-chat>${aiIcon("new-chat.svg")}<span>新建对话</span>${aiIcon("new-chat-shortcut.svg", "ai-shortcut-icon")}</button>
+          </div>
+          <div class="ai-history-tools"><button class="ai-history-tool" type="button" data-ai-search-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.searchOpen}">${aiIcon("search.svg")}<span>搜索</span></button><button class="ai-history-tool" type="button" data-ai-new-group-trigger aria-haspopup="dialog" aria-expanded="${aiRuntime.newGroupOpen}">${aiIcon("new-group.svg")}<span>新建分组</span></button></div>
+          <button class="ai-history-section-toggle" type="button" data-ai-history-section="groups" aria-expanded="${aiRuntime.historyGroupsExpanded}"><span>分组</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
+          <div class="ai-history-section ai-history-groups" ${aiRuntime.historyGroupsExpanded ? "" : "hidden"}>
+            ${getAiHistoryGroups().map((group) => {
+              const expanded = !aiRuntime.collapsedHistoryGroups.has(group);
+              return `<button class="ai-history-group" type="button" data-ai-history-group="${escapeHtml(group)}" data-ai-tooltip="${escapeHtml(group)}" aria-expanded="${expanded}">${aiIcon("new-group.svg")}<span>${escapeHtml(group)}</span>${aiIcon("chevron-down.svg", "ai-group-chevron")}</button>${expanded ? aiRuntime.groupedHistoryItems.filter((item) => item.group === group).map((item) => renderAiHistoryItem(item, true)).join("") : ""}`;
+            }).join("")}
+          </div>
+          <button class="ai-history-section-toggle" type="button" data-ai-history-section="recent" aria-expanded="${aiRuntime.historyRecentExpanded}"><span>最近对话</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
+          <div class="ai-history-section ai-history-list" ${aiRuntime.historyRecentExpanded ? "" : "hidden"}>${aiRuntime.historyItems.map((item) => renderAiHistoryItem(item)).join("")}</div>
         </div>
-        <button class="ai-history-section-toggle" type="button" data-ai-history-section="recent" aria-expanded="${aiRuntime.historyRecentExpanded}"><span>最近对话</span>${aiIcon("chevron-down.svg", "ai-section-chevron")}</button>
-        <div class="ai-history-section ai-history-list" ${aiRuntime.historyRecentExpanded ? "" : "hidden"}>${aiRuntime.historyItems.map((item) => renderAiHistoryItem(item)).join("")}</div>
       </aside>
     `;
 
@@ -17021,13 +18224,13 @@
       const rightPanel = aiRuntime.preview ? "preview" : (aiRuntime.filePanel ? "files" : "");
       const rightPanelWidth = rightPanel === "preview" ? aiRuntime.previewWidth : (rightPanel === "files" ? aiRuntime.filesWidth : 0);
       const activeItem = getActiveAiHistoryItem();
-      const conversationTitle = activeItem?.isLocalFallback ? activeItem.title : "查找付款申请单";
+      const conversationTitle = activeItem?.title || "查找付款申请单";
       return `
         <section class="ai-center-page ${aiRuntime.preview ? "with-preview" : ""} ${aiRuntime.filePanel ? "with-files" : ""}" style="--ai-side-width:${aiRuntime.historyWidth}px;--ai-right-pane-width:${rightPanelWidth}px" data-ai-center-page>
           ${aiRuntime.historyCollapsed ? "" : `${renderAiHistory()}${renderAiResizeHandle("left")}`}
           <section class="ai-canvas">
             <div class="ai-main-area">
-              <section class="ai-chat-stage" style="--ai-composer-height:${Math.round(aiRuntime.composerHeight)}px">
+              <section class="ai-chat-stage" style="--ai-composer-height:${Math.round(getAiComposerDisplayHeight())}px">
                 <div class="ai-canvas-top-left">${aiRuntime.historyCollapsed ? `<div class="ai-history-quick-wrap"><button class="ai-top-icon" type="button" data-ai-history-toggle data-ai-no-tooltip aria-label="展开会话栏">${aiIcon("sidebar-toggle.svg")}</button>${renderAiHistoryQuickPreview()}</div>` : ""}${aiRuntime.view !== "welcome" ? `<div class="ai-conversation-title-wrap"><span class="ai-conversation-title" data-ai-tooltip="${escapeHtml(conversationTitle)}">${escapeHtml(conversationTitle)}</span><button class="ai-conversation-more-button" type="button" data-ai-conversation-more data-ai-tooltip="更多操作" aria-label="当前对话更多操作" aria-haspopup="menu" aria-expanded="${aiRuntime.conversationMenuOpen}">${aiIcon("more.svg")}</button>${aiRuntime.conversationMenuOpen ? renderAiConversationMenu() : ""}</div>` : ""}</div>
                 <div class="ai-canvas-top-right"><button class="ai-files-button" type="button" data-ai-file-panel aria-label="${aiRuntime.filePanel ? "收起文件库" : "展开文件库"}">${aiIcon("file-library.svg")}<span>文件库</span></button><button class="ai-top-icon" type="button" data-ai-last-preview aria-label="打开上次查看的文件">${aiIcon("sidebar-toggle.svg")}</button></div>
                 ${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask({ resizable: true })}
@@ -17038,17 +18241,75 @@
           </section>
           ${aiRuntime.searchOpen ? renderAiSearchOverlay() : ""}
           ${aiRuntime.newGroupOpen ? renderAiNewGroupOverlay() : ""}
+          ${aiRuntime.renameOpen ? renderAiRenameOverlay() : ""}
           ${aiRuntime.deleteConfirmOpen ? renderAiDeleteConfirmOverlay() : ""}
-          ${aiRuntime.toast ? `<span class="ai-toast">${aiRuntime.toast}</span>` : ""}
+          ${aiRuntime.toast ? `<span class="ai-toast" role="status" aria-live="polite">${escapeHtml(aiRuntime.toast)}</span>` : ""}
         </section>
       `;
+    };
+
+    const renderAiQuickWelcome = () => `
+      <div class="ai-quick-welcome">
+        <div class="ai-welcome-profile">
+          <span class="ai-avatar" aria-hidden="true"></span>
+          <div class="ai-welcome-greeting">你好！我是<strong>每刻档案AI助手</strong><div class="ai-welcome-copy">可以找我帮你解决档案的任何问题</div></div>
+        </div>
+        <section class="ai-quick-scenes" aria-label="选择使用场景">
+          <span class="ai-quick-scenes-title">请选择使用场景</span>
+          <div class="ai-suggestions">${AI_SCENARIOS.map((item) => `<button class="ai-suggestion ${aiRuntime.selectedScenarioKey === item ? "selected" : ""}" type="button" data-ai-suggestion="${item}" aria-pressed="${aiRuntime.selectedScenarioKey === item}">${aiScenarioIcon(item)}<span>${item}</span></button>`).join("")}</div>
+        </section>
+      </div>
+      <div class="ai-chat-composer ai-quick-composer">${renderAiPrompt({ welcome: true })}</div>
+    `;
+
+    const getAiQuickDrawerWidthLimits = () => {
+      const max = Math.max(1, Math.floor(window.innerWidth * .45));
+      return { min: Math.min(AI_LAYOUT_DEFAULTS.quickDrawerWidth, max), max };
+    };
+
+    const applyAiQuickDrawerWidth = (requestedWidth, handle = document.querySelector("[data-ai-quick-resize]")) => {
+      const drawer = document.getElementById("aiQuickDrawer");
+      const { min, max } = getAiQuickDrawerWidthLimits();
+      const nextWidth = Math.round(Math.min(max, Math.max(min, Number(requestedWidth) || AI_LAYOUT_DEFAULTS.quickDrawerWidth)));
+      aiRuntime.quickDrawerWidth = nextWidth;
+      if (drawer && aiRuntime.quickMode === "drawer") drawer.style.width = `${nextWidth}px`;
+      handle?.setAttribute("aria-valuemin", String(min));
+      handle?.setAttribute("aria-valuemax", String(max));
+      handle?.setAttribute("aria-valuenow", String(nextWidth));
+      return nextWidth;
+    };
+
+    const positionAiQuickDrawer = (drawer) => {
+      const floating = aiRuntime.quickMode === "floating";
+      drawer.classList.toggle("floating", floating);
+      if (!floating) {
+        drawer.removeAttribute("style");
+        applyAiQuickDrawerWidth(aiRuntime.quickDrawerWidth);
+        return;
+      }
+      const width = Math.min(438, Math.max(280, window.innerWidth - 16));
+      const height = Math.min(666, Math.max(420, window.innerHeight - 58));
+      const maxLeft = Math.max(8, window.innerWidth - width - 8);
+      const maxTop = Math.max(58, window.innerHeight - height - 8);
+      aiRuntime.quickX = Math.max(8, Math.min(Number.isFinite(aiRuntime.quickX) ? aiRuntime.quickX : maxLeft, maxLeft));
+      aiRuntime.quickY = Math.max(58, Math.min(Number.isFinite(aiRuntime.quickY) ? aiRuntime.quickY : 58, maxTop));
+      drawer.style.left = `${Math.round(aiRuntime.quickX)}px`;
+      drawer.style.top = `${Math.round(aiRuntime.quickY)}px`;
+      drawer.style.right = "auto";
+      drawer.style.bottom = "auto";
+      drawer.style.width = `${Math.round(width)}px`;
+      drawer.style.height = `${Math.round(height)}px`;
     };
 
     const renderAiQuickDrawer = () => {
       const drawer = document.getElementById("aiQuickDrawer");
       if (!drawer) return;
       drawer.classList.toggle("open", aiRuntime.quickOpen);
-      drawer.innerHTML = aiRuntime.quickOpen ? `<section class="ai-workbench"><header class="ai-workbench-head"><span class="ai-workbench-name">每刻档案AI助手</span><div class="ai-head-actions"><button class="ai-icon-button ai-drag-handle" type="button" aria-label="移动 AI 助手窗口">${aiIcon("move.svg")}</button><button class="ai-icon-button" type="button" data-ai-go-center aria-label="进入 AI 应用中心">${aiIcon("fullscreen.svg")}</button><button class="ai-icon-button" type="button" data-ai-quick-close data-ai-no-tooltip aria-label="关闭 AI 助手">${aiIcon("close.svg")}</button></div></header><div class="ai-main-area"><section class="ai-chat-stage">${aiRuntime.view === "welcome" ? renderAiWelcome() : renderAiTask()}</section></div>${aiIcon("resize-handle.svg", "ai-resize-handle")}</section>` : "";
+      positionAiQuickDrawer(drawer);
+      const quickWidthLimits = getAiQuickDrawerWidthLimits();
+      const quickResizeHandle = aiRuntime.quickMode === "drawer" ? `<div class="ai-quick-resizer" role="separator" tabindex="0" aria-label="调整快捷 AI 助手宽度" aria-orientation="vertical" aria-valuemin="${quickWidthLimits.min}" aria-valuemax="${quickWidthLimits.max}" aria-valuenow="${Math.round(aiRuntime.quickDrawerWidth)}" data-ai-quick-resize></div>` : "";
+      drawer.innerHTML = aiRuntime.quickOpen ? `${quickResizeHandle}<section class="ai-workbench ai-quick-shell"><header class="ai-workbench-head"><div class="ai-history-quick-wrap" data-ai-quick-history-preview><button class="ai-icon-button ai-quick-header-toggle" type="button" data-ai-quick-history-entry data-ai-no-tooltip aria-label="进入 AI 主页面并展开历史对话">${aiIcon("sidebar-toggle.svg")}</button>${renderAiHistoryQuickPreview()}</div><div class="ai-head-actions"><button class="ai-icon-button" type="button" data-ai-new-chat data-ai-tooltip="新建对话" aria-label="新建对话">${aiIcon("quick-new-chat.svg", "ai-quick-new-chat-icon")}</button><button class="ai-icon-button ai-drag-handle" type="button" data-ai-quick-drag aria-label="拖动 AI 助手窗口">${aiIcon("move.svg")}</button><button class="ai-icon-button" type="button" data-ai-go-center aria-label="进入 AI 应用中心">${aiIcon("fullscreen.svg")}</button><button class="ai-icon-button" type="button" data-ai-quick-close data-ai-no-tooltip aria-label="关闭 AI 助手">${aiIcon("close.svg")}</button></div></header><div class="ai-main-area"><section class="ai-chat-stage" style="--ai-quick-composer-height:${getAiQuickComposerDisplayHeight()}px">${aiRuntime.view === "welcome" ? renderAiQuickWelcome() : renderAiTask({ quick: true })}</section></div>${aiRuntime.searchOpen ? renderAiSearchOverlay() : ""}${aiRuntime.newGroupOpen ? renderAiNewGroupOverlay() : ""}${aiRuntime.renameOpen ? renderAiRenameOverlay() : ""}${aiRuntime.deleteConfirmOpen ? renderAiDeleteConfirmOverlay() : ""}${aiRuntime.toast ? `<span class="ai-toast" role="status" aria-live="polite">${escapeHtml(aiRuntime.toast)}</span>` : ""}</section>` : "";
+      applyAiQuickDrawerWidth(aiRuntime.quickDrawerWidth);
     };
 
     let aiTooltipTarget = null;
@@ -17120,10 +18381,55 @@
       });
     };
 
-    const refreshAiUi = () => {
+    let aiTaskPanelResizeObserver = null;
+
+    const syncAiConversationSafeArea = () => {
+      aiTaskPanelResizeObserver?.disconnect();
+      aiTaskPanelResizeObserver = typeof ResizeObserver === "function"
+        ? new ResizeObserver((entries) => {
+          entries.forEach(({ target }) => {
+            const stage = target.closest(".ai-chat-stage");
+            if (!stage) return;
+            const isVisible = getComputedStyle(target).display !== "none";
+            stage.style.setProperty("--ai-task-panel-height", `${isVisible ? Math.ceil(target.getBoundingClientRect().height) : 0}px`);
+          });
+        })
+        : null;
+
+      document.querySelectorAll(".ai-chat-stage").forEach((stage) => {
+        const taskPanel = stage.querySelector(":scope > .ai-task-card, :scope > .ai-status-card");
+        const isVisible = taskPanel && getComputedStyle(taskPanel).display !== "none";
+        stage.style.setProperty("--ai-task-panel-height", `${isVisible ? Math.ceil(taskPanel.getBoundingClientRect().height) : 0}px`);
+        if (taskPanel && aiTaskPanelResizeObserver) aiTaskPanelResizeObserver.observe(taskPanel);
+      });
+    };
+
+    const scrollAiConversationToBottom = () => {
+      requestAnimationFrame(() => {
+        syncAiConversationSafeArea();
+        requestAnimationFrame(() => {
+          document.querySelectorAll(".ai-chat-content").forEach((content) => {
+            content.scrollTop = content.scrollHeight;
+          });
+        });
+      });
+    };
+
+    const refreshAiUi = ({ scrollChatToBottom = false } = {}) => {
       hideAiTooltip();
-      if (routeFromHash().module === "ai-center") document.getElementById("pageBody").innerHTML = renderAiCenter();
+      if (routeFromHash().module === "ai-center") {
+        const currentHistoryScroller = document.querySelector("[data-ai-history-scroll]");
+        if (currentHistoryScroller) aiRuntime.historyScrollTop = currentHistoryScroller.scrollTop;
+        document.getElementById("pageBody").innerHTML = renderAiCenter();
+        requestAnimationFrame(() => {
+          hydrateAiActivePreview();
+          const nextHistoryScroller = document.querySelector("[data-ai-history-scroll]");
+          if (nextHistoryScroller) nextHistoryScroller.scrollTop = aiRuntime.historyScrollTop;
+        });
+      }
       renderAiQuickDrawer();
+      if (scrollChatToBottom) scrollAiConversationToBottom();
+      else requestAnimationFrame(syncAiConversationSafeArea);
     };
 
     const openAiNewGroupDialog = (source = "history") => {
@@ -17132,6 +18438,10 @@
       aiRuntime.newGroupError = "";
       aiRuntime.newGroupSource = source;
       aiRuntime.searchOpen = false;
+      aiRuntime.renameOpen = false;
+      aiRuntime.renameHistoryId = "";
+      aiRuntime.renameName = "";
+      aiRuntime.renameError = "";
       aiRuntime.historyMenuId = null;
       aiRuntime.historyMenuActiveIndex = -1;
       aiRuntime.historyMoveOpen = false;
@@ -17173,13 +18483,87 @@
       aiRuntime.newGroupOpen = false;
       aiRuntime.newGroupName = "";
       aiRuntime.newGroupError = "";
-      aiRuntime.toast = `已新建分组：${groupName}`;
+      setAiToast(`已新建分组：${groupName}`);
       refreshAiUi();
       requestAnimationFrame(() => {
         const groupButton = Array.from(document.querySelectorAll("[data-ai-history-group]"))
           .find((button) => button.dataset.aiHistoryGroup === groupName);
         groupButton?.scrollIntoView({ block: "nearest" });
         groupButton?.focus();
+      });
+      return true;
+    };
+
+    const openAiRenameDialog = (historyId, source = "history") => {
+      if (!getAiHistoryItem(historyId)) return false;
+      aiRuntime.renameOpen = true;
+      aiRuntime.renameHistoryId = historyId;
+      aiRuntime.renameName = "";
+      aiRuntime.renameError = "";
+      aiRuntime.renameSource = source;
+      aiRuntime.searchOpen = false;
+      aiRuntime.newGroupOpen = false;
+      aiRuntime.newGroupName = "";
+      aiRuntime.newGroupError = "";
+      aiRuntime.deleteConfirmOpen = false;
+      aiRuntime.deleteHistoryId = "";
+      aiRuntime.historyMenuId = null;
+      aiRuntime.historyMenuActiveIndex = -1;
+      aiRuntime.historyMoveOpen = false;
+      aiRuntime.historyMoveActiveIndex = -1;
+      aiRuntime.conversationMenuOpen = false;
+      aiRuntime.conversationMenuActiveIndex = -1;
+      aiRuntime.conversationMoveOpen = false;
+      aiRuntime.conversationMoveActiveIndex = -1;
+      refreshAiUi();
+      return true;
+    };
+
+    const closeAiRenameDialog = ({ restoreFocus = true } = {}) => {
+      const historyId = aiRuntime.renameHistoryId;
+      const source = aiRuntime.renameSource;
+      aiRuntime.renameOpen = false;
+      aiRuntime.renameHistoryId = "";
+      aiRuntime.renameName = "";
+      aiRuntime.renameError = "";
+      refreshAiUi();
+      if (!restoreFocus) return;
+      requestAnimationFrame(() => {
+        const selector = source === "conversation"
+          ? "[data-ai-conversation-more]"
+          : `[data-ai-history-more="${historyId}"]`;
+        document.querySelector(selector)?.focus();
+      });
+    };
+
+    const saveAiRename = (form) => {
+      const input = form?.querySelector("[data-ai-rename-input]");
+      const nextTitle = String(input?.value || "").replace(/\s+/g, " ").trim();
+      const historyItem = getAiHistoryItem(aiRuntime.renameHistoryId);
+      if (!historyItem || !nextTitle) {
+        aiRuntime.renameName = nextTitle;
+        aiRuntime.renameError = historyItem ? "请输入新的命名" : "未找到对应的对话";
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-rename-input]")?.focus());
+        return false;
+      }
+      const historyId = historyItem.id;
+      const source = aiRuntime.renameSource;
+      historyItem.title = nextTitle;
+      aiHistoryRenames[historyId] = nextTitle;
+      persistAiHistoryRenames();
+      if (historyItem.isLocalFallback) persistAiCustomHistoryItems();
+      aiRuntime.renameOpen = false;
+      aiRuntime.renameHistoryId = "";
+      aiRuntime.renameName = "";
+      aiRuntime.renameError = "";
+      setAiToast("对话已重命名");
+      refreshAiUi();
+      requestAnimationFrame(() => {
+        const selector = source === "conversation"
+          ? "[data-ai-conversation-more]"
+          : `[data-ai-history-more="${historyId}"]`;
+        document.querySelector(selector)?.focus();
       });
       return true;
     };
@@ -17220,7 +18604,7 @@
       if (!stage) return aiRuntime.composerHeight;
       const nextHeight = Math.round(Math.min(210, Math.max(96, Number(requestedHeight) || AI_LAYOUT_DEFAULTS.composerHeight)));
       aiRuntime.composerHeight = nextHeight;
-      stage.style.setProperty("--ai-composer-height", `${nextHeight}px`);
+      stage.style.setProperty("--ai-composer-height", `${getAiComposerDisplayHeight()}px`);
       handle.setAttribute("aria-valuenow", String(nextHeight));
       return nextHeight;
     };
@@ -17236,8 +18620,9 @@
       aiRuntime[stateKey] = nextIndex;
       options.forEach((option, index) => {
         option.classList.toggle("keyboard-active", index === nextIndex);
-        option.setAttribute("aria-selected", String(index === nextIndex));
+        if (option.getAttribute("role") === "option") option.setAttribute("aria-selected", String(index === nextIndex));
       });
+      options[nextIndex]?.focus({ preventScroll: true });
       return nextIndex;
     };
 
@@ -17257,6 +18642,10 @@
       aiRuntime.deleteHistoryId = historyId;
       aiRuntime.searchOpen = false;
       aiRuntime.newGroupOpen = false;
+      aiRuntime.renameOpen = false;
+      aiRuntime.renameHistoryId = "";
+      aiRuntime.renameName = "";
+      aiRuntime.renameError = "";
       aiRuntime.historyMenuId = null;
       aiRuntime.historyMenuActiveIndex = -1;
       aiRuntime.historyMoveOpen = false;
@@ -17295,8 +18684,16 @@
       historyList.splice(historyIndex, 1);
       aiDeletedHistoryIds.add(historyId);
       persistAiDeletedHistoryIds();
+      delete aiHistoryRenames[historyId];
+      persistAiHistoryRenames();
       delete aiHistoryGroupAssignments[historyId];
       persistAiHistoryGroupAssignments();
+      delete aiHistoryThreads[historyId];
+      try {
+        localStorage.setItem(AI_HISTORY_THREADS_STORAGE_KEY, JSON.stringify(aiHistoryThreads));
+      } catch (error) {
+        // Storage can be unavailable in local previews; deletion still applies to the current session.
+      }
       persistAiCustomHistoryItems();
       aiRuntime.deleteConfirmOpen = false;
       aiRuntime.deleteHistoryId = "";
@@ -17305,7 +18702,7 @@
         aiRuntime.activeHistoryId = aiRuntime.historyItems[0]?.id || aiRuntime.groupedHistoryItems[0]?.id || "";
         resetAiConversation();
       }
-      aiRuntime.toast = "对话已删除";
+      setAiToast("对话已删除");
       refreshAiUi();
       return true;
     };
@@ -17340,7 +18737,9 @@
       const currentIndex = historyList.findIndex((item) => item.id === historyId);
       if (currentIndex < 0) return false;
       const [item] = historyList.splice(currentIndex, 1);
-      item.pinned = pinned;
+      item.pinned = Boolean(pinned);
+      aiHistoryPinStates[item.id] = item.pinned;
+      persistAiHistoryPinStates();
       const firstUnpinnedIndex = historyList.findIndex((historyItem) => !historyItem.pinned);
       const insertIndex = firstUnpinnedIndex < 0 ? historyList.length : firstUnpinnedIndex;
       historyList.splice(insertIndex, 0, item);
@@ -17385,8 +18784,11 @@
       clearTimeout(aiTaskTimer);
       aiRuntime.view = "welcome";
       aiRuntime.taskStep = 0;
+      aiRuntime.taskMessageId = "";
       aiRuntime.taskDetailsExpanded = false;
+      aiRuntime.taskStatusDismissed = false;
       aiRuntime.preview = false;
+      aiRuntime.previewFullscreen = false;
       aiRuntime.filePanel = false;
       aiRuntime.fileRowMenuId = null;
       aiRuntime.fileRowMenuActiveIndex = -1;
@@ -17406,9 +18808,9 @@
       aiRuntime.conversationMenuActiveIndex = -1;
       aiRuntime.conversationMoveOpen = false;
       aiRuntime.conversationMoveActiveIndex = -1;
-      aiRuntime.reactionVote = null;
       aiRuntime.draft = "";
-      aiRuntime.toast = "";
+      aiRuntime.composerAttachmentIds = [];
+      clearAiToast();
       refreshAiUi();
     };
 
@@ -17416,23 +18818,46 @@
       const prompt = String(promptText || "").trim();
       if (!prompt) return;
       clearTimeout(aiTaskTimer);
-      const historyItem = {
-        id: `custom-history-${Date.now()}-${aiCustomHistorySequence += 1}`,
-        title: prompt.replace(/\s+/g, " "),
+      const activeHistoryItem = getActiveAiHistoryItem();
+      const shouldCreateConversation = aiRuntime.view === "welcome" || !activeHistoryItem;
+      const message = {
+        id: `message-${Date.now()}-${aiCustomHistorySequence += 1}`,
         prompt,
         response: AI_FALLBACK_RESPONSE,
-        pinned: false,
+        answeredAt: formatAiAnswerTime(),
         cancelled: false,
-        isLocalFallback: true
+        kind: "fallback"
       };
-      const firstUnpinnedIndex = aiRuntime.historyItems.findIndex((item) => !item.pinned);
-      aiRuntime.historyItems.splice(firstUnpinnedIndex < 0 ? aiRuntime.historyItems.length : firstUnpinnedIndex, 0, historyItem);
-      aiRuntime.activeHistoryId = historyItem.id;
-      persistAiCustomHistoryItems();
+      let historyItem = activeHistoryItem;
+      if (shouldCreateConversation) {
+        historyItem = {
+          id: `custom-history-${Date.now()}-${aiCustomHistorySequence}`,
+          title: prompt.replace(/\s+/g, " "),
+          prompt,
+          response: AI_FALLBACK_RESPONSE,
+          pinned: false,
+          cancelled: false,
+          answeredAt: message.answeredAt,
+          messages: [message],
+          isLocalFallback: true
+        };
+        const firstUnpinnedIndex = aiRuntime.historyItems.findIndex((item) => !item.pinned);
+        aiRuntime.historyItems.splice(firstUnpinnedIndex < 0 ? aiRuntime.historyItems.length : firstUnpinnedIndex, 0, historyItem);
+        aiRuntime.activeHistoryId = historyItem.id;
+      } else {
+        ensureAiConversationMessages(historyItem).push(message);
+        historyItem.cancelled = false;
+        historyItem.answeredAt = message.answeredAt;
+      }
+      persistAiHistoryThread(historyItem);
+      if (historyItem.isLocalFallback) persistAiCustomHistoryItems();
       aiRuntime.view = "processing";
       aiRuntime.taskStep = 0;
+      aiRuntime.taskMessageId = message.id;
       aiRuntime.taskDetailsExpanded = false;
+      aiRuntime.taskStatusDismissed = false;
       aiRuntime.preview = false;
+      aiRuntime.previewFullscreen = false;
       aiRuntime.filePanel = false;
       aiRuntime.fileRowMenuId = null;
       aiRuntime.fileRowMenuActiveIndex = -1;
@@ -17446,20 +18871,28 @@
       aiRuntime.conversationMenuActiveIndex = -1;
       aiRuntime.conversationMoveOpen = false;
       aiRuntime.conversationMoveActiveIndex = -1;
-      aiRuntime.reactionVote = null;
       aiRuntime.draft = "";
-      aiRuntime.toast = "";
+      aiRuntime.composerAttachmentIds = [];
+      clearAiToast();
       const advance = () => {
         if (aiRuntime.view !== "processing") return;
         aiRuntime.taskStep += 1;
         if (aiRuntime.taskStep >= AI_FALLBACK_TASK_STEPS.length) {
+          const completedItem = getActiveAiHistoryItem();
+          const completedMessage = getAiLatestConversationMessage(completedItem);
+          if (completedItem && completedMessage) {
+            completedMessage.answeredAt = formatAiAnswerTime();
+            completedMessage.cancelled = false;
+            persistAiHistoryThread(completedItem);
+            if (completedItem.isLocalFallback) persistAiCustomHistoryItems();
+          }
           aiRuntime.view = "result";
-          aiRuntime.toast = "回答已生成";
+          setAiToast("回答已生成");
         }
-        refreshAiUi();
+        refreshAiUi({ scrollChatToBottom: true });
         if (aiRuntime.view === "processing") aiTaskTimer = setTimeout(advance, 620);
       };
-      refreshAiUi();
+      refreshAiUi({ scrollChatToBottom: true });
       aiTaskTimer = setTimeout(advance, 620);
     };
 
@@ -17469,13 +18902,15 @@
       aiTaskTimer = null;
       aiRuntime.view = "cancelled";
       aiRuntime.taskDetailsExpanded = false;
-      aiRuntime.toast = "";
+      clearAiToast();
       const activeItem = getActiveAiHistoryItem();
-      if (activeItem?.isLocalFallback) {
-        activeItem.cancelled = true;
-        persistAiCustomHistoryItems();
+      const activeMessage = getAiLatestConversationMessage(activeItem);
+      if (activeItem && activeMessage) {
+        activeMessage.cancelled = true;
+        persistAiHistoryThread(activeItem);
+        if (activeItem.isLocalFallback) persistAiCustomHistoryItems();
       }
-      refreshAiUi();
+      refreshAiUi({ scrollChatToBottom: true });
       requestAnimationFrame(() => document.querySelector(".ai-prompt-input")?.focus());
     };
 
@@ -17734,6 +19169,10 @@
 
     const renderPage = () => {
       const route = routeFromHash();
+      if (route.module === "ai-center") {
+        aiRuntime.quickOpen = false;
+        aiRuntime.quickHistoryOpen = false;
+      }
       closeUserMenu();
       closeNotificationMenu();
       const module = moduleMap[route.module];
@@ -17798,6 +19237,7 @@
 
       if (route.module === "ai-center") {
         document.getElementById("pageBody").innerHTML = renderAiCenter();
+        requestAnimationFrame(hydrateAiActivePreview);
         renderAiQuickDrawer();
         return;
       }
@@ -17887,7 +19327,11 @@
       syncActionColumnShadows();
     };
 
-    window.addEventListener("resize", syncActionColumnShadows);
+    window.addEventListener("resize", () => {
+      syncActionColumnShadows();
+      if (aiRuntime.quickOpen && aiRuntime.quickMode === "floating") renderAiQuickDrawer();
+      else if (aiRuntime.quickOpen) applyAiQuickDrawerWidth(aiRuntime.quickDrawerWidth);
+    });
 
     document.addEventListener("mouseover", (event) => {
       const target = getAiTooltipTarget(event.target);
@@ -17910,17 +19354,105 @@
       hideAiTooltip();
     });
 
-    document.addEventListener("scroll", hideAiTooltip, true);
+    document.addEventListener("scroll", (event) => {
+      hideAiTooltip();
+      const promptInput = event.target.closest?.(".ai-prompt-input");
+      if (!promptInput) return;
+      const agentPrefix = promptInput.closest(".ai-prompt-entry")?.querySelector(".ai-selected-agent-prefix");
+      if (agentPrefix) agentPrefix.style.transform = promptInput.scrollTop ? `translateY(${-promptInput.scrollTop}px)` : "";
+    }, true);
     window.addEventListener("resize", hideAiTooltip);
 
     document.addEventListener("pointerdown", (event) => {
+      const quickResizeHandle = event.target.closest?.("[data-ai-quick-resize]");
+      if (quickResizeHandle && event.button === 0 && aiRuntime.quickMode === "drawer") {
+        event.preventDefault();
+        const drawer = quickResizeHandle.closest(".ai-quick-drawer");
+        if (!drawer) return;
+        const startX = event.clientX;
+        const startWidth = applyAiQuickDrawerWidth(drawer.getBoundingClientRect().width, quickResizeHandle);
+        quickResizeHandle.classList.add("is-resizing");
+        document.body.classList.add("ai-quick-resizing");
+        quickResizeHandle.setPointerCapture?.(event.pointerId);
+
+        const moveQuickResize = (moveEvent) => {
+          if (moveEvent.pointerId !== event.pointerId) return;
+          applyAiQuickDrawerWidth(startWidth + (startX - moveEvent.clientX), quickResizeHandle);
+        };
+        const finishQuickResize = (finishEvent) => {
+          if (finishEvent.pointerId !== event.pointerId) return;
+          quickResizeHandle.classList.remove("is-resizing");
+          document.body.classList.remove("ai-quick-resizing");
+          quickResizeHandle.releasePointerCapture?.(event.pointerId);
+          document.removeEventListener("pointermove", moveQuickResize);
+          document.removeEventListener("pointerup", finishQuickResize);
+          document.removeEventListener("pointercancel", finishQuickResize);
+          persistAiLayoutPreferences();
+        };
+
+        document.addEventListener("pointermove", moveQuickResize);
+        document.addEventListener("pointerup", finishQuickResize);
+        document.addEventListener("pointercancel", finishQuickResize);
+        return;
+      }
+
+      const quickDragHandle = event.target.closest?.("[data-ai-quick-drag]");
+      if (quickDragHandle && event.button === 0) {
+        event.preventDefault();
+        let drawer = quickDragHandle.closest(".ai-quick-drawer");
+        if (!drawer) return;
+        const initialRect = drawer.querySelector(".ai-quick-shell")?.getBoundingClientRect() || drawer.getBoundingClientRect();
+        if (aiRuntime.quickMode !== "floating") {
+          aiRuntime.quickMode = "floating";
+          aiRuntime.quickX = initialRect.left;
+          aiRuntime.quickY = initialRect.top;
+          renderAiQuickDrawer();
+          drawer = document.getElementById("aiQuickDrawer");
+        }
+        const rect = drawer.getBoundingClientRect();
+        const offsetX = event.clientX - rect.left;
+        const offsetY = event.clientY - rect.top;
+        document.body.classList.add("ai-quick-dragging");
+        drawer.setPointerCapture?.(event.pointerId);
+
+        const moveQuickDrawer = (moveEvent) => {
+          if (moveEvent.pointerId !== event.pointerId) return;
+          const currentRect = drawer.getBoundingClientRect();
+          const maxLeft = Math.max(8, window.innerWidth - currentRect.width - 8);
+          const maxTop = Math.max(58, window.innerHeight - currentRect.height - 8);
+          aiRuntime.quickX = Math.max(8, Math.min(moveEvent.clientX - offsetX, maxLeft));
+          aiRuntime.quickY = Math.max(58, Math.min(moveEvent.clientY - offsetY, maxTop));
+          drawer.style.left = `${Math.round(aiRuntime.quickX)}px`;
+          drawer.style.top = `${Math.round(aiRuntime.quickY)}px`;
+        };
+        const finishQuickDrawer = (finishEvent) => {
+          if (finishEvent.pointerId !== event.pointerId) return;
+          document.body.classList.remove("ai-quick-dragging");
+          drawer.releasePointerCapture?.(event.pointerId);
+          document.removeEventListener("pointermove", moveQuickDrawer);
+          document.removeEventListener("pointerup", finishQuickDrawer);
+          document.removeEventListener("pointercancel", finishQuickDrawer);
+          const finalRect = drawer.getBoundingClientRect();
+          if (window.innerWidth - finalRect.right <= 12) {
+            aiRuntime.quickMode = "drawer";
+            aiRuntime.quickHistoryOpen = false;
+            renderAiQuickDrawer();
+          }
+        };
+
+        document.addEventListener("pointermove", moveQuickDrawer);
+        document.addEventListener("pointerup", finishQuickDrawer);
+        document.addEventListener("pointercancel", finishQuickDrawer);
+        return;
+      }
+
       const composerHandle = event.target.closest?.("[data-ai-composer-resize]");
       if (composerHandle && event.button === 0) {
         event.preventDefault();
         const composer = composerHandle.closest(".ai-chat-composer");
         if (!composer) return;
         const startY = event.clientY;
-        const startHeight = applyAiComposerHeight(composerHandle, composer.getBoundingClientRect().height);
+        const startHeight = aiRuntime.composerHeight;
         composerHandle.classList.add("is-resizing");
         document.body.classList.add("ai-row-resizing");
         composerHandle.setPointerCapture?.(event.pointerId);
@@ -17984,6 +19516,12 @@
     });
 
     document.addEventListener("click", (event) => {
+      const aiCenterNavigation = event.target.closest?.('a[href="#/ai-center"]');
+      if (aiCenterNavigation && aiRuntime.quickOpen) {
+        aiRuntime.quickOpen = false;
+        aiRuntime.quickHistoryOpen = false;
+        renderAiQuickDrawer();
+      }
       if (!event.target.closest(".ai-prompt")) {
         aiRuntime.mentionOpen = false;
         aiRuntime.mentionActiveIndex = -1;
@@ -18050,6 +19588,19 @@
         return;
       }
 
+      const aiRenameClose = event.target.closest("[data-ai-rename-close], [data-ai-rename-cancel]");
+      if (aiRenameClose) {
+        event.preventDefault();
+        closeAiRenameDialog();
+        return;
+      }
+
+      if (event.target.matches("[data-ai-rename-backdrop]")) {
+        event.preventDefault();
+        closeAiRenameDialog();
+        return;
+      }
+
       const aiNewGroupTrigger = event.target.closest("[data-ai-new-group-trigger]");
       if (aiNewGroupTrigger) {
         event.preventDefault();
@@ -18080,6 +19631,7 @@
         aiRuntime.fileRowMenuId = null;
         aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-search-panel]")?.focus({ preventScroll: true }));
         return;
       }
 
@@ -18091,6 +19643,7 @@
         aiRuntime.fileRowMenuId = null;
         aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
+        requestAnimationFrame(() => document.querySelector(`[data-ai-search-tab="${aiRuntime.searchTab}"]`)?.focus({ preventScroll: true }));
         return;
       }
 
@@ -18117,26 +19670,29 @@
         const historyItem = getAiHistoryItem(aiRuntime.activeHistoryId);
         aiRuntime.searchOpen = false;
         aiRuntime.searchActiveIndex = -1;
-        aiRuntime.view = historyItem?.cancelled ? "cancelled" : "result";
-        aiRuntime.taskStep = historyItem?.isLocalFallback ? AI_FALLBACK_TASK_STEPS.length : AI_PRESET_TASK_STEPS.length;
+        const latestMessage = getAiLatestConversationMessage(historyItem);
+        aiRuntime.view = latestMessage?.cancelled ? "cancelled" : "result";
+        aiRuntime.taskStep = latestMessage?.kind === "preset" ? AI_PRESET_TASK_STEPS.length : AI_FALLBACK_TASK_STEPS.length;
+        aiRuntime.taskMessageId = latestMessage?.id || "";
         aiRuntime.taskDetailsExpanded = false;
+        aiRuntime.taskStatusDismissed = false;
         aiRuntime.preview = false;
         aiRuntime.filePanel = false;
         aiRuntime.draft = "";
-        refreshAiUi();
+        aiRuntime.composerAttachmentIds = [];
+        refreshAiUi({ scrollChatToBottom: true });
         return;
       }
 
-      const aiSearchFile = event.target.closest("[data-ai-search-file]");
+      const aiSearchFile = event.target.closest("[data-ai-search-file-id]");
       if (aiSearchFile) {
         event.preventDefault();
+        const fileId = aiSearchFile.dataset.aiSearchFileId || "";
+        const file = getAiFileById(fileId);
         aiRuntime.searchOpen = false;
         aiRuntime.searchActiveIndex = -1;
-        aiRuntime.preview = true;
-        aiRuntime.filePanel = false;
-        aiRuntime.fileRowMenuId = null;
-        aiRuntime.fileRowMenuActiveIndex = -1;
-        aiRuntime.toast = `已打开文件：${aiSearchFile.dataset.aiSearchFile}`;
+        openAiFilePreview(fileId);
+        setAiToast(file ? `已打开文件：${file[1]}` : "未找到该文件");
         refreshAiUi();
         return;
       }
@@ -18178,7 +19734,12 @@
       const aiQuickTrigger = event.target.closest("[data-ai-quick-trigger]");
       if (aiQuickTrigger) {
         event.preventDefault();
-        aiRuntime.quickOpen = !aiRuntime.quickOpen;
+        const opening = !aiRuntime.quickOpen;
+        aiRuntime.quickOpen = opening;
+        if (opening) {
+          aiRuntime.quickMode = "drawer";
+          aiRuntime.quickHistoryOpen = false;
+        }
         renderAiQuickDrawer();
         return;
       }
@@ -18187,6 +19748,7 @@
       if (aiQuickClose) {
         event.preventDefault();
         aiRuntime.quickOpen = false;
+        aiRuntime.quickHistoryOpen = false;
         renderAiQuickDrawer();
         return;
       }
@@ -18195,8 +19757,34 @@
       if (aiGoCenter) {
         event.preventDefault();
         aiRuntime.quickOpen = false;
+        aiRuntime.quickHistoryOpen = false;
         renderAiQuickDrawer();
         window.location.hash = "#/ai-center";
+        return;
+      }
+
+      const aiUserCopy = event.target.closest("[data-ai-user-copy]");
+      if (aiUserCopy) {
+        event.preventDefault();
+        const messageText = aiUserCopy.closest(".ai-user-message-wrap")?.querySelector(".ai-user-message")?.textContent?.trim() || "";
+        copyAiTextToClipboard(messageText).then((copied) => {
+          setAiToast(copied ? "已复制用户消息" : "复制失败，请重试");
+          refreshAiUi();
+          requestAnimationFrame(() => document.querySelector("[data-ai-user-copy]")?.focus());
+        });
+        return;
+      }
+
+      const aiTaskStepsView = event.target.closest("[data-ai-task-steps]");
+      if (aiTaskStepsView) {
+        event.preventDefault();
+        const messageId = aiTaskStepsView.dataset.aiTaskSteps || "";
+        if (!messageId) return;
+        aiRuntime.taskMessageId = messageId;
+        aiRuntime.taskStatusDismissed = false;
+        aiRuntime.taskDetailsExpanded = true;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-task-details-toggle]")?.focus());
         return;
       }
 
@@ -18204,17 +19792,44 @@
       if (aiReaction) {
         event.preventDefault();
         const action = aiReaction.dataset.aiReaction;
+        const messageId = aiReaction.dataset.aiReactionMessage || "";
+        const activeItem = getActiveAiHistoryItem();
+        const message = ensureAiConversationMessages(activeItem).find((item) => item.id === messageId);
+        if (action === "copy") {
+          const answerText = aiReaction.closest(".ai-response-area")?.querySelector(".ai-result-copy")?.textContent?.trim() || "";
+          copyAiTextToClipboard(answerText).then((copied) => {
+            setAiToast(copied ? "已复制回答" : "复制失败，请重试");
+            refreshAiUi();
+            requestAnimationFrame(() => document.querySelector('[data-ai-reaction="copy"]')?.focus());
+          });
+          return;
+        }
         if (action === "like" || action === "dislike") {
-          const wasActive = aiRuntime.reactionVote === action;
-          aiRuntime.reactionVote = wasActive ? null : action;
-          aiRuntime.toast = wasActive ? (action === "like" ? "已取消点赞" : "已取消差评") : (action === "like" ? "已点赞" : "已提交差评");
-        } else if (action === "copy") {
-          aiRuntime.toast = getActiveAiHistoryItem()?.isLocalFallback ? "已复制回答" : "已复制文件名";
+          if (!message) return;
+          const wasActive = message.feedback === action;
+          message.feedback = wasActive ? null : action;
+          persistAiHistoryThread(activeItem);
+          if (activeItem?.isLocalFallback) persistAiCustomHistoryItems();
+          setAiToast(wasActive ? (action === "like" ? "已取消点赞" : "已取消差评") : (action === "like" ? "已点赞" : "已提交差评"));
         } else if (action === "refresh") {
-          aiRuntime.toast = "已重新生成";
+          if (message) {
+            aiRuntime.taskMessageId = message.id;
+            aiRuntime.taskStatusDismissed = false;
+            aiRuntime.taskDetailsExpanded = false;
+          }
+          setAiToast("已重新生成");
         }
         refreshAiUi();
         requestAnimationFrame(() => document.querySelector(`[data-ai-reaction="${action}"]`)?.focus());
+        return;
+      }
+
+      const aiTaskStatusClose = event.target.closest("[data-ai-task-status-close]");
+      if (aiTaskStatusClose) {
+        event.preventDefault();
+        event.stopPropagation();
+        aiRuntime.taskStatusDismissed = true;
+        refreshAiUi();
         return;
       }
 
@@ -18230,7 +19845,19 @@
       const aiNewChat = event.target.closest("[data-ai-new-chat]");
       if (aiNewChat) {
         event.preventDefault();
+        if (aiNewChat.closest(".ai-quick-history")) aiRuntime.quickHistoryOpen = false;
         resetAiConversation();
+        return;
+      }
+
+      const aiQuickHistoryEntry = event.target.closest("[data-ai-quick-history-entry]");
+      if (aiQuickHistoryEntry) {
+        event.preventDefault();
+        aiRuntime.quickOpen = false;
+        aiRuntime.quickHistoryOpen = false;
+        aiRuntime.historyCollapsed = false;
+        renderAiQuickDrawer();
+        window.location.hash = "#/ai-center";
         return;
       }
 
@@ -18246,6 +19873,13 @@
       if (aiQuickHistoryGroup) {
         event.preventDefault();
         const groupName = aiQuickHistoryGroup.dataset.aiQuickHistoryGroup;
+        const fromQuickPreview = Boolean(aiQuickHistoryGroup.closest("[data-ai-quick-history-preview]"));
+        if (fromQuickPreview) {
+          aiRuntime.quickOpen = false;
+          aiRuntime.quickHistoryOpen = false;
+          renderAiQuickDrawer();
+          window.location.hash = "#/ai-center";
+        }
         aiRuntime.historyCollapsed = false;
         aiRuntime.historyGroupsExpanded = true;
         aiRuntime.collapsedHistoryGroups.delete(groupName);
@@ -18294,7 +19928,7 @@
           return;
         }
         const moved = moveAiHistoryItemToGroup(aiRuntime.activeHistoryId, group);
-        aiRuntime.toast = moved ? `已移至分组：${group}` : "未找到可移动的对话";
+        setAiToast(moved ? `已移至分组：${group}` : "未找到可移动的对话");
         aiRuntime.conversationMenuOpen = false;
         aiRuntime.conversationMenuActiveIndex = -1;
         aiRuntime.conversationMoveOpen = false;
@@ -18309,10 +19943,11 @@
         event.stopPropagation();
         const action = aiConversationAction.dataset.aiConversationAction;
         if (action === "rename") {
-          aiRuntime.toast = "已打开重命名操作";
+          openAiRenameDialog(aiRuntime.activeHistoryId, "conversation");
+          return;
         } else if (action === "pin" || action === "unpin") {
-          aiRuntime.conversationPinned = action === "pin";
-          aiRuntime.toast = action === "pin" ? "对话已置顶" : "已取消置顶";
+          const changed = setAiHistoryPinned(aiRuntime.activeHistoryId, action === "pin");
+          setAiToast(changed ? (action === "pin" ? "对话已置顶" : "已取消置顶") : "未找到当前对话");
         } else if (action === "move") {
           aiRuntime.conversationMoveOpen = true;
           aiRuntime.conversationMoveActiveIndex = -1;
@@ -18346,7 +19981,7 @@
         const historyId = aiHistoryPinToggle.dataset.aiHistoryPinToggle;
         const historyItem = getAiHistoryItem(historyId);
         const nextPinned = !historyItem?.pinned;
-        if (setAiHistoryPinned(historyId, nextPinned)) aiRuntime.toast = nextPinned ? "对话已置顶" : "已取消置顶";
+        if (setAiHistoryPinned(historyId, nextPinned)) setAiToast(nextPinned ? "对话已置顶" : "已取消置顶");
         aiRuntime.historyMenuId = null;
         aiRuntime.historyMenuActiveIndex = -1;
         aiRuntime.historyMoveOpen = false;
@@ -18383,7 +20018,7 @@
           return;
         }
         const moved = moveAiHistoryItemToGroup(aiRuntime.historyMenuId, group);
-        aiRuntime.toast = moved ? `已移至分组：${group}` : "未找到可移动的对话";
+        setAiToast(moved ? `已移至分组：${group}` : "未找到可移动的对话");
         aiRuntime.historyMenuId = null;
         aiRuntime.historyMenuActiveIndex = -1;
         aiRuntime.historyMoveOpen = false;
@@ -18400,9 +20035,10 @@
         const action = aiHistoryAction.dataset.aiHistoryAction;
         if (historyId && (action === "pin" || action === "unpin")) {
           setAiHistoryPinned(historyId, action === "pin");
-          aiRuntime.toast = action === "pin" ? "对话已置顶" : "已取消置顶";
+          setAiToast(action === "pin" ? "对话已置顶" : "已取消置顶");
         } else if (action === "rename") {
-          aiRuntime.toast = "已打开重命名操作";
+          openAiRenameDialog(historyId, "history");
+          return;
         } else if (action === "move") {
           aiRuntime.historyMoveOpen = true;
           aiRuntime.historyMoveActiveIndex = -1;
@@ -18424,19 +20060,32 @@
       const aiHistoryItem = event.target.closest("[data-ai-history-item]");
       if (aiHistoryItem) {
         event.preventDefault();
+        const fromQuickPreview = Boolean(aiHistoryItem.closest("[data-ai-quick-history-preview]"));
+        if (aiHistoryItem.closest(".ai-quick-history")) aiRuntime.quickHistoryOpen = false;
+        if (fromQuickPreview) {
+          aiRuntime.quickOpen = false;
+          aiRuntime.quickHistoryOpen = false;
+          aiRuntime.historyCollapsed = false;
+          renderAiQuickDrawer();
+          window.location.hash = "#/ai-center";
+        }
         aiRuntime.activeHistoryId = aiHistoryItem.dataset.aiHistoryItem || aiRuntime.activeHistoryId;
         const historyItem = getAiHistoryItem(aiRuntime.activeHistoryId);
         aiRuntime.conversationMenuOpen = false;
         aiRuntime.conversationMenuActiveIndex = -1;
         aiRuntime.conversationMoveOpen = false;
         aiRuntime.conversationMoveActiveIndex = -1;
-        aiRuntime.view = historyItem?.cancelled ? "cancelled" : "result";
-        aiRuntime.taskStep = historyItem?.isLocalFallback ? AI_FALLBACK_TASK_STEPS.length : AI_PRESET_TASK_STEPS.length;
+        const latestMessage = getAiLatestConversationMessage(historyItem);
+        aiRuntime.view = latestMessage?.cancelled ? "cancelled" : "result";
+        aiRuntime.taskStep = latestMessage?.kind === "preset" ? AI_PRESET_TASK_STEPS.length : AI_FALLBACK_TASK_STEPS.length;
+        aiRuntime.taskMessageId = latestMessage?.id || "";
         aiRuntime.taskDetailsExpanded = false;
+        aiRuntime.taskStatusDismissed = false;
         aiRuntime.preview = false;
         aiRuntime.filePanel = false;
         aiRuntime.draft = "";
-        refreshAiUi();
+        aiRuntime.composerAttachmentIds = [];
+        refreshAiUi({ scrollChatToBottom: true });
         return;
       }
 
@@ -18482,13 +20131,24 @@
         return;
       }
 
+      const aiAttachmentRemove = event.target.closest("[data-ai-attachment-remove]");
+      if (aiAttachmentRemove) {
+        event.preventDefault();
+        const attachmentId = aiAttachmentRemove.dataset.aiAttachmentRemove || "";
+        aiRuntime.composerAttachmentIds = aiRuntime.composerAttachmentIds.filter((fileId) => fileId !== attachmentId);
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector(".ai-prompt-input")?.focus({ preventScroll: true }));
+        return;
+      }
+
       const aiFileOption = event.target.closest("[data-ai-file-option]");
       if (aiFileOption) {
         event.preventDefault();
+        const uploadKind = aiFileOption.dataset.aiFileOption === "image" ? "image" : "file";
         aiRuntime.fileOpen = false;
         aiRuntime.fileActiveIndex = -1;
-        aiRuntime.toast = aiFileOption.dataset.aiFileOption === "image" ? "已打开图片上传" : "已打开文件上传";
         refreshAiUi();
+        openAiLocalFilePicker(uploadKind);
         return;
       }
 
@@ -18515,6 +20175,7 @@
         aiRuntime.fileRowMenuId = null;
         aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
+        requestAnimationFrame(() => document.querySelector(`[data-ai-file-tab="${aiRuntime.fileTab}"]`)?.focus({ preventScroll: true }));
         return;
       }
 
@@ -18531,14 +20192,20 @@
         return;
       }
 
-      const aiPreviewResult = event.target.closest("[data-ai-preview-result]");
-      if (aiPreviewResult) {
+      const aiPreviewFile = event.target.closest("[data-ai-preview-file-id]");
+      if (aiPreviewFile) {
         event.preventDefault();
-        aiRuntime.preview = true;
-        aiRuntime.filePanel = false;
-        aiRuntime.fileRowMenuId = null;
-        aiRuntime.fileRowMenuActiveIndex = -1;
+        openAiFilePreview(aiPreviewFile.dataset.aiPreviewFileId || "");
         refreshAiUi();
+        return;
+      }
+
+      const aiPreviewFullscreen = event.target.closest("[data-ai-preview-fullscreen]");
+      if (aiPreviewFullscreen) {
+        event.preventDefault();
+        aiRuntime.previewFullscreen = !aiRuntime.previewFullscreen;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-preview-fullscreen]")?.focus());
         return;
       }
 
@@ -18546,6 +20213,7 @@
       if (aiPreviewClose) {
         event.preventDefault();
         aiRuntime.preview = false;
+        aiRuntime.previewFullscreen = false;
         refreshAiUi();
         return;
       }
@@ -18553,10 +20221,8 @@
       const aiLastPreview = event.target.closest("[data-ai-last-preview]");
       if (aiLastPreview) {
         event.preventDefault();
-        aiRuntime.preview = true;
-        aiRuntime.filePanel = false;
-        aiRuntime.fileRowMenuId = null;
-        aiRuntime.fileRowMenuActiveIndex = -1;
+        const file = getAiActivePreviewFile();
+        if (file) openAiFilePreview(getAiFileState(file).id);
         refreshAiUi();
         return;
       }
@@ -18566,6 +20232,7 @@
         event.preventDefault();
         aiRuntime.filePanel = !aiRuntime.filePanel;
         aiRuntime.preview = false;
+        aiRuntime.previewFullscreen = false;
         aiRuntime.fileRowMenuId = null;
         aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
@@ -18575,7 +20242,19 @@
       const aiDownload = event.target.closest("[data-ai-download]");
       if (aiDownload) {
         event.preventDefault();
-        aiRuntime.toast = `已模拟下载：${aiDownload.dataset.aiDownload || AI_FILES[0][1]}`;
+        const file = getAiFileById(aiDownload.dataset.aiDownloadFileId || "");
+        const fileState = getAiFileState(file);
+        if (fileState.objectUrl) {
+          const link = document.createElement("a");
+          link.href = fileState.objectUrl;
+          link.download = file?.[1] || aiDownload.dataset.aiDownload || "下载文件";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setAiToast(`已下载：${link.download}`);
+        } else {
+          setAiToast(`已模拟下载：${aiDownload.dataset.aiDownload || AI_FILES[0][1]}`);
+        }
         aiRuntime.fileRowMenuId = null;
         aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
@@ -19206,6 +20885,34 @@
         return;
       }
 
+      const aiRenameInput = event.target.closest?.("[data-ai-rename-input]");
+      if (aiRuntime.renameOpen && aiRenameInput && event.key === "Enter" && !event.isComposing && event.keyCode !== 229) {
+        event.preventDefault();
+        saveAiRename(aiRenameInput.closest("[data-ai-rename-form]"));
+        return;
+      }
+      if (aiRuntime.renameOpen && event.key === "Escape") {
+        event.preventDefault();
+        closeAiRenameDialog();
+        return;
+      }
+      if (aiRuntime.renameOpen && event.key === "Tab") {
+        const dialog = document.querySelector("[data-ai-rename-form]");
+        const focusable = Array.from(dialog?.querySelectorAll("button:not(:disabled), input:not(:disabled)") || []);
+        if (focusable.length) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+        return;
+      }
+
       const aiNewGroupInput = event.target.closest?.("[data-ai-new-group-input]");
       if (aiRuntime.newGroupOpen && aiNewGroupInput && event.key === "Enter" && !event.isComposing && event.keyCode !== 229) {
         event.preventDefault();
@@ -19234,6 +20941,21 @@
         return;
       }
 
+      const aiQuickResizeHandle = event.target.closest?.("[data-ai-quick-resize]");
+      if (aiQuickResizeHandle && ["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        const { min, max } = getAiQuickDrawerWidthLimits();
+        const currentWidth = Number(aiQuickResizeHandle.getAttribute("aria-valuenow")) || aiRuntime.quickDrawerWidth;
+        const nextWidth = event.key === "Home"
+          ? min
+          : event.key === "End"
+            ? max
+            : currentWidth + (event.key === "ArrowLeft" ? 8 : -8);
+        applyAiQuickDrawerWidth(nextWidth, aiQuickResizeHandle);
+        persistAiLayoutPreferences();
+        return;
+      }
+
       const aiComposerResizeHandle = event.target.closest?.("[data-ai-composer-resize]");
       if (aiComposerResizeHandle && ["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
         event.preventDefault();
@@ -19248,7 +20970,16 @@
         return;
       }
 
+      if (aiRuntime.previewFullscreen && event.key === "Escape") {
+        event.preventDefault();
+        aiRuntime.previewFullscreen = false;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector("[data-ai-preview-fullscreen]")?.focus());
+        return;
+      }
+
       const aiSearchPanel = event.target.closest?.("[data-ai-search-panel]");
+      const aiSearchTabTarget = event.target.closest?.("[data-ai-search-tab]");
       const aiSearchKeyboardTarget = event.target.closest?.("[data-ai-search-input], [data-ai-search-result]");
       const aiSearchFileMenuTarget = event.target.closest?.("[data-ai-file-row-more], [data-ai-download]");
       if (aiRuntime.searchOpen && event.key === "Escape" && !(aiRuntime.fileRowMenuId !== null && aiSearchFileMenuTarget)) {
@@ -19259,6 +20990,39 @@
         aiRuntime.fileRowMenuActiveIndex = -1;
         refreshAiUi();
         requestAnimationFrame(() => document.querySelector("[data-ai-search-trigger]")?.focus());
+        return;
+      }
+      if (aiRuntime.searchOpen && event.key === "Tab") {
+        const panel = document.querySelector("[data-ai-search-panel]");
+        const focusable = Array.from(panel?.querySelectorAll('button:not(:disabled):not([tabindex="-1"]), input:not(:disabled)') || []);
+        if (focusable.length) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+        return;
+      }
+      if (aiRuntime.searchOpen && aiSearchTabTarget && ["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        const tabs = AI_SEARCH_TABS.map((tab) => tab.id);
+        const currentIndex = Math.max(0, tabs.indexOf(aiRuntime.searchTab));
+        const nextIndex = event.key === "Home"
+          ? 0
+          : event.key === "End"
+            ? tabs.length - 1
+            : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+        aiRuntime.searchTab = tabs[nextIndex];
+        aiRuntime.searchActiveIndex = -1;
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector(`[data-ai-search-tab="${aiRuntime.searchTab}"]`)?.focus());
         return;
       }
       if (aiRuntime.searchOpen && aiSearchPanel && aiSearchKeyboardTarget && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
@@ -19283,6 +21047,24 @@
         const keyboardDelta = event.key === "ArrowRight" ? 8 : -8;
         applyAiPanelWidth(aiResizeHandle, currentWidth + (keyboardDelta * direction));
         persistAiLayoutPreferences();
+        return;
+      }
+
+      const aiFileTabTarget = event.target.closest?.("[data-ai-file-tab]");
+      if (aiFileTabTarget && ["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        const tabs = ["upload", "generated"];
+        const currentIndex = Math.max(0, tabs.indexOf(aiRuntime.fileTab));
+        const nextIndex = event.key === "Home"
+          ? 0
+          : event.key === "End"
+            ? tabs.length - 1
+            : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+        aiRuntime.fileTab = tabs[nextIndex];
+        aiRuntime.fileRowMenuId = null;
+        aiRuntime.fileRowMenuActiveIndex = -1;
+        refreshAiUi();
+        requestAnimationFrame(() => document.querySelector(`[data-ai-file-tab="${aiRuntime.fileTab}"]`)?.focus());
         return;
       }
 
@@ -19563,6 +21345,13 @@
       }
     });
 
+    window.addEventListener("beforeunload", () => {
+      getAiAllFiles().forEach((file) => {
+        const objectUrl = getAiFileState(file).objectUrl;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+      });
+    });
+
     document.addEventListener("dragstart", (event) => {
       const component = event.target.closest("[data-form-component]");
       if (!component) return;
@@ -19600,6 +21389,17 @@
     });
 
     document.addEventListener("input", (event) => {
+      const aiRenameInput = event.target.closest("[data-ai-rename-input]");
+      if (aiRenameInput) {
+        aiRuntime.renameName = aiRenameInput.value;
+        if (aiRuntime.renameError) {
+          aiRuntime.renameError = "";
+          aiRenameInput.setAttribute("aria-invalid", "false");
+          const status = aiRenameInput.closest("[data-ai-rename-form]")?.querySelector(".ai-new-group-status");
+          if (status) status.textContent = "";
+        }
+        return;
+      }
       const aiNewGroupInput = event.target.closest("[data-ai-new-group-input]");
       if (aiNewGroupInput) {
         aiRuntime.newGroupName = aiNewGroupInput.value;
@@ -19643,7 +21443,7 @@
         if (mentionMenu) mentionMenu.hidden = !mentionOpen;
         prompt?.querySelectorAll("[data-ai-mention-option]").forEach((option) => {
           option.classList.remove("keyboard-active");
-          option.setAttribute("aria-selected", "false");
+          option.setAttribute("aria-checked", option.dataset.aiMentionOption === aiRuntime.selectedScenarioKey ? "true" : "false");
         });
         return;
       }
@@ -19674,6 +21474,11 @@
     });
 
     document.addEventListener("submit", (event) => {
+      if (event.target.matches("[data-ai-rename-form]")) {
+        event.preventDefault();
+        saveAiRename(event.target);
+        return;
+      }
       if (event.target.matches("[data-ai-new-group-form]")) {
         event.preventDefault();
         saveAiNewGroup(event.target);
